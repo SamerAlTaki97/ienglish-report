@@ -78,17 +78,6 @@
       return textLikeTypes.has((field.getAttribute("type") || "").toLowerCase());
     }
 
-    function unlockField(field) {
-      if (!field || field.dataset.originalReadonly === "true") return;
-      if (field.dataset.suggestionGuard === "true") {
-        field.readOnly = false;
-      }
-    }
-
-    function delayUnlock(field) {
-      window.setTimeout(() => unlockField(field), 120);
-    }
-
     function applyNoSuggest(root) {
       const scope = root && root.querySelectorAll ? root : document;
 
@@ -107,21 +96,6 @@
         field.setAttribute("data-lpignore", "true");
         field.setAttribute("data-1p-ignore", "true");
         field.name = `no_browser_suggestions_${Date.now()}_${fieldCounter++}_${index}`;
-
-        if (!field.dataset.suggestionGuard) {
-          field.dataset.originalReadonly = field.readOnly ? "true" : "false";
-          if (!field.readOnly) {
-            field.readOnly = true;
-            field.dataset.suggestionGuard = "true";
-          }
-          field.addEventListener("pointerdown", () => delayUnlock(field), true);
-          field.addEventListener("touchstart", () => delayUnlock(field), true);
-          field.addEventListener("focus", () => delayUnlock(field), true);
-          field.addEventListener("keydown", () => unlockField(field), true);
-          field.addEventListener("blur", () => {
-            if (field.dataset.originalReadonly !== "true") field.readOnly = true;
-          }, true);
-        }
       });
     }
 

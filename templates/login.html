@@ -187,30 +187,6 @@
           field.setAttribute("aria-autocomplete", "none");
           field.setAttribute("data-lpignore", "true");
           field.setAttribute("data-1p-ignore", "true");
-
-          if (!field.dataset.suggestionGuard) {
-            field.dataset.originalReadonly = field.readOnly ? "true" : "false";
-            if (!field.readOnly) {
-              field.readOnly = true;
-              field.dataset.suggestionGuard = "true";
-            }
-            field.addEventListener("pointerdown", () => {
-              window.setTimeout(() => {
-                if (field.dataset.originalReadonly !== "true") field.readOnly = false;
-              }, 120);
-            }, true);
-            field.addEventListener("focus", () => {
-              window.setTimeout(() => {
-                if (field.dataset.originalReadonly !== "true") field.readOnly = false;
-              }, 120);
-            }, true);
-            field.addEventListener("keydown", () => {
-              if (field.dataset.originalReadonly !== "true") field.readOnly = false;
-            }, true);
-            field.addEventListener("blur", () => {
-              if (field.dataset.originalReadonly !== "true") field.readOnly = true;
-            }, true);
-          }
         });
       }
 
