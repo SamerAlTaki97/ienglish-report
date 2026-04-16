@@ -1,0 +1,7 @@
+.env
+.runtime_tmp/
+__pycache__/
+*.pyc
+venv/
+app.db
+app.db.*.bak

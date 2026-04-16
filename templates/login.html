@@ -1,0 +1,223 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+
+    <style>
+      :root {
+        --red: #9f171f;
+        --wood: #2b1b12;
+        --glass: rgba(255, 255, 255, 0.52);
+        --glass-line: rgba(255, 255, 255, 0.5);
+        --ink: #231f20;
+        --muted: rgba(35, 31, 32, 0.72);
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        font-family: Arial, sans-serif;
+        color: var(--ink);
+        background:
+          linear-gradient(rgba(16, 10, 8, 0.46), rgba(16, 10, 8, 0.52)),
+          url("/static/background.jpeg") center center / cover no-repeat;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 28px;
+      }
+
+      .login-card {
+        width: min(470px, 100%);
+        margin-left: calc(25vw - min(235px, 50%));
+        padding: 42px 54px 26px;
+        border-radius: 12px;
+        background: var(--glass);
+        border: 1px solid var(--glass-line);
+        box-shadow: 0 28px 70px rgba(0, 0, 0, 0.26);
+        backdrop-filter: blur(11px);
+        text-align: center;
+      }
+
+      .brand-logo {
+        width: min(270px, 86%);
+        max-height: 130px;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto 30px;
+        filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.16));
+      }
+
+      .field {
+        margin-bottom: 18px;
+      }
+
+      .field input {
+        width: 100%;
+        height: 56px;
+        border: none;
+        border-radius: 9px;
+        background: rgba(255, 255, 255, 0.86);
+        padding: 0 22px;
+        color: var(--ink);
+        font-size: 18px;
+        outline: none;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+      }
+
+      .field input::placeholder {
+        color: rgba(35, 31, 32, 0.62);
+        letter-spacing: 0.02em;
+      }
+
+      .field input:focus {
+        background: white;
+        box-shadow: inset 0 0 0 2px rgba(159, 23, 31, 0.3);
+      }
+
+      .submit {
+        width: 100%;
+        height: 56px;
+        margin-top: 8px;
+        border: none;
+        border-radius: 9px;
+        color: white;
+        background: rgba(43, 27, 18, 0.9);
+        font-size: 17px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 12px 24px rgba(43, 27, 18, 0.25);
+      }
+
+      .submit:hover {
+        background: var(--red);
+      }
+
+      .login-icon {
+        margin-left: 8px;
+        font-size: 19px;
+      }
+
+      .error {
+        margin: -10px 0 16px;
+        padding: 11px 13px;
+        border-radius: 9px;
+        background: rgba(127, 29, 29, 0.15);
+        border: 1px solid rgba(127, 29, 29, 0.2);
+        color: #7f1d1d;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      @media (max-width: 560px) {
+        body {
+          padding: 18px;
+          justify-content: center;
+        }
+
+        .login-card {
+          margin-left: 0;
+          padding: 34px 24px 22px;
+        }
+
+        .field input,
+        .submit {
+          height: 52px;
+          font-size: 16px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="login-card">
+      <img src="/static/logo.png" alt="iEnglish" class="brand-logo" />
+
+      {% if error %}
+      <div class="error">{{ error }}</div>
+      {% endif %}
+
+      <form method="POST" autocomplete="off">
+        <div class="field">
+          <input
+            type="text"
+            name="login_user_id"
+            placeholder="Username"
+            autocomplete="off"
+            autocapitalize="none"
+            autocorrect="off"
+            spellcheck="false"
+            required
+          />
+        </div>
+        <div class="field">
+          <input
+            type="password"
+            name="login_access_key"
+            placeholder="Password"
+            autocomplete="new-password"
+            autocapitalize="none"
+            autocorrect="off"
+            spellcheck="false"
+            required
+          />
+        </div>
+        <button class="submit" type="submit">Login <span class="login-icon">↪</span></button>
+      </form>
+    </main>
+
+    <script>
+      function disableBrowserSuggestions(root) {
+        const scope = root && root.querySelectorAll ? root : document;
+
+        scope.querySelectorAll("form").forEach((form) => {
+          form.setAttribute("autocomplete", "off");
+        });
+
+        scope.querySelectorAll("input, textarea").forEach((field, index) => {
+          field.setAttribute("autocomplete", "off");
+          field.setAttribute("autocapitalize", "none");
+          field.setAttribute("autocorrect", "off");
+          field.setAttribute("spellcheck", "false");
+          field.setAttribute("aria-autocomplete", "none");
+          field.setAttribute("data-lpignore", "true");
+          field.setAttribute("data-1p-ignore", "true");
+
+          if (!field.dataset.suggestionGuard) {
+            field.dataset.originalReadonly = field.readOnly ? "true" : "false";
+            if (!field.readOnly) {
+              field.readOnly = true;
+              field.dataset.suggestionGuard = "true";
+            }
+            field.addEventListener("pointerdown", () => {
+              window.setTimeout(() => {
+                if (field.dataset.originalReadonly !== "true") field.readOnly = false;
+              }, 120);
+            }, true);
+            field.addEventListener("focus", () => {
+              window.setTimeout(() => {
+                if (field.dataset.originalReadonly !== "true") field.readOnly = false;
+              }, 120);
+            }, true);
+            field.addEventListener("keydown", () => {
+              if (field.dataset.originalReadonly !== "true") field.readOnly = false;
+            }, true);
+            field.addEventListener("blur", () => {
+              if (field.dataset.originalReadonly !== "true") field.readOnly = true;
+            }, true);
+          }
+        });
+      }
+
+      disableBrowserSuggestions(document);
+      localStorage.removeItem("formData");
+      localStorage.removeItem("report");
+      sessionStorage.clear();
+    </script>
+  </body>
+</html>

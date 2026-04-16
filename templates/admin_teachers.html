@@ -1,0 +1,327 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>User Management</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <style>
+      body { font-family: Arial, sans-serif; background: #eef2f7; margin: 0; color: #0f172a; }
+      .container { max-width: 1120px; margin: 32px auto; background: white; padding: 24px; border-radius: 16px; box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08); }
+      .head { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 18px; }
+      h1 { margin: 0; }
+      .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+      input, select, button { padding: 10px 12px; border-radius: 10px; border: 1px solid #cbd5e1; box-sizing: border-box; font: inherit; }
+      button { background: #2563eb; color: white; border: none; cursor: pointer; font-weight: 700; }
+      .secondary { background: #111827; }
+      .danger { background: #b91c1c; }
+      .ghost { background: white; color: #111827; border: 1px solid #cbd5e1; }
+      .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+      .feedback { margin-top: 12px; color: #166534; font-size: 14px; font-weight: 700; }
+      table { width: 100%; border-collapse: collapse; }
+      td, th { padding: 12px 10px; border-bottom: 1px solid #e5e7eb; text-align: left; }
+      th { background: #f8fafc; color: #475569; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; }
+      .modal-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.48); display: none; align-items: center; justify-content: center; padding: 22px; z-index: 1000; }
+      .modal-backdrop.open { display: flex; }
+      .modal { width: min(520px, 100%); background: white; border-radius: 18px; box-shadow: 0 28px 60px rgba(15, 23, 42, 0.26); overflow: hidden; }
+      .modal-head { display: flex; justify-content: space-between; align-items: center; padding: 20px 22px; border-bottom: 1px solid #e2e8f0; }
+      .modal-head h2 { margin: 0; }
+      .modal-body { padding: 22px; display: grid; gap: 12px; }
+      .modal-actions { display: flex; gap: 10px; justify-content: flex-end; padding: 0 22px 22px; }
+      .hidden { display: none; }
+      @media (max-width: 800px) {
+        .head { align-items: flex-start; flex-direction: column; }
+        table, thead, tbody, th, td, tr { display: block; }
+        thead { display: none; }
+        tr { border-bottom: 1px solid #e5e7eb; padding: 8px 0; }
+        td { display: flex; justify-content: space-between; gap: 14px; }
+        td::before { content: attr(data-label); font-weight: 700; color: #475569; }
+      }
+    </style>
+  </head>
+  <body>
+    {% include "_navbar.html" %}
+    <div class="container">
+      <div class="head">
+        <h1>User Management</h1>
+        <button onclick="openAddModal()">Add User</button>
+      </div>
+
+      <div class="filters">
+        <select id="roleFilter">
+          <option value="">All roles</option>
+          {% if role == 'superadmin' %}
+          <option value="admin">Admin</option>
+          {% endif %}
+          <option value="teacher">Teacher</option>
+          <option value="operation">Operation</option>
+          <option value="sales">Educational Consultant</option>
+        </select>
+        {% if role == 'superadmin' %}
+        <select id="branchFilter">
+          <option value="">All branches</option>
+          <option value="AlAin">AlAin</option>
+          <option value="Abu Dhabi">Abu Dhabi</option>
+        </select>
+        {% endif %}
+        <button class="ghost" onclick="load()">Search</button>
+      </div>
+
+      <div id="feedback" class="feedback"></div>
+
+      <table style="margin-top: 18px">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Username</th>
+            <th>Password</th>
+            <th>Show</th>
+            <th>Role</th>
+            <th>Branch</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="table"></tbody>
+      </table>
+    </div>
+
+    <div id="addModal" class="modal-backdrop" onclick="maybeCloseModal(event)">
+      <div class="modal">
+        <div class="modal-head">
+          <h2>Add User</h2>
+          <button class="ghost" onclick="closeAddModal()">Close</button>
+        </div>
+        <div class="modal-body">
+          <input id="name" placeholder="Full Name" />
+          <input id="username" placeholder="Username" autocomplete="off" />
+          <input id="password" placeholder="Password" autocomplete="new-password" />
+          <select id="role">
+            {% if role == 'superadmin' %}
+            <option value="admin">Admin</option>
+            {% endif %}
+            <option value="teacher">Teacher</option>
+            <option value="sales">Educational Consultant</option>
+            <option value="operation">Operation</option>
+          </select>
+          {% if role == 'superadmin' %}
+          <select id="branch">
+            <option value="">Select branch</option>
+            <option value="AlAin">AlAin</option>
+            <option value="Abu Dhabi">Abu Dhabi</option>
+          </select>
+          {% else %}
+          <select id="branch" disabled>
+            <option value="{{ user_branch or '' }}">{{ user_branch or 'Branch' }}</option>
+          </select>
+          {% endif %}
+        </div>
+        <div class="modal-actions">
+          <button class="ghost" onclick="closeAddModal()">Cancel</button>
+          <button onclick="addUser()">Save User</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="deleteModal" class="modal-backdrop" onclick="maybeCloseDeleteModal(event)">
+      <div class="modal">
+        <div class="modal-head">
+          <h2>Delete User</h2>
+          <button class="ghost" onclick="closeDeleteModal()">Close</button>
+        </div>
+        <div class="modal-body">
+          <div id="deleteUserName"></div>
+          <input id="deletePassword" type="password" placeholder="Your Password" autocomplete="current-password" />
+        </div>
+        <div class="modal-actions">
+          <button class="ghost" onclick="closeDeleteModal()">Cancel</button>
+          <button class="danger" onclick="deleteUser()">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const currentRole = "{{ role }}";
+      const currentUserId = Number("{{ user_id or 0 }}");
+      let pendingDeleteUserId = null;
+      let loadedUsersById = new Map();
+
+      function cleanUsername(value) {
+        return String(value || "").replace(/\s+/g, "");
+      }
+
+      function escapeHtml(value) {
+        return String(value || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function bindUsernameInput() {
+        const input = document.getElementById("username");
+        input.addEventListener("keydown", (event) => {
+          if (event.key === " ") event.preventDefault();
+        });
+        input.addEventListener("input", () => {
+          input.value = cleanUsername(input.value);
+        });
+      }
+
+      async function load() {
+        const query = new URLSearchParams();
+        const selectedRole = document.getElementById("roleFilter").value;
+        if (selectedRole) query.set("role", selectedRole);
+        const branchFilter = document.getElementById("branchFilter");
+        if (branchFilter && branchFilter.value) query.set("branch", branchFilter.value);
+
+        const response = await fetch(`/api/users?${query.toString()}`);
+        const users = await response.json();
+        const table = document.getElementById("table");
+        table.innerHTML = "";
+        loadedUsersById = new Map(users.map((user) => [Number(user.id), user]));
+        users.forEach((user) => {
+          const safeName = escapeHtml(user.name);
+          const safeUsername = escapeHtml(user.username || "-");
+          table.innerHTML += `
+            <tr>
+              <td data-label="Name">${safeName}</td>
+              <td data-label="Username">${safeUsername}</td>
+              <td data-label="Password" data-password-for="${user.id}">Hidden</td>
+              <td data-label="Show">${renderPasswordButton(user)}</td>
+              <td data-label="Role">${displayRole(user.role)}</td>
+              <td data-label="Branch">${escapeHtml(user.branch || "-")}</td>
+              <td data-label="Actions"><div class="actions">${renderDeleteButton(user)}</div></td>
+            </tr>
+          `;
+        });
+      }
+
+      function displayRole(value) {
+        if (value === "sales") return "Educational Consultant";
+        if (value === "superadmin") return "System Manager";
+        return value;
+      }
+
+      function renderPasswordButton(user) {
+        if (user.role === "superadmin") return "-";
+        return `<button class="secondary" onclick="revealPassword(${user.id})">Show Password</button>`;
+      }
+
+      function renderDeleteButton(user) {
+        if (user.id === currentUserId || user.role === "superadmin") return "-";
+        if (currentRole !== "admin" && currentRole !== "superadmin") return "-";
+        return `<button class="danger" onclick="openDeleteModal(${user.id})">Delete</button>`;
+      }
+
+      function openAddModal() {
+        document.getElementById("addModal").classList.add("open");
+        document.getElementById("feedback").innerText = "";
+      }
+
+      function closeAddModal() {
+        document.getElementById("addModal").classList.remove("open");
+      }
+
+      function maybeCloseModal(event) {
+        if (event.target.id === "addModal") closeAddModal();
+      }
+
+      function openDeleteModal(userId) {
+        const user = loadedUsersById.get(Number(userId)) || {};
+        pendingDeleteUserId = userId;
+        document.getElementById("deleteUserName").innerText = `User: ${user.name || user.username || userId}`;
+        document.getElementById("deletePassword").value = "";
+        document.getElementById("deleteModal").classList.add("open");
+        document.getElementById("deletePassword").focus();
+      }
+
+      function closeDeleteModal() {
+        pendingDeleteUserId = null;
+        document.getElementById("deleteModal").classList.remove("open");
+      }
+
+      function maybeCloseDeleteModal(event) {
+        if (event.target.id === "deleteModal") closeDeleteModal();
+      }
+
+      async function addUser() {
+        const username = cleanUsername(document.getElementById("username").value);
+        document.getElementById("username").value = username;
+        if (!username) {
+          alert("Username is required");
+          return;
+        }
+
+        const response = await fetch("/admin/teachers/add", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: document.getElementById("name").value.trim(),
+            username,
+            password: document.getElementById("password").value,
+            role: document.getElementById("role").value,
+            branch: document.getElementById("branch").value,
+          }),
+        });
+        const payload = await response.json();
+        if (!response.ok) {
+          alert(payload.error || "Unable to create user");
+          return;
+        }
+        document.getElementById("name").value = "";
+        document.getElementById("username").value = "";
+        document.getElementById("password").value = "";
+        document.getElementById("role").value = currentRole === "superadmin" ? "admin" : "teacher";
+        if (currentRole === "superadmin") document.getElementById("branch").value = "";
+        document.getElementById("feedback").innerText = "User added successfully.";
+        closeAddModal();
+        load();
+      }
+
+      async function revealPassword(userId) {
+        const adminPassword = prompt("Enter your password");
+        if (!adminPassword) return;
+
+        const response = await fetch("/admin/users/reveal-passwords", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ admin_password: adminPassword, user_id: userId }),
+        });
+        const payload = await response.json();
+        if (!response.ok) {
+          alert(payload.error || "Unable to reveal password");
+          return;
+        }
+
+        const cell = document.querySelector(`[data-password-for="${payload.id}"]`);
+        if (cell) cell.innerText = payload.password;
+      }
+
+      async function deleteUser() {
+        const accountPassword = document.getElementById("deletePassword").value;
+        if (!pendingDeleteUserId || !accountPassword) {
+          alert("Password is required");
+          return;
+        }
+
+        const response = await fetch(`/admin/users/${pendingDeleteUserId}`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ account_password: accountPassword }),
+        });
+        const payload = await response.json();
+        if (!response.ok) {
+          alert(payload.error || "Unable to delete user");
+          return;
+        }
+
+        document.getElementById("feedback").innerText = "User deleted successfully.";
+        closeDeleteModal();
+        load();
+      }
+
+      bindUsernameInput();
+      load();
+    </script>
+  </body>
+</html>

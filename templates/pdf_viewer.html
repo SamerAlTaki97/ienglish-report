@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>PDF Viewer</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <style>
+      body { font-family: Arial, sans-serif; background: #eef2f7; margin: 0; }
+      .page { max-width: 1280px; margin: 24px auto; padding: 0 16px 24px; }
+      .header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+      .title { font-size: 22px; font-weight: 700; color: #0f172a; }
+      .meta { color: #475569; font-size: 14px; }
+      .viewer-shell { background: white; border-radius: 14px; padding: 14px; box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08); }
+      .viewer-frame { width: 100%; height: calc(100vh - 190px); min-height: 720px; border: 1px solid #dbe3ee; border-radius: 10px; background: #f8fafc; }
+      .fallback { margin-top: 12px; }
+      .fallback a { color: #2563eb; text-decoration: none; font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    {% include "_navbar.html" %}
+    <div class="page">
+      <div class="header">
+        <div>
+          <div class="title">Report Viewer</div>
+          <div class="meta">
+            {{ report.student_name or 'Student Report' }}
+            {% if report.student_id %} | {{ report.student_id }}{% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="viewer-shell">
+        <iframe class="viewer-frame" src="{{ pdf_src }}#toolbar=1&navpanes=0&scrollbar=1"></iframe>
+        <div class="fallback">
+          <a href="{{ pdf_src }}" target="_blank">Open PDF</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

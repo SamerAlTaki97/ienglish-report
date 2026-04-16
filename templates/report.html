@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <meta charset="UTF-8" />
+    <title>Report Preview</title>
+    <style>
+      body { font-family: Arial, sans-serif; background: #f3f6fb; margin: 0; }
+      .container { width: min(900px, calc(100% - 32px)); margin: 32px auto; background: white; padding: 28px; border-radius: 12px; }
+      .header { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center; }
+      .logo { width: 100px; }
+      .title { font-size: 28px; font-weight: bold; }
+      .meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 20px; padding: 14px; background: #f8fafc; border-radius: 8px; }
+      .section { margin-top: 20px; }
+      .section-title { color: #c1121f; font-weight: bold; margin-bottom: 5px; }
+      .section-content { line-height: 1.7; }
+      .actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 24px; }
+      button, a.action-link { width: 100%; padding: 12px; border: none; border-radius: 6px; color: white; cursor: pointer; text-align: center; text-decoration: none; box-sizing: border-box; }
+      .blue { background: #2563eb; }
+      .green { background: #16a34a; }
+      .amber { background: #d97706; }
+      .red { background: #dc2626; }
+      .status { margin-top: 12px; color: #2563eb; font-size: 14px; }
+      @media (max-width: 760px) { .meta, .actions { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    {% include "_navbar.html" %}
+    <div class="container">
+      <div class="header">
+        <img src="/static/logo.png" class="logo" />
+        <div class="title">Student Progress Report</div>
+      </div>
+
+      <div class="meta">
+        <div>
+          Student: <b id="name"></b><br />
+          Phone: <b id="phone"></b><br />
+          Teacher: <b id="teacher"></b><br />
+          Branch: <b id="branch"></b>
+        </div>
+        <div>
+          Level: <b id="level"></b><br />
+          Course: <b id="course"></b><br />
+          Report Type: <b id="reportType"></b><br />
+          Status: <b id="status"></b>
+        </div>
+      </div>
+
+      <div id="sections"></div>
+
+      <div class="actions">
+        <button class="blue" onclick="downloadWord()">Download Word</button>
+        <button class="amber" id="submitBtn" onclick="sendToOperation()">Send To Operation</button>
+        <a class="action-link green" id="viewPdfLink" target="_blank">Preview Report</a>
+        <button class="red" onclick="newReport()">New Report</button>
+      </div>
+
+      <div id="message" class="status"></div>
+    </div>
+
+    <script>
+      const data = JSON.parse(localStorage.getItem("report") || "{}");
+      if (!data.report_id) window.location.href = "/teacher";
+
+      document.getElementById("name").innerText = data.student?.name || "";
+      document.getElementById("phone").innerText = data.student?.phone || "";
+      document.getElementById("teacher").innerText = data.student?.teacher || "";
+      document.getElementById("branch").innerText = data.student?.branch || "";
+      document.getElementById("level").innerText = data.student?.level || "";
+      document.getElementById("course").innerText = data.student?.course || "";
+      document.getElementById("reportType").innerText = data.report_type || "midterm";
+      document.getElementById("status").innerText = data.status || "draft";
+      document.getElementById("viewPdfLink").href = `/view/${data.report_id}`;
+
+      const container = document.getElementById("sections");
+      (data.sections || []).forEach((section) => {
+        container.innerHTML += `
+          <div class="section">
+            <div class="section-title">${section.title}</div>
+            <div class="section-content">${section.content}</div>
+          </div>
+        `;
+      });
+
+      function downloadWord() {
+        fetch("/word", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        }).then((response) => response.blob()).then((blob) => {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "report.docx";
+          link.click();
+        });
+      }
+
+      async function sendToOperation() {
+        const response = await fetch(`/reports/${data.report_id}/submit`, { method: "POST" });
+        const payload = await response.json();
+        if (!response.ok) {
+          alert(payload.error || "Unable to submit report.");
+          return;
+        }
+        data.status = payload.status;
+        localStorage.setItem("report", JSON.stringify(data));
+        document.getElementById("status").innerText = payload.status;
+        document.getElementById("submitBtn").disabled = true;
+        document.getElementById("message").innerText = "Report submitted to operation for approval.";
+      }
+
+      function newReport() {
+        localStorage.removeItem("report");
+        localStorage.removeItem("formData");
+        window.location.href = "/teacher";
+      }
+    </script>
+  </body>
+</html>

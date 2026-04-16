@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <meta charset="UTF-8" />
+    <title>Educational Consultant Reports</title>
+    <style>
+      body { font-family: Arial, sans-serif; background: #eef2f7; margin: 0; }
+      .container { max-width: 1160px; margin: 32px auto; background: white; padding: 24px; border-radius: 12px; }
+      .filters { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+      input, select, button { padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; }
+      button { cursor: pointer; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: left; }
+      th { background: #f8fafc; }
+    </style>
+  </head>
+  <body>
+    {% include "_navbar.html" %}
+    <div class="container">
+      <h1>Educational Consultant View</h1>
+
+      <div class="filters">
+        <input id="phoneFilter" placeholder="Search by student phone" />
+        <select id="statusFilter">
+          <option value="">All statuses</option>
+          <option value="draft">Draft</option>
+          <option value="pending_operation">Pending operation</option>
+          <option value="approved">Approved</option>
+          <option value="delivered">Delivered</option>
+        </select>
+        <button onclick="load()">Search</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Phone</th>
+            <th>Student</th>
+            <th>Teacher</th>
+            <th>Level</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Delivered</th>
+            <th>View</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <script>
+      async function load() {
+        const phone = document.getElementById("phoneFilter").value.trim();
+        const status = document.getElementById("statusFilter").value;
+        const query = new URLSearchParams();
+        if (phone) query.set("phone", phone);
+        if (status) query.set("status", status);
+        const response = await fetch(`/sales/reports?${query.toString()}`);
+        const rows = await response.json();
+        const tbody = document.getElementById("tableBody");
+        tbody.innerHTML = "";
+        rows.forEach((row) => {
+          tbody.innerHTML += `
+            <tr>
+              <td>${row.id}</td>
+              <td>${row.student_id}</td>
+              <td>${row.student_name}</td>
+              <td>${row.teacher_name}</td>
+              <td>${row.level || "-"}</td>
+              <td>${row.report_type}</td>
+              <td>${row.status}</td>
+              <td>${row.sent_at || "-"}</td>
+              <td><a href="/view/${row.id}" target="_blank">Preview</a></td>
+            </tr>
+          `;
+        });
+      }
+
+      load();
+    </script>
+  </body>
+</html>

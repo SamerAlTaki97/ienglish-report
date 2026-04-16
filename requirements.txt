@@ -1,0 +1,8 @@
+Flask
+Werkzeug
+boto3
+gunicorn
+matplotlib
+openai
+playwright
+python-docx

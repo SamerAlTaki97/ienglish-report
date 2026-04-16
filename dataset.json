@@ -1,0 +1,1492 @@
+[
+  {
+    "input": {
+      "report_type": "midterm",
+      "student": {
+        "phone": "0542147464",
+        "name": "Omar",
+        "branch": "AlAin",
+        "sales_id": 4,
+        "teacher": "Samer AlTaki",
+        "email": "",
+        "level": "5",
+        "course": "Mon-Wed , 5 PM"
+      },
+      "performance": {
+        "attendance": "10",
+        "assignment": "7"
+      },
+      "skills": {
+        "reading": "10",
+        "writing": "9",
+        "listening": "8",
+        "speaking": "7",
+        "vocab": "6",
+        "grammar": "5"
+      },
+      "sections": {
+        "communication": [
+          "Fluency: generally smooth speech with occasional hesitation when expressing complex ideas  ",
+          "Interaction: responds appropriately and maintains conversation flow in most situations  ",
+          "Confidence: shows moderate confidence, though slight hesitation appears under pressure  ",
+          "Pronunciation: clear overall, with minor issues in stress and intonation patterns  ",
+          "Coherence: ideas are logically connected but sometimes lack precise transitions  "
+        ],
+        "vocabulary": [
+          "Range: sufficient vocabulary for everyday and academic topics with occasional limitations  ",
+          "Accuracy: mostly accurate usage with some word choice inconsistencies  ",
+          "Topic Vocabulary: able to use relevant vocabulary in familiar topics but struggles with specialized terms  ",
+          "Collocations: attempts common collocations with occasional misuse  ",
+          "Word Choice: generally appropriate but sometimes repetitive  "
+        ],
+        "grammar": [
+          "Tenses: good control of present and past tenses, occasional errors in perfect forms  ",
+          "Sentence Structure: produces varied sentence forms with some structural inaccuracies  ",
+          "Articles & Prepositions: noticeable but not frequent errors affecting clarity slightly  ",
+          "Verb Forms: mostly correct with occasional misuse in complex constructions  ",
+          "Agreement: generally accurate with minor agreement slips  "
+        ],
+        "strengths": [
+          "Strength: Strong listening comprehension and ability to follow detailed instructions  ",
+          "Extra: Consistent participation and willingness to engage in discussions  ",
+          "Extra: Ability to express ideas clearly in familiar contexts  "
+        ],
+        "weaknesses": [
+          "Weakness: Limited precision in vocabulary when discussing abstract or unfamiliar topics  ",
+          "Extra: Inconsistent accuracy in complex grammatical structures  ",
+          "Extra: Hesitation when organizing extended spoken responses  "
+        ],
+        "final_note": "Omar demonstrates solid upper-intermediate performance, showing consistent progress across most skills while requiring focused development in accuracy and lexical precision to reach a more advanced level.\n"
+      }
+    },
+    "output": {
+      "student": {
+        "phone": "0542147464",
+        "name": "Omar",
+        "branch": "AlAin",
+        "sales_id": 4,
+        "teacher": "Samer AlTaki",
+        "email": "",
+        "level": "5",
+        "course": "Mon-Wed , 5 PM"
+      },
+      "report_type": "midterm",
+      "sections": [
+        {
+          "title": "INTRODUCTION",
+          "content": "This report provides a comprehensive overview of progress in the English language course at level 5. It highlights performance across essential skills, identifies strengths, and suggests areas for enhancement, focusing on the development of communication, vocabulary, grammar, and reading and writing skills."
+        },
+        {
+          "title": "ATTENDANCE & PERFORMANCE",
+          "content": "Omar has maintained consistent attendance, accumulating a total of 10 classes attended, which reflects a commendable commitment to the course. In terms of assignment completion, a score of 7 indicates a satisfactory level of engagement with coursework, suggesting that there is a foundational understanding of the material covered."
+        },
+        {
+          "title": "COMMUNICATION SKILLS",
+          "content": "In communication skills, the fluency observed is generally smooth, although there are moments of hesitation, particularly when grappling with more complex ideas. Interaction ability is commendable, allowing Omar to respond appropriately and maintain conversational flow. Confidence appears moderate, with minor hesitations surfacing under pressure. Pronunciation is largely clear, yet there are slight issues with stress and intonation. Coherence is acceptable, but occasionally lacks precise transitions between ideas."
+        },
+        {
+          "title": "VOCABULARY DEVELOPMENT",
+          "content": "Regarding vocabulary development, there is a sufficient range for everyday and academic discussions, although limitations become apparent in more abstract topics. While usage is mostly accurate, inconsistencies in word choice do emerge. Omar demonstrates the ability to employ relevant vocabulary in familiar subjects but experiences challenges with specialized terminology. Efforts to form common collocations are recognizable, though there are instances of misuse that could be addressed."
+        },
+        {
+          "title": "GRAMMAR ANALYSIS",
+          "content": "The grammatical analysis indicates good control over present and past tenses, although errors in perfect forms can occasionally disrupt clarity. Sentence structure varies, yet some inaccuracies exist, particularly with articles and prepositions, which can affect understanding. There is mostly correct use of verb forms, although occasional misapplications are noted in complex constructions. General accuracy is high, with minor slips in agreement."
+        },
+        {
+          "title": "READING & WRITING",
+          "content": "Omar’s reading skills are exceptionally strong, achieving a score of 10, which highlights impressive comprehension abilities. Writing skills, rated at 9, indicate effective expression of ideas, though further refinement in organizing thoughts cohesively during extended responses is warranted. This area remains crucial for ongoing academic success."
+        },
+        {
+          "title": "STRENGTHS",
+          "content": "Key strengths include an excellent capacity for listening comprehension, evident in the ability to follow detailed instructions. Consistency in participation during discussions showcases engagement and willingness to articulate ideas clearly in familiar settings. These attributes contribute positively to overall classroom dynamics and collaborative learning."
+        },
+        {
+          "title": "AREAS FOR IMPROVEMENT",
+          "content": "Improvement is needed in the precision of vocabulary used, especially when discussing abstract or unfamiliar concepts, as this has shown to affect fluency. Additional focus on complex grammatical structures is recommended, as consistency here is lacking. Additionally, organizing extended spoken responses needs attention, as hesitation remains noticeable."
+        },
+        {
+          "title": "FINAL RECOMMENDATION",
+          "content": "The overall progress display is commendable, reflecting solid upper-intermediate performance. Continued dedication to enhancing vocabulary precision and grammatical accuracy is essential for advancing toward a more proficient level. Targeted practice in these areas will facilitate further growth and development in language capabilities."
+        }
+      ]
+    }
+  },
+  {
+    "input": {
+      "report_type": "midterm",
+      "student": {
+        "name": "abdulla",
+        "branch": "AlAin",
+        "sales_id": 4,
+        "teacher": "Samer",
+        "level": "5",
+        "course": "Mon-Wed , 5 PM",
+        "phone": "TMP-20260415093253711308",
+        "email": null
+      },
+      "performance": {
+        "attendance": "10",
+        "assignment": "8"
+      },
+      "skills": {
+        "reading": "10",
+        "writing": "8",
+        "listening": "6",
+        "speaking": "8",
+        "vocab": "5",
+        "grammar": "7"
+      },
+      "sections": {
+        "communication": [
+          "Fluency: generally smooth speech with occasional hesitation when expressing complex ideas  ",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "vocabulary": [
+          "Range: sufficient vocabulary for everyday and academic topics with occasional limitations  ",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "grammar": [
+          "Tenses: good control of present and past tenses, occasional errors in perfect forms  ",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "strengths": [
+          "Strength: Strong listening comprehension and ability to follow detailed instructions  "
+        ],
+        "weaknesses": [
+          "Weakness: Limited precision in vocabulary when discussing abstract or unfamiliar topics  "
+        ],
+        "final_note": "Omar demonstrates solid upper-intermediate performance, showing consistent progress across most skills while requiring focused development in accuracy and lexical precision to reach a more advanced level.\n"
+      }
+    },
+    "output": {
+      "student": {
+        "name": "abdulla",
+        "branch": "AlAin",
+        "sales_id": 4,
+        "teacher": "Samer",
+        "level": "5",
+        "course": "Mon-Wed , 5 PM",
+        "phone": "",
+        "email": null
+      },
+      "report_type": "midterm",
+      "sections": [
+        {
+          "title": "INTRODUCTION",
+          "content": "This midterm progress report provides an analysis of the academic performance of abdulla, reflecting on various aspects of language proficiency developed throughout the current course. The observations noted herein are based on attendance, assignment completion, and skill assessments while emphasizing areas for further enhancement."
+        },
+        {
+          "title": "ATTENDANCE & PERFORMANCE",
+          "content": "Abdulla has demonstrated commendable dedication to the course with a total attendance of 10 sessions, indicating a commitment to actively participate in classes. The assignment performance as evidenced by a score of 8 signifies a solid understanding of the material presented, suggesting a reliable effort to engage with the coursework."
+        },
+        {
+          "title": "COMMUNICATION SKILLS",
+          "content": "In communication skills, a generally smooth fluency has been observed during verbal interactions. Although there are moments of hesitation, particularly when conveying complex ideas, abdulla's ability to articulate thoughts reflects a developing proficiency in spoken language."
+        },
+        {
+          "title": "VOCABULARY DEVELOPMENT",
+          "content": "The vocabulary range exhibited by abdulla appears sufficient for engaging in both everyday and academic discussions; however, there exist occasional limitations in precision, especially when addressing abstract or unfamiliar topics, indicating a need for further vocabulary expansion."
+        },
+        {
+          "title": "GRAMMAR ANALYSIS",
+          "content": "Regarding grammatical competence, abdulla displays a good command of present and past tenses. Nonetheless, there are some errors in the use of perfect forms, suggesting a necessity for targeted grammar practice to enhance overall sentence accuracy and complexity."
+        },
+        {
+          "title": "READING & WRITING",
+          "content": "Abdulla's reading skills are particularly strong, rated at a score of 10, which is indicative of keen comprehension abilities in understanding texts. Writing, scored at 8, demonstrates a solid grasp of structural elements but could benefit from refinement in lexical diversity and syntax to enhance clarity and sophistication."
+        },
+        {
+          "title": "STRENGTHS",
+          "content": "One of the notable strengths identified is abdulla's strong listening comprehension and the ability to follow detailed instructions effectively. This aspect of skill proficiency supports overall academic performance and helps facilitate learning in other areas."
+        },
+        {
+          "title": "AREAS FOR IMPROVEMENT",
+          "content": "The primary area for improvement lies in the precision of vocabulary when discussing topics that are abstract or less familiar. Focusing on expanding vocabulary in these areas could significantly enhance confidence and effectiveness in communication."
+        },
+        {
+          "title": "FINAL RECOMMENDATION",
+          "content": "Given the progress demonstrated thus far, it is recommended that abdulla continues to engage actively in classroom discussions while dedicating time to expand vocabulary range and grammatical accuracy. This focused approach is expected to elevate proficiency to an advanced level, fostering a more comprehensive understanding of academic English."
+        }
+      ]
+    }
+  },
+  {
+    "input": {
+      "report_type": "midterm",
+      "student": {
+        "name": "No Phone Student",
+        "branch": "HQ",
+        "level": "B1",
+        "course": "General English",
+        "phone": null,
+        "email": null,
+        "sales_id": null,
+        "teacher": "Teacher Test"
+      },
+      "performance": {
+        "attendance": "8",
+        "assignment": "7"
+      },
+      "skills": {
+        "reading": "8",
+        "writing": "7",
+        "listening": "8",
+        "speaking": "7",
+        "vocab": "8",
+        "grammar": "7"
+      },
+      "sections": {
+        "communication": [],
+        "vocabulary": [],
+        "grammar": [],
+        "strengths": [],
+        "weaknesses": [],
+        "final_note": ""
+      }
+    },
+    "output": {
+      "student": {
+        "name": "No Phone Student",
+        "branch": "HQ",
+        "level": "B1",
+        "course": "General English",
+        "phone": null,
+        "email": null,
+        "sales_id": null,
+        "teacher": "Teacher Test"
+      },
+      "report_type": "midterm",
+      "sections": [
+        {
+          "title": "INTRODUCTION",
+          "content": "Test content."
+        }
+      ]
+    }
+  },
+  {
+    "input": {
+      "report_type": "midterm",
+      "student": {
+        "name": "Omar",
+        "branch": "AlAin",
+        "sales_id": null,
+        "teacher": "Samer",
+        "level": "5",
+        "course": "Mon-Wed , 5 PM",
+        "phone": null,
+        "email": null
+      },
+      "performance": {
+        "attendance": "10",
+        "assignment": "8"
+      },
+      "skills": {
+        "reading": "9",
+        "writing": "7",
+        "listening": "10",
+        "speaking": "8",
+        "vocab": "7",
+        "grammar": "6"
+      },
+      "sections": {
+        "communication": [
+          "Fluency: generally smooth speech with occasional hesitation when expressing complex ideas",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "vocabulary": [
+          "Range: sufficient vocabulary for everyday and academic topics with occasional limitations",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "grammar": [
+          "Tenses: good control of present and past tenses, occasional errors in perfect forms",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "strengths": [
+          "Strength: Strong listening comprehension and ability to follow detailed instructions"
+        ],
+        "weaknesses": [
+          "Weakness: Limited precision in vocabulary when discussing abstract or unfamiliar topics"
+        ],
+        "final_note": "Omar demonstrates solid upper-intermediate performance, showing consistent progress across most skills while requiring focused development in accuracy and lexical precision to reach a more advanced level.\n"
+      }
+    },
+    "output": {
+      "student": {
+        "name": "Omar",
+        "branch": "AlAin",
+        "sales_id": null,
+        "teacher": "Samer",
+        "level": "5",
+        "course": "Mon-Wed , 5 PM",
+        "phone": null,
+        "email": null
+      },
+      "report_type": "midterm",
+      "sections": [
+        {
+          "title": "INTRODUCTION",
+          "content": "This midterm report reflects Omar's progress and performance in the academic English course. The evaluation focuses on various dimensions of language acquisition, revealing strengths as well as areas that require further attention."
+        },
+        {
+          "title": "ATTENDANCE & PERFORMANCE",
+          "content": "Omar has exhibited commendable commitment by maintaining an attendance rate of 100%. The assignments submitted have consistently met expectations, with an average score of 8, indicating a thorough engagement with the course material."
+        },
+        {
+          "title": "COMMUNICATION SKILLS",
+          "content": "In communication, Omar demonstrates generally smooth speech with occasional pauses when addressing complex ideas, highlighting a need for enhanced fluency in more challenging discussions. Nevertheless, Omar effectively conveys ideas in most contexts."
+        },
+        {
+          "title": "VOCABULARY DEVELOPMENT",
+          "content": "Omar's vocabulary is adequate for everyday and academic settings; however, there are moments where limitations become apparent, particularly when engaging with abstract or unfamiliar themes, which necessitates a focus on expanding lexical range."
+        },
+        {
+          "title": "GRAMMAR ANALYSIS",
+          "content": "Analysis of grammar indicates a good command of present and past tenses, with only infrequent errors seen in perfect forms. This suggests a solid understanding of foundational grammar, though there remains room for improvement in more complex grammatical structures."
+        },
+        {
+          "title": "READING & WRITING",
+          "content": "Omar's reading skills reflect a strong capability with a score of 9, which is commendable. Writing skills, however, scored slightly lower at 7, revealing the need for greater refinement and precision in written expression to enhance overall clarity."
+        },
+        {
+          "title": "STRENGTHS",
+          "content": "Among Omar's notable strengths is a strong listening comprehension, which facilitates effective understanding of complex instructions. This skill significantly contributes to his performance in various language tasks."
+        },
+        {
+          "title": "AREAS FOR IMPROVEMENT",
+          "content": "A primary area identified for improvement is the precision of vocabulary, particularly in discussions that involve abstract concepts or new terminology. Attention to this weakness will be crucial in advancing to higher levels of proficiency."
+        },
+        {
+          "title": "FINAL RECOMMENDATION",
+          "content": "Omar exhibits solid upper-intermediate capabilities and demonstrates continuous progress across most skills. Focused development in vocabulary precision and grammatical accuracy is recommended to facilitate advancement to a more advanced level of proficiency."
+        }
+      ]
+    }
+  },
+  {
+    "input": {
+      "report_type": "midterm",
+      "student": {
+        "name": "Ali",
+        "branch": "AlAin",
+        "sales_id": 4,
+        "teacher": "Samer",
+        "level": "5",
+        "course": "Mon-Wed , 5 PM",
+        "phone": null,
+        "email": null
+      },
+      "performance": {
+        "attendance": "9",
+        "assignment": "7"
+      },
+      "skills": {
+        "reading": "9",
+        "writing": "9",
+        "listening": "5",
+        "speaking": "8",
+        "vocab": "7",
+        "grammar": "7"
+      },
+      "sections": {
+        "communication": [
+          "Fluency: generally smooth speech with occasional hesitation when expressing complex ideas  ",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "vocabulary": [
+          "Range: sufficient vocabulary for everyday and academic topics with occasional limitations  ",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "grammar": [
+          "Tenses: good control of present and past tenses, occasional errors in perfect forms  ",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "strengths": [
+          "Strength: Strong listening comprehension and ability to follow detailed instructions  "
+        ],
+        "weaknesses": [
+          "Weakness: Limited precision in vocabulary when discussing abstract or unfamiliar topics  "
+        ],
+        "final_note": "Omar demonstrates solid upper-intermediate performance, showing consistent progress across most skills while requiring focused development in accuracy and lexical precision to reach a more advanced level.\n"
+      }
+    },
+    "output": {
+      "student": {
+        "name": "Ali",
+        "branch": "AlAin",
+        "sales_id": 4,
+        "teacher": "Samer",
+        "level": "5",
+        "course": "Mon-Wed , 5 PM",
+        "phone": null,
+        "email": null
+      },
+      "report_type": "midterm",
+      "sections": [
+        {
+          "title": "INTRODUCTION",
+          "content": "This midterm report provides an evaluation of Ali's progress in the current academic course, focusing on various key competencies that are crucial for effective language use. The analysis draws upon observed performance in both skills and assignments thus far."
+        },
+        {
+          "title": "ATTENDANCE & PERFORMANCE",
+          "content": "Ali has maintained a commendable attendance record with 9 out of 10 possible classes attended, signifying a strong commitment to the learning process. The assignment performance, however, while satisfactory at a level 7, indicates room for enhancement in grasping and applying concepts."
+        },
+        {
+          "title": "COMMUNICATION SKILLS",
+          "content": "Communication ability exhibits a generally smooth fluency, with spoken interactions characterized by occasional pauses, particularly when navigating complex ideas or subjects. This reflects a need for further practice in articulating advanced concepts to enhance confidence and fluidity."
+        },
+        {
+          "title": "VOCABULARY DEVELOPMENT",
+          "content": "Ali displays a sufficient range of vocabulary for both everyday and academic contexts; however, limitations arise when addressing more abstract or complex topics. Expanded vocabulary will be essential in fostering deeper discussions and improving overall expressive capabilities."
+        },
+        {
+          "title": "GRAMMAR ANALYSIS",
+          "content": "The usage of present and past tenses has been particularly strong, demonstrating good control and overall accuracy. Nevertheless, there are instances of errors in perfect verb forms, suggesting that focused grammatical exercises might aid in achieving greater precision."
+        },
+        {
+          "title": "READING & WRITING",
+          "content": "Reading and writing skills are notably robust, both receiving high evaluations of 9. This indicates a proficiency in comprehension and analysis of texts, as well as an ability to express ideas clearly in written form, reflecting a solid grasp of structure and coherence."
+        },
+        {
+          "title": "STRENGTHS",
+          "content": "A key strength lies in Ali's exceptional listening comprehension, facilitating the ability to follow detailed instructions effectively, which is crucial in both academic and real-world settings. This skill not only aids in understanding instructional material but also fosters collaborative learning."
+        },
+        {
+          "title": "AREAS FOR IMPROVEMENT",
+          "content": "There exists a notable weakness in vocabulary precision, especially when attempting to discuss abstract or unfamiliar topics. Addressing this gap through targeted vocabulary exercises and exposure to diverse language contexts will be critical for advancing overall communicative competence."
+        },
+        {
+          "title": "FINAL RECOMMENDATION",
+          "content": "Ali demonstrates solid upper-intermediate performance, indicating consistent progress across most skills. However, focused development in accuracy and lexical precision is required to reach a more advanced level. Engagement in activities that promote deeper vocabulary usage and grammatical refinement will facilitate this growth."
+        }
+      ]
+    }
+  },
+  {
+    "input": {
+      "report_type": "final",
+      "student": {
+        "name": "Ahmad",
+        "branch": "AlAin",
+        "sales_id": 4,
+        "teacher": "Samer",
+        "level": "5",
+        "course": "Mon-Wed , 5 PM",
+        "phone": null,
+        "email": null
+      },
+      "performance": {
+        "attendance": "10",
+        "assignment": "9"
+      },
+      "skills": {
+        "reading": "8",
+        "writing": "7",
+        "listening": "7",
+        "speaking": "8",
+        "vocab": "7",
+        "grammar": "7"
+      },
+      "sections": {
+        "communication": [
+          "Fluency: generally smooth speech with occasional hesitation when expressing complex ideas  ",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "vocabulary": [
+          "Range: sufficient vocabulary for everyday and academic topics with occasional limitations  ",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "grammar": [
+          "Tenses: good control of present and past tenses, occasional errors in perfect forms  ",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "strengths": [
+          "Strength: Strong listening comprehension and ability to follow detailed instructions  "
+        ],
+        "weaknesses": [
+          "Weakness: Limited precision in vocabulary when discussing abstract or unfamiliar topics  "
+        ],
+        "final_note": "Omar demonstrates solid upper-intermediate performance, showing consistent progress across most skills while requiring focused development in accuracy and lexical precision to reach a more advanced level.\n"
+      }
+    },
+    "output": {
+      "student": {
+        "name": "Ahmad",
+        "branch": "AlAin",
+        "sales_id": 4,
+        "teacher": "Samer",
+        "level": "5",
+        "course": "Mon-Wed , 5 PM",
+        "phone": null,
+        "email": null
+      },
+      "report_type": "final",
+      "sections": [
+        {
+          "title": "INTRODUCTION",
+          "content": "This final progress report aims to provide a comprehensive overview of Ahmad's performance throughout the course. With a consistent attendance record of ten sessions and an impressive assignment completion rate of nine, Ahmad has demonstrated a commendable commitment to academic advancement."
+        },
+        {
+          "title": "ATTENDANCE & PERFORMANCE",
+          "content": "Ahmad's attendance record has been exemplary, which reflects a strong dedication to the course structure and regular participation in classes. Alongside this commitment, the performance on assignments indicates a robust understanding of the material, showcasing efforts that align with expectations for level five students."
+        },
+        {
+          "title": "COMMUNICATION SKILLS",
+          "content": "In the area of communication, Ahmad exhibits generally smooth speech characterized by a good command of fluency. However, it is noted that there are occasional hesitations in expressing more complex ideas, a factor that suggests further practice may be beneficial in articulating thoughts with enhanced clarity."
+        },
+        {
+          "title": "VOCABULARY DEVELOPMENT",
+          "content": "The vocabulary range utilized by Ahmad is sufficient for covering both everyday and academic topics, demonstrating a solid foundation. Nonetheless, limitations arise when discussing abstract or unfamiliar topics, indicating a need to expand lexical resources to achieve greater expressive capabilities."
+        },
+        {
+          "title": "GRAMMAR ANALYSIS",
+          "content": "Ahmad displays a commendable grasp of present and past tenses, reflecting an understanding of fundamental grammatical structures. However, occasional inaccuracies in perfect forms suggest that targeted practice in this area could enhance grammatical precision and overall writing quality."
+        },
+        {
+          "title": "READING & WRITING",
+          "content": "In reading, Ahmad has scored an eight, showing effective comprehension skills and the ability to interpret texts relevant to the course. Writing, rated at a seven, indicates satisfactory skills but highlights the potential for further refinement in style and coherence. Enhancing these areas will contribute to improved overall proficiency."
+        },
+        {
+          "title": "STRENGTHS",
+          "content": "Ahmad's strengths are particularly prominent in listening comprehension, where there is a strong ability to follow detailed instructions. This skill not only contributes to effective communication but also facilitates learning in various contexts encountered within the academic environment."
+        },
+        {
+          "title": "AREAS FOR IMPROVEMENT",
+          "content": "The primary area for improvement is the precision in vocabulary usage during discussions, particularly with abstract concepts. Expanding the vocabulary repertoire to include terms that address unfamiliar topics will aid in achieving a more nuanced expression in both spoken and written forms."
+        },
+        {
+          "title": "FINAL RECOMMENDATION",
+          "content": "In conclusion, Ahmad demonstrates solid upper-intermediate performance with consistent progress across most skills. Focused development in grammatical accuracy and lexical precision is recommended to reach a more advanced level of proficiency. Continuous engagement in interactive practices and exposure to diverse texts are advised to further enhance overall communication skills."
+        }
+      ]
+    }
+  },
+  {
+    "input": {
+      "report_type": "final",
+      "student": {
+        "name": "Zaid",
+        "branch": "AlAin",
+        "sales_id": null,
+        "teacher": "Samer",
+        "level": "8",
+        "course": "Mon-Wed , 5 PM",
+        "phone": null,
+        "email": null
+      },
+      "performance": {
+        "attendance": "10",
+        "assignment": "10"
+      },
+      "skills": {
+        "reading": "8",
+        "writing": "7",
+        "listening": "7",
+        "speaking": "8",
+        "vocab": "7",
+        "grammar": "7"
+      },
+      "sections": {
+        "communication": [
+          "Fluency: generally smooth speech with occasional hesitation when expressing complex ideas  ",
+          "Interaction: responds appropriately and maintains conversation flow in most situations  ",
+          "Confidence: shows moderate confidence, though slight hesitation appears under pressure  ",
+          "Pronunciation: clear overall, with minor issues in stress and intonation patterns  ",
+          "Coherence: ideas are logically connected but sometimes lack precise transitions  "
+        ],
+        "vocabulary": [
+          "Range: sufficient vocabulary for everyday and academic topics with occasional limitations  ",
+          "Accuracy: mostly accurate usage with some word choice inconsistencies  ",
+          "Topic Vocabulary: able to use relevant vocabulary in familiar topics but struggles with specialized terms  ",
+          "Collocations: attempts common collocations with occasional misuse  ",
+          "Word Choice: generally appropriate but sometimes repetitive  "
+        ],
+        "grammar": [
+          "Tenses: good control of present and past tenses, occasional errors in perfect forms  ",
+          "Sentence Structure: produces varied sentence forms with some structural inaccuracies  ",
+          "Articles & Prepositions: noticeable but not frequent errors affecting clarity slightly  ",
+          "Verb Forms: mostly correct with occasional misuse in complex constructions  ",
+          "Agreement: generally accurate with minor agreement slips  "
+        ],
+        "strengths": [
+          "Strength: Strong listening comprehension and ability to follow detailed instructions  ",
+          "Extra: Consistent participation and willingness to engage in discussions  ",
+          "Extra: Ability to express ideas clearly in familiar contexts  "
+        ],
+        "weaknesses": [
+          "Weakness: Limited precision in vocabulary when discussing abstract or unfamiliar topics  ",
+          "Extra: Inconsistent accuracy in complex grammatical structures  ",
+          "Extra: Hesitation when organizing extended spoken responses  "
+        ],
+        "final_note": "Omar demonstrates solid upper-intermediate performance, showing consistent progress across most skills while requiring focused development in accuracy and lexical precision to reach a more advanced level.\n"
+      }
+    },
+    "output": {
+      "student": {
+        "name": "Zaid",
+        "branch": "AlAin",
+        "sales_id": null,
+        "teacher": "Samer",
+        "level": "8",
+        "course": "Mon-Wed , 5 PM",
+        "phone": null,
+        "email": null
+      },
+      "report_type": "final",
+      "sections": [
+        {
+          "title": "INTRODUCTION",
+          "content": "Zaid has completed the course with notable engagement and a clear trajectory of improvement across various language competencies. The assessment reflects consistent efforts in both attendance and participation, contributing positively to the overall learning experience."
+        },
+        {
+          "title": "ATTENDANCE & PERFORMANCE",
+          "content": "Zaid demonstrated exceptional commitment with a perfect attendance record and consistently completed assignments punctually. This dedication to the course has greatly enhanced the learning experience and has laid a strong foundation for further development."
+        },
+        {
+          "title": "COMMUNICATION SKILLS",
+          "content": "Zaid exhibits generally smooth speech, marked by occasional hesitation when navigating complex ideas. However, responses in conversation are mostly appropriate and demonstrate an ability to maintain the flow of dialogue. Although moderate confidence is apparent, particularly when under pressure, minor issues in pronunciation and coherence suggest room for improvement in terms of conveying ideas with precise transitions."
+        },
+        {
+          "title": "VOCABULARY DEVELOPMENT",
+          "content": "Zaid possesses a sufficient range of vocabulary that covers both everyday conversations and academic contexts, though limitations arise when dealing with more specialized terminology. While the overall accuracy of word choice suffices, inconsistencies are noted, particularly with collocations. The tendency towards repetitive language underlines the need for enhanced lexical variety."
+        },
+        {
+          "title": "GRAMMAR ANALYSIS",
+          "content": "Demonstrating good control of present and past tenses, Zaid occasionally encounters challenges in perfect forms. Sentence construction reflects a degree of variability, though structural inaccuracies intermittently occur. Errors with articles and prepositions, while noticeable, are infrequent and do not detract significantly from clarity. Additionally, while verb forms are predominantly accurate, misuse in more complex constructions signals a need for targeted practice."
+        },
+        {
+          "title": "READING & WRITING",
+          "content": "In reading, Zaid shows adequate comprehension skills, and writing displays emerging cohesion and clarity, particularly in familiar contexts. Nevertheless, writing may occasionally lack precision and depth, particularly when discussing abstract concepts, thus indicating an area for potential growth."
+        },
+        {
+          "title": "STRENGTHS",
+          "content": "A significant strength lies in Zaid's listening comprehension abilities, allowing for effective following of detailed instructions. Consistent participation further enhances classroom dynamics, coupled with the capacity to express ideas clearly in familiar contexts, which are commendable attributes that serve as a solid base for continued advancement."
+        },
+        {
+          "title": "AREAS FOR IMPROVEMENT",
+          "content": "While Zaid exhibits strengths, there are identifiable areas requiring improvement. Specific challenges include a lack of precision in vocabulary when addressing abstract topics, inconsistencies in complex grammatical structures, and the tendency to hesitate when organizing extended spoken responses. Focusing on these aspects will foster greater fluency and confidence."
+        },
+        {
+          "title": "FINAL RECOMMENDATION",
+          "content": "Overall, Zaid has demonstrated solid upper-intermediate performance with consistent progress evident in various skills. It is recommended that targeted development in vocabulary precision and grammatical accuracy take precedence in future learning endeavors to facilitate progression to more advanced language capabilities."
+        }
+      ]
+    }
+  },
+  {
+    "input": {
+      "report_type": "midterm",
+      "student": {
+        "name": "Values Check",
+        "branch": "HQ",
+        "level": "B1",
+        "course": "General English",
+        "phone": null,
+        "email": null,
+        "sales_id": null,
+        "teacher": "Teacher Test"
+      },
+      "performance": {
+        "attendance": "9",
+        "assignment": "8"
+      },
+      "skills": {
+        "reading": "8",
+        "writing": "7",
+        "listening": "9",
+        "speaking": "8",
+        "vocab": "8",
+        "grammar": "7"
+      },
+      "sections": {
+        "communication": [],
+        "vocabulary": [],
+        "grammar": [],
+        "strengths": [],
+        "weaknesses": [],
+        "final_note": ""
+      }
+    },
+    "output": {
+      "student": {
+        "name": "Values Check",
+        "branch": "HQ",
+        "level": "B1",
+        "course": "General English",
+        "phone": null,
+        "email": null,
+        "sales_id": null,
+        "teacher": "Teacher Test"
+      },
+      "report_type": "midterm",
+      "sections": [
+        {
+          "title": "INTRODUCTION",
+          "content": "Test content"
+        }
+      ]
+    }
+  },
+  {
+    "input": {
+      "report_type": "final",
+      "student": {
+        "name": "Eman",
+        "branch": "AlAin",
+        "sales_id": 4,
+        "teacher": "Samer",
+        "level": "5",
+        "course": "Mon-Wed , 5 PM",
+        "phone": null,
+        "email": null
+      },
+      "performance": {
+        "attendance": "10",
+        "assignment": "9"
+      },
+      "skills": {
+        "reading": "7",
+        "writing": "6",
+        "listening": "7",
+        "speaking": "5",
+        "vocab": "6",
+        "grammar": "5"
+      },
+      "sections": {
+        "communication": [
+          "Fluency: speaks slowly with pauses",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "vocabulary": [
+          "Range: limited vocabulary",
+          "Accuracy: some wrong word choices",
+          "",
+          "",
+          ""
+        ],
+        "grammar": [
+          "Tenses: confusion between past and present",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "strengths": [
+          "Strength: Good listening ability"
+        ],
+        "weaknesses": [
+          "Weakness: Grammar accuracy"
+        ],
+        "final_note": "Needs regular speaking practice and grammar exercises to improve overall performance"
+      }
+    },
+    "output": {
+      "student": {
+        "name": "Eman",
+        "branch": "AlAin",
+        "sales_id": 4,
+        "teacher": "Samer",
+        "level": "5",
+        "course": "Mon-Wed , 5 PM",
+        "phone": null,
+        "email": null
+      },
+      "report_type": "final",
+      "sections": [
+        {
+          "title": "INTRODUCTION",
+          "content": "This report provides an analytical overview of Eman's performance across various domains in the academic English course. Undertaken at the AlAin branch under the instruction of Teacher Samer, this final evaluation reflects Eman's engagement and proficiency, as well as identifying paths for improvement."
+        },
+        {
+          "title": "ATTENDANCE & PERFORMANCE",
+          "content": "Eman demonstrated commendable commitment to the course with an attendance record of 10, which is indicative of strong dedication. Performance on assignments also reflected a solid effort, scoring 9. These metrics signify a positive approach towards learning, although additional focus on practical application may yield even greater academic results."
+        },
+        {
+          "title": "COMMUNICATION SKILLS",
+          "content": "Overall communication skills exhibit a foundation, with a discernible need for enhancement in fluency. Eman tends to speak slowly and frequently incorporates pauses, which can interrupt the flow of conversation. This pattern suggests a cautious approach to speaking but may hinder spontaneous dialogue, necessitating focused practice in this area."
+        },
+        {
+          "title": "VOCABULARY DEVELOPMENT",
+          "content": "The vocabulary used by Eman is characterized by a range that is currently limited. While some attempts to utilize new terms are evident, instances of inaccurate word choices indicate a need for further development. Expanding the vocabulary repertoire would not only enhance expression but also facilitate better communication of ideas."
+        },
+        {
+          "title": "GRAMMAR ANALYSIS",
+          "content": "Grammar usage presents challenges, particularly with tenses, where confusion between past and present forms has been observed. Such inconsistencies can impede clarity in communication, highlighting the importance of practicing grammatical structures to bolster overall language proficiency."
+        },
+        {
+          "title": "READING & WRITING",
+          "content": "In reading, Eman's performance at a score of 7 indicates a reasonable level of comprehension. However, writing capabilities are more concerning, with a score of 6 suggesting that ideas may not always be conveyed with the necessary clarity and structure. Continued development in these areas will be essential to achieving greater efficacy in academic endeavors."
+        },
+        {
+          "title": "STRENGTHS",
+          "content": "A notable strength is Eman's good listening ability, which serves as a critical asset in language acquisition and interaction. This skill not only aids in understanding spoken language but also provides a solid foundation upon which other competencies, such as speaking and vocabulary usage, can be built."
+        },
+        {
+          "title": "AREAS FOR IMPROVEMENT",
+          "content": "There are several areas that require attention. The primary weakness identified is related to grammar accuracy, which necessitates focused practice and review. Furthermore, enhancing speaking skills through regular practice will be vital for improving overall language proficiency and boosting confidence in communicative contexts."
+        },
+        {
+          "title": "FINAL RECOMMENDATION",
+          "content": "To maximize Eman's potential, a structured approach that includes regular speaking practice paired with targeted grammar exercises is highly recommended. Such an approach will not only address immediate weaknesses but will also cultivate a more robust skill set, thereby enhancing Eman's overall performance in future language learning endeavors."
+        }
+      ]
+    }
+  },
+  {
+    "input": {
+      "report_type": "midterm",
+      "student": {
+        "name": "Omar",
+        "branch": "AlAin",
+        "sales_id": 4,
+        "teacher": "Samer",
+        "level": "7",
+        "course": "Sat/Sun 10:30 AM",
+        "phone": null,
+        "email": null
+      },
+      "performance": {
+        "attendance": "10",
+        "assignment": "8"
+      },
+      "skills": {
+        "reading": "9",
+        "writing": "7",
+        "listening": "7",
+        "speaking": "6",
+        "vocab": "5",
+        "grammar": "5"
+      },
+      "sections": {
+        "communication": [
+          "Fluency: speaks slowly with pauses",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "vocabulary": [
+          "Range: limited vocabulary",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "grammar": [
+          "Tenses: confusion between past and present",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "strengths": [
+          "Strength: Good listening ability",
+          "Extra: Pays attention in class"
+        ],
+        "weaknesses": [
+          "Weakness: Grammar accuracy",
+          "Extra: Speaking confidence"
+        ],
+        "final_note": "Needs regular speaking practice and grammar exercises to improve overall performance"
+      }
+    },
+    "output": {
+      "student": {
+        "name": "Omar",
+        "branch": "AlAin",
+        "sales_id": 4,
+        "teacher": "Samer",
+        "level": "7",
+        "course": "Sat/Sun 10:30 AM",
+        "phone": null,
+        "email": null
+      },
+      "report_type": "midterm",
+      "sections": [
+        {
+          "title": "INTRODUCTION",
+          "content": "This midterm report provides an overview of Omar's progress in the academic course, highlighting key performance metrics and areas for development. The evaluation will detail various competencies, including attendance, communication skills, vocabulary usage, grammatical understanding, and reading and writing abilities."
+        },
+        {
+          "title": "ATTENDANCE & PERFORMANCE",
+          "content": "Omar has demonstrated commendable attendance, being present for ten out of twelve sessions, which reflects a strong commitment to the course. In terms of assignment performance, a score of eight indicates a good level of understanding and effort; however, this also suggests that there is room for improvement in the completion of assigned tasks."
+        },
+        {
+          "title": "COMMUNICATION SKILLS",
+          "content": "Omar's oral communication skills exhibit some challenges, particularly in the realm of fluency, as he tends to speak slowly and often incorporates pauses. These tendencies can hinder the flow of conversation and limit effective communication. Enhanced speaking practices are recommended to build both fluency and confidence."
+        },
+        {
+          "title": "VOCABULARY DEVELOPMENT",
+          "content": "The vocabulary demonstrated by Omar remains limited in range, which significantly affects the ability to express ideas coherently and creatively. Continuous exposure to varied vocabulary through reading and practical applications would be beneficial for his linguistic development."
+        },
+        {
+          "title": "GRAMMAR ANALYSIS",
+          "content": "There are evident weaknesses in grammar, particularly with verb tenses, where confusion between past and present forms is recurrent. This grammatical inconsistency impacts both written and spoken communication, suggesting a need for targeted exercises to solidify understanding."
+        },
+        {
+          "title": "READING & WRITING",
+          "content": "Regarding reading abilities, Omar scores a nine, indicating proficiency in comprehension. However, writing skills, assessed at seven, show that while he can produce text, the complexity and accuracy could be enhanced by focused writing practice and feedback."
+        },
+        {
+          "title": "STRENGTHS",
+          "content": "Omar possesses a notable strength in listening, demonstrating the ability to absorb and understand spoken language effectively. Additionally, his attentiveness during class discussions and activities indicates a positive attitude towards learning, enhancing his overall progress in the academic environment."
+        },
+        {
+          "title": "AREAS FOR IMPROVEMENT",
+          "content": "There are several areas where improvement is necessary, particularly in grammar accuracy and speaking confidence, which currently impede communication efforts. A more proactive approach to speaking exercises and grammar practice will likely address these weaknesses and promote more effective communication."
+        },
+        {
+          "title": "FINAL RECOMMENDATION",
+          "content": "To facilitate holistic language development, it is imperative that Omar engages in regular speaking practice combined with focused grammar exercises. These measures will not only enhance his overall performance but also bolster his confidence in using the language both verbally and in writing."
+        }
+      ]
+    }
+  },
+  {
+    "input": {
+      "performance": {
+        "assignment": "8",
+        "attendance": "8"
+      },
+      "report_type": "midterm",
+      "sections": {
+        "communication": [
+          "Fluency: good"
+        ],
+        "final_note": "Continue regular practice.",
+        "grammar": [],
+        "strengths": [
+          "Good participation"
+        ],
+        "vocabulary": [],
+        "weaknesses": [
+          "Needs grammar practice"
+        ]
+      },
+      "skills": {
+        "grammar": "6",
+        "listening": "8",
+        "reading": "8",
+        "speaking": "6",
+        "vocab": "7",
+        "writing": "7"
+      },
+      "student": {
+        "branch": "AlAin",
+        "course": "English",
+        "level": "A1",
+        "name": "Test Student",
+        "sales_id": null,
+        "teacher": "Samer",
+        "phone": null,
+        "email": null
+      }
+    },
+    "output": {
+      "student": {
+        "branch": "AlAin",
+        "course": "English",
+        "level": "A1",
+        "name": "Test Student",
+        "sales_id": null,
+        "teacher": "Samer",
+        "phone": null,
+        "email": null
+      },
+      "report_type": "midterm",
+      "sections": [
+        {
+          "title": "INTRODUCTION",
+          "content": "Test Student has completed the current midterm report cycle with an overall performance average of 7.2/10. The report reflects classroom performance, submitted work, and the core language skill scores provided by the teacher."
+        },
+        {
+          "title": "ATTENDANCE & PERFORMANCE",
+          "content": "Test Student's attendance is currently strong at 8/10, while assignment completion is strong at 8/10. These indicators should be monitored together because consistent attendance and regular assignment practice strongly support measurable language progress."
+        },
+        {
+          "title": "COMMUNICATION SKILLS",
+          "content": "Fluency: good"
+        },
+        {
+          "title": "VOCABULARY DEVELOPMENT",
+          "content": "Test Student should continue expanding vocabulary range and accuracy through topic-based practice, guided review, and frequent use of new words in complete spoken and written responses."
+        },
+        {
+          "title": "GRAMMAR ANALYSIS",
+          "content": "Test Student's grammar development should focus on accuracy, sentence control, and consistent use of target structures across classroom activities and written assignments."
+        },
+        {
+          "title": "READING & WRITING",
+          "content": "In reading, Test Student scored 8/10, and in writing, Test Student scored 7/10. Continued practice should connect reading comprehension with clear written production so progress remains balanced."
+        },
+        {
+          "title": "STRENGTHS",
+          "content": "Good participation"
+        },
+        {
+          "title": "AREAS FOR IMPROVEMENT",
+          "content": "Needs grammar practice"
+        },
+        {
+          "title": "FINAL RECOMMENDATION",
+          "content": "Continue regular practice."
+        }
+      ]
+    }
+  },
+  {
+    "input": {
+      "performance": {
+        "assignment": "8",
+        "attendance": "8"
+      },
+      "report_type": "midterm",
+      "sections": {
+        "communication": [
+          "Fluency: good"
+        ],
+        "final_note": "Continue regular practice.",
+        "grammar": [],
+        "strengths": [
+          "Good participation"
+        ],
+        "vocabulary": [],
+        "weaknesses": [
+          "Needs grammar practice"
+        ]
+      },
+      "skills": {
+        "grammar": "6",
+        "listening": "8",
+        "reading": "8",
+        "speaking": "6",
+        "vocab": "7",
+        "writing": "7"
+      },
+      "student": {
+        "branch": "AlAin",
+        "course": "English",
+        "level": "A1",
+        "name": "Test Student",
+        "sales_id": null,
+        "teacher": "Samer",
+        "phone": null,
+        "email": null
+      }
+    },
+    "output": {
+      "student": {
+        "branch": "AlAin",
+        "course": "English",
+        "level": "A1",
+        "name": "Test Student",
+        "sales_id": null,
+        "teacher": "Samer",
+        "phone": null,
+        "email": null
+      },
+      "report_type": "midterm",
+      "sections": [
+        {
+          "title": "INTRODUCTION",
+          "content": "Test Student has completed the current midterm report cycle with an overall performance average of 7.2/10. The report reflects classroom performance, submitted work, and the core language skill scores provided by the teacher."
+        },
+        {
+          "title": "ATTENDANCE & PERFORMANCE",
+          "content": "Test Student's attendance is currently strong at 8/10, while assignment completion is strong at 8/10. These indicators should be monitored together because consistent attendance and regular assignment practice strongly support measurable language progress."
+        },
+        {
+          "title": "COMMUNICATION SKILLS",
+          "content": "Fluency: good"
+        },
+        {
+          "title": "VOCABULARY DEVELOPMENT",
+          "content": "Test Student should continue expanding vocabulary range and accuracy through topic-based practice, guided review, and frequent use of new words in complete spoken and written responses."
+        },
+        {
+          "title": "GRAMMAR ANALYSIS",
+          "content": "Test Student's grammar development should focus on accuracy, sentence control, and consistent use of target structures across classroom activities and written assignments."
+        },
+        {
+          "title": "READING & WRITING",
+          "content": "In reading, Test Student scored 8/10, and in writing, Test Student scored 7/10. Continued practice should connect reading comprehension with clear written production so progress remains balanced."
+        },
+        {
+          "title": "STRENGTHS",
+          "content": "Good participation"
+        },
+        {
+          "title": "AREAS FOR IMPROVEMENT",
+          "content": "Needs grammar practice"
+        },
+        {
+          "title": "FINAL RECOMMENDATION",
+          "content": "Continue regular practice."
+        }
+      ]
+    }
+  },
+  {
+    "input": {
+      "report_type": "midterm",
+      "student": {
+        "name": "Samer",
+        "branch": "HQ",
+        "sales_id": null,
+        "teacher": "Fouad",
+        "level": "4",
+        "course": "mon /10 PM",
+        "phone": null,
+        "email": null
+      },
+      "performance": {
+        "attendance": "10",
+        "assignment": "9"
+      },
+      "skills": {
+        "reading": "10",
+        "writing": "9",
+        "listening": "7",
+        "speaking": "5",
+        "vocab": "8",
+        "grammar": "6"
+      },
+      "sections": {
+        "communication": [
+          "Fluency: generally smooth speech with occasional hesitation when expressing complex ideas  ",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "vocabulary": [
+          "Range: sufficient vocabulary for everyday and academic topics with occasional limitations  ",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "grammar": [
+          "Tenses: good control of present and past tenses, occasional errors in perfect forms  ",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "strengths": [
+          "Strength: Strong listening comprehension and ability to follow detailed instructions  "
+        ],
+        "weaknesses": [
+          "Weakness: Limited precision in vocabulary when discussing abstract or unfamiliar topics  "
+        ],
+        "final_note": "Omar demonstrates solid upper-intermediate performance, showing consistent progress across most skills while requiring focused development in accuracy and lexical precision to reach a more advanced level.\n"
+      }
+    },
+    "output": {
+      "student": {
+        "name": "Samer",
+        "branch": "HQ",
+        "sales_id": null,
+        "teacher": "Fouad",
+        "level": "4",
+        "course": "mon /10 PM",
+        "phone": null,
+        "email": null
+      },
+      "report_type": "midterm",
+      "sections": [
+        {
+          "title": "INTRODUCTION",
+          "content": "This midterm progress report evaluates the performance of Samer in the context of the academic English course. The analysis considers various language skills, attendance, and the capability to engage in effective communication. Insights derived from ongoing assessments reveal both strengths and areas needing improvement."
+        },
+        {
+          "title": "ATTENDANCE & PERFORMANCE",
+          "content": "Samer has maintained perfect attendance with a record of 10 out of a possible 10. This consistent presence in class suggests a strong commitment to learning and engagement with course content. Performance in assignments is commendable, achieving an impressive score of 9, which indicates a high level of understanding and dedication to the coursework."
+        },
+        {
+          "title": "COMMUNICATION SKILLS",
+          "content": "In terms of communication, Samer demonstrates fluency in expressing ideas, typically exhibiting smooth speech patterns. However, there are instances of hesitation when attempting to articulate more complex ideas, which suggests a need for enhanced confidence and preparation in these contexts. Overall, communication abilities reflect a positive trajectory."
+        },
+        {
+          "title": "VOCABULARY DEVELOPMENT",
+          "content": "Samer possesses a sufficient vocabulary that comfortably addresses both everyday scenarios and academic discussions. Nevertheless, there are occasional limitations when it comes to more abstract or nuanced topics, indicating that targeted vocabulary expansion would be beneficial for improved expressiveness and comprehension in more complicated discussions."
+        },
+        {
+          "title": "GRAMMAR ANALYSIS",
+          "content": "Grammar usage displays a reasonable command over various tenses, particularly in present and past contexts. However, some errors persist concerning perfect forms, signifying an area that requires additional focus. Continued practice and targeted exercises will help rectify these grammatical inconsistencies."
+        },
+        {
+          "title": "READING & WRITING",
+          "content": "Samer excels in reading, achieving a perfect score of 10, reflecting strong comprehension skills and the ability to engage with texts effectively. Writing performance is also commendable, with a score of 9 indicating a solid grasp of composition skills. Ongoing practice in writing will be essential to further enhance clarity and precision in expression."
+        },
+        {
+          "title": "STRENGTHS",
+          "content": "One of Samer's notable strengths lies in listening comprehension, where a strong ability to follow detailed instructions has been observed. This skill significantly contributes to overall learning and classroom dynamics, facilitating collaborative opportunities and enhancing engagement with peers and instructors alike."
+        },
+        {
+          "title": "AREAS FOR IMPROVEMENT",
+          "content": "Despite existing strengths, Samer faces challenges with precision in vocabulary, particularly when addressing abstract or unfamiliar topics. This limitation can hinder deeper discussions and expressions of complex ideas, necessitating a focused approach to expanding lexical knowledge and usage in varied contexts."
+        },
+        {
+          "title": "FINAL RECOMMENDATION",
+          "content": "Overall, Samer demonstrates solid upper-intermediate performance, showing consistent progress across most skills. However, to reach a more advanced level, focused development in both accuracy and lexical precision is encouraged. Engaging in targeted practice and expanding vocabulary knowledge will significantly benefit Samer's language acquisition journey."
+        }
+      ]
+    }
+  },
+  {
+    "input": {
+      "report_type": "final",
+      "student": {
+        "name": "Ahmaad",
+        "branch": "HQ",
+        "sales_id": 8,
+        "teacher": "System Manager",
+        "level": "7",
+        "course": "Sun 10 PM",
+        "phone": null,
+        "email": null
+      },
+      "performance": {
+        "attendance": "10",
+        "assignment": "9"
+      },
+      "skills": {
+        "reading": "10",
+        "writing": "9",
+        "listening": "10",
+        "speaking": "9",
+        "vocab": "7",
+        "grammar": "9"
+      },
+      "sections": {
+        "communication": [
+          "Fluency: generally smooth speech with occasional hesitation when expressing complex ideas  ",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "vocabulary": [
+          "Range: sufficient vocabulary for everyday and academic topics with occasional limitations  ",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "grammar": [
+          "Tenses: good control of present and past tenses, occasional errors in perfect forms  ",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "strengths": [
+          "Strength: Strong listening comprehension and ability to follow detailed instructions  "
+        ],
+        "weaknesses": [
+          "Weakness: Limited precision in vocabulary when discussing abstract or unfamiliar topics  "
+        ],
+        "final_note": "Omar demonstrates solid upper-intermediate performance, showing consistent progress across most skills while requiring focused development in accuracy and lexical precision to reach a more advanced level.\n"
+      }
+    },
+    "output": {
+      "student": {
+        "name": "Ahmaad",
+        "branch": "HQ",
+        "sales_id": 8,
+        "teacher": "System Manager",
+        "level": "7",
+        "course": "Sun 10 PM",
+        "phone": null,
+        "email": null
+      },
+      "report_type": "final",
+      "sections": [
+        {
+          "title": "INTRODUCTION",
+          "content": "This report summarizes the academic progress of Ahmaad in the English language course. The evaluation reflects performance across various skills and provides insights into strengths and areas that require additional focus."
+        },
+        {
+          "title": "ATTENDANCE & PERFORMANCE",
+          "content": "Ahmaad has exhibited commendable commitment to the course, achieving full attendance at ten sessions, which significantly contributed to his overall learning experience. Additionally, an assignment completion rating of nine indicates a strong dedication to course tasks, demonstrating responsibility and engagement."
+        },
+        {
+          "title": "COMMUNICATION SKILLS",
+          "content": "Ahmaad generally showcases smooth speech, particularly in fluent contexts; however, there are instances of hesitation when attempting to articulate more complex ideas. This suggests a need for further practice in developing spontaneous speech, especially in unfamiliar situations."
+        },
+        {
+          "title": "VOCABULARY DEVELOPMENT",
+          "content": "The vocabulary employed is adequate for both everyday interactions and academic discussions, though it exhibits occasional limitations. This indicates that while Ahmaad can communicate effectively, enhancing lexical range and precision, particularly with abstract topics, would greatly benefit performance."
+        },
+        {
+          "title": "GRAMMAR ANALYSIS",
+          "content": "In grammar, Ahmaad demonstrates good control over present and past tenses, exhibiting a foundational proficiency. Nevertheless, there are occasional errors noted in the use of perfect tenses, suggesting a need for further refinement in this area to solidify overall grammatical accuracy."
+        },
+        {
+          "title": "READING & WRITING",
+          "content": "Ahmaad achieved the highest rating in reading skills, illustrating a strong ability to comprehend diverse texts thoroughly. Writing skills are also notably strong, although some improvements in lexical precision would enhance clarity and impact in written communication."
+        },
+        {
+          "title": "STRENGTHS",
+          "content": "One of Ahmaad's most significant strengths is his exceptional listening comprehension. He exhibits a remarkable capacity to follow detailed instructions, which facilitates his understanding in a learning environment where auditory processing is vital."
+        },
+        {
+          "title": "AREAS FOR IMPROVEMENT",
+          "content": "An area for improvement lies in Ahmaad's vocabulary, specifically related to precision in discussions about abstract or less familiar topics. Addressing this weakness will enhance his ability to express more complex ideas accurately and refine his overall communication skills."
+        },
+        {
+          "title": "FINAL RECOMMENDATION",
+          "content": "Owing to consistent progress across various skills, Ahmaad demonstrates solid upper-intermediate performance. Focused development in both accuracy and lexical precision will be crucial for advancing to a more proficient level. Continued practice and targeted exercises in vocabulary and complex grammatical structures are recommended to facilitate this growth."
+        }
+      ]
+    }
+  },
+  {
+    "input": {
+      "report_type": "final",
+      "student": {
+        "name": "Omar",
+        "branch": "HQ",
+        "sales_id": null,
+        "teacher": "Samer",
+        "level": "5",
+        "course": "1",
+        "phone": null,
+        "email": null
+      },
+      "performance": {
+        "attendance": "10",
+        "assignment": "10"
+      },
+      "skills": {
+        "reading": "10",
+        "writing": "7",
+        "listening": "7",
+        "speaking": "6",
+        "vocab": "7",
+        "grammar": "7"
+      },
+      "sections": {
+        "communication": [
+          "Fluency: good",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "vocabulary": [
+          "Range: good",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "grammar": [
+          "Tenses: good",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "strengths": [
+          "Strength: good Grammar "
+        ],
+        "weaknesses": [
+          "Weakness: week Vocabulary "
+        ],
+        "final_note": ""
+      }
+    },
+    "output": {
+      "student": {
+        "name": "Omar",
+        "branch": "HQ",
+        "sales_id": null,
+        "teacher": "Samer",
+        "level": "5",
+        "course": "1",
+        "phone": null,
+        "email": null
+      },
+      "report_type": "final",
+      "sections": [
+        {
+          "title": "INTRODUCTION",
+          "content": "This final progress report provides a comprehensive overview of Omar's performance throughout the course. The analysis encompasses attendance, academic skills, and overall development in the English language as instructed by Samer."
+        },
+        {
+          "title": "ATTENDANCE & PERFORMANCE",
+          "content": "Omar achieved an exemplary attendance rate, scoring a perfect 10, which underscores a commendable commitment to his studies. Furthermore, the completion of assignments was also rated at 10, indicating a strong work ethic and a dedication to fulfilling course requirements."
+        },
+        {
+          "title": "COMMUNICATION SKILLS",
+          "content": "Omar's communication skills exhibit noticeable strengths, particularly in fluency, which has been evaluated positively. Despite this strength, further improvement in speaking is necessary to maximize his overall communicative effectiveness."
+        },
+        {
+          "title": "VOCABULARY DEVELOPMENT",
+          "content": "The vocabulary range is adequate, reflected in a score of 7, yet there remains significant room for enhancement. Strengthening vocabulary through diverse reading and practice will contribute to greater expressive capabilities."
+        },
+        {
+          "title": "GRAMMAR ANALYSIS",
+          "content": "Omar demonstrates a solid grasp of grammar, particularly concerning tenses, which has been characterized as good. This foundation in grammatical structures is essential for developing more complex expressions and enhancing overall writing quality."
+        },
+        {
+          "title": "READING & WRITING",
+          "content": "Reading abilities are robust, with a score of 10 illustrating a deep comprehension of text. However, writing skills, rated at 7, indicate the need for improvement in clarity and coherence. Continued focus on writing techniques will aid in crafting more articulate pieces."
+        },
+        {
+          "title": "STRENGTHS",
+          "content": "Omar’s proficiency in grammar appears to be a significant strength, positively impacting his academic performance. This capability is foundational for further language acquisition and offers a solid base for enhancing other skills."
+        },
+        {
+          "title": "AREAS FOR IMPROVEMENT",
+          "content": "A crucial area for improvement lies in vocabulary development, which is currently perceived as a weakness. Addressing this gap will be vital for advancing Omar’s overall language proficiency. Additionally, enhancing speaking skills would further bolster his ability to communicate effectively."
+        },
+        {
+          "title": "FINAL RECOMMENDATION",
+          "content": "To facilitate Omar's continued growth in English language proficiency, it is recommended that he engages in activities focused on vocabulary expansion and speaking practice. Supplementing his studies with targeted resources will provide a well-rounded approach to overcoming current challenges."
+        }
+      ]
+    }
+  }
+]

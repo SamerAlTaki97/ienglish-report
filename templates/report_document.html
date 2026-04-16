@@ -1,0 +1,634 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ student.name or "Student" }} - {{ report_type_label }}</title>
+    <style>
+      :root {
+        --navy: #0f2d52;
+        --blue: #0f4c81;
+        --teal: #2a9d8f;
+        --ink: #0f172a;
+        --muted: #526173;
+        --line: #d9e2ec;
+        --panel: #f8fbff;
+        --warm: #fff6ee;
+        --warm-ink: #b45309;
+        --green: #1c6e56;
+      }
+
+      @page {
+        size: A4;
+        margin: 12mm;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Calibri, Arial, sans-serif;
+        color: var(--ink);
+        background: {% if preview_mode %}#edf3f8{% else %}white{% endif %};
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .preview-shell {
+        {% if preview_mode %}
+        max-width: 980px;
+        margin: 24px auto 48px;
+        padding: 0 14px;
+        {% endif %}
+      }
+
+      .preview-bar {
+        {% if preview_mode %}
+        position: sticky;
+        top: 12px;
+        z-index: 30;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+        padding: 14px 18px;
+        background: rgba(15, 45, 82, 0.95);
+        color: white;
+        border-radius: 16px;
+        box-shadow: 0 18px 36px rgba(15, 23, 42, 0.16);
+        {% else %}
+        display: none;
+        {% endif %}
+      }
+
+      .preview-bar a {
+        color: white;
+        text-decoration: none;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.15);
+        font-weight: 700;
+      }
+
+      .document {
+        width: 210mm;
+        margin: 0 auto;
+        background: white;
+        {% if preview_mode %}
+        box-shadow: 0 28px 60px rgba(15, 23, 42, 0.12);
+        {% endif %}
+      }
+
+      .page {
+        min-height: 273mm;
+        padding: 16mm 14mm 14mm;
+        page-break-after: always;
+      }
+
+      .page:last-child { page-break-after: auto; }
+
+      .topline {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 10px;
+        margin-bottom: 18px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .brand img {
+        width: 54px;
+        height: 54px;
+        object-fit: contain;
+      }
+
+      .brand h1, .topline h2 { margin: 0; }
+      .brand h1 { font-size: 17px; letter-spacing: 0.03em; color: var(--navy); }
+      .doc-meta { text-align: right; }
+      .doc-meta h2 { font-size: 13px; color: var(--blue); text-transform: uppercase; letter-spacing: 0.08em; }
+
+      .hero {
+        background: linear-gradient(135deg, var(--navy), #174b7a 58%, #1d6f8f);
+        color: white;
+        border-radius: 28px;
+        padding: 28px 30px;
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 22px;
+        margin-bottom: 20px;
+      }
+
+      .hero h3, .hero p { margin: 0; }
+      .eyebrow {
+        display: inline-flex;
+        padding: 7px 12px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.14);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+      }
+
+      .hero-title {
+        font-size: 33px;
+        line-height: 1.1;
+        font-weight: 800;
+        max-width: 420px;
+      }
+
+      .hero-sub {
+        margin-top: 14px;
+        color: rgba(255,255,255,0.86);
+        line-height: 1.6;
+        font-size: 14px;
+      }
+
+      .score-box {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.16);
+        border-radius: 22px;
+        padding: 20px;
+        display: grid;
+        gap: 12px;
+        align-content: start;
+      }
+
+      .score-box .label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: rgba(255,255,255,0.72);
+      }
+
+      .score-box .value {
+        font-size: 44px;
+        font-weight: 800;
+        line-height: 1;
+      }
+
+      .score-box .caption {
+        color: rgba(255,255,255,0.84);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .meta-grid,
+      .card-grid,
+      .stat-grid,
+      .analysis-grid,
+      .duo-grid,
+      .steps-grid,
+      .focus-grid {
+        display: grid;
+        gap: 14px;
+      }
+
+      .meta-grid { grid-template-columns: repeat(3, 1fr); margin-bottom: 18px; }
+      .card-grid { grid-template-columns: repeat(4, 1fr); margin-bottom: 18px; }
+      .stat-grid { grid-template-columns: 1fr; margin-bottom: 18px; }
+      .analysis-grid { grid-template-columns: repeat(2, 1fr); }
+      .duo-grid { grid-template-columns: repeat(2, 1fr); margin-bottom: 18px; }
+      .steps-grid { grid-template-columns: repeat(2, 1fr); }
+      .focus-grid { grid-template-columns: repeat(2, 1fr); }
+      .section-subtitle {
+        margin-top: 4px;
+        color: #6b7b8e;
+        font-size: 11px;
+        line-height: 1.4;
+      }
+
+      .page-heading {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .analysis-page .topline,
+      .action-page .topline {
+        align-items: flex-start;
+        margin-bottom: 16px;
+      }
+
+      .analysis-page .doc-meta,
+      .action-page .doc-meta {
+        padding-top: 2px;
+      }
+
+      .analysis-page .doc-meta h2,
+      .action-page .doc-meta h2 {
+        font-size: 12px;
+        letter-spacing: 0.09em;
+      }
+
+      .info-card,
+      .summary-card,
+      .stat-card,
+      .panel,
+      .recommendation-panel,
+      .step-card {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: white;
+      }
+
+      .info-card {
+        padding: 14px 16px;
+        background: var(--panel);
+      }
+
+      .info-card .k {
+        color: var(--blue);
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 6px;
+      }
+
+      .info-card .v {
+        font-size: 15px;
+        font-weight: 700;
+      }
+
+      .summary-card {
+        padding: 16px 18px;
+        background: linear-gradient(180deg, #fbfdff, #f5f9fd);
+      }
+
+      .summary-card h4,
+      .panel h4,
+      .recommendation-panel h4,
+      .step-card h4 {
+        margin: 0 0 10px;
+        font-size: 18px;
+        color: var(--navy);
+      }
+
+      .summary-card p,
+      .panel p,
+      .recommendation-panel p,
+      .step-card p {
+        margin: 0;
+        color: #334155;
+        line-height: 1.62;
+        font-size: 13.2px;
+      }
+
+      .metric-card {
+        border-radius: 18px;
+        padding: 18px;
+        color: white;
+      }
+
+      .metric-card .small {
+        font-size: 11px;
+        opacity: 0.84;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .metric-card .big {
+        margin-top: 10px;
+        font-size: 23px;
+        font-weight: 800;
+        line-height: 1.2;
+      }
+
+      .metric-navy { background: linear-gradient(135deg, #0f4c81, #1c6ca3); }
+      .metric-blue { background: linear-gradient(135deg, #1d6f8f, #2892a9); }
+      .metric-teal { background: linear-gradient(135deg, #2a9d8f, #47b8aa); }
+      .metric-warm { background: linear-gradient(135deg, #c97a40, #df9a54); }
+
+      .chart-panel,
+      .snapshot-chart {
+        overflow: hidden;
+      }
+
+      .chart-panel img,
+      .snapshot-chart img {
+        width: 100%;
+        display: block;
+        max-width: 100%;
+        object-fit: contain;
+      }
+
+      .chart-panel img {
+        max-height: 260px;
+        margin: 0 auto;
+      }
+
+      .snapshot-chart img {
+        max-height: 180px;
+        margin: 0 auto;
+      }
+
+      .stat-card {
+        padding: 16px 18px;
+        background: var(--panel);
+      }
+
+      .stat-card .eyeline {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--blue);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .stat-card .headline {
+        font-size: 21px;
+        font-weight: 800;
+        margin-top: 8px;
+      }
+
+      .panel {
+        padding: 16px 16px 14px;
+        background: white;
+        break-inside: avoid;
+        page-break-inside: avoid;
+        border-color: #d7e3ef;
+      }
+
+      .panel .tag {
+        display: inline-flex;
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: #edf5ff;
+        color: var(--blue);
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 10px;
+      }
+
+      .warm-panel { background: var(--warm); }
+      .sea-panel { background: #f1fbf8; }
+
+      .recommendation-panel {
+        padding: 18px 18px 16px;
+        background: linear-gradient(180deg, #fbfdff, #f4f8fc);
+        margin-bottom: 18px;
+        border-color: #d7e3ef;
+      }
+
+      .step-card {
+        padding: 16px 16px 14px;
+        background: white;
+        break-inside: avoid;
+        page-break-inside: avoid;
+        border-color: #d7e3ef;
+        min-height: 118px;
+      }
+
+      .step-number {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--navy);
+        color: white;
+        font-weight: 800;
+        margin-bottom: 10px;
+        font-size: 13px;
+      }
+
+      .analysis-page .panel,
+      .action-page .panel,
+      .action-page .recommendation-panel,
+      .action-page .step-card {
+        box-shadow: 0 1px 0 rgba(15, 45, 82, 0.03);
+      }
+
+      @media screen and (max-width: 1000px) {
+        .document { width: 100%; }
+        .page { min-height: auto; padding: 20px; }
+        .hero,
+        .meta-grid,
+        .card-grid,
+        .stat-grid,
+        .analysis-grid,
+        .focus-grid,
+        .duo-grid,
+        .steps-grid { grid-template-columns: 1fr; }
+      }
+
+      @media print {
+        body { background: white; }
+        .preview-shell { margin: 0; padding: 0; }
+        .document { box-shadow: none; width: auto; }
+        .page { min-height: auto; }
+        .analysis-grid,
+        .duo-grid,
+        .steps-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 10px;
+          align-items: start;
+        }
+        .analysis-page .panel,
+        .action-page .panel,
+        .action-page .recommendation-panel,
+        .action-page .step-card {
+          padding: 13px 13px 11px;
+        }
+        .analysis-page .panel p,
+        .action-page .panel p,
+        .action-page .recommendation-panel p,
+        .action-page .step-card p {
+          font-size: 11.7px;
+          line-height: 1.48;
+        }
+        .analysis-page .panel .tag,
+        .action-page .panel .tag {
+          margin-bottom: 8px;
+          font-size: 10px;
+        }
+        .action-page .step-number {
+          width: 26px;
+          height: 26px;
+          margin-bottom: 8px;
+          font-size: 12px;
+        }
+        .analysis-page .topline,
+        .action-page .topline {
+          margin-bottom: 11px;
+        }
+        .analysis-page .section-subtitle,
+        .action-page .section-subtitle {
+          font-size: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="preview-shell">
+      {% if preview_mode %}
+      <div class="preview-bar">
+        <div>
+          <strong>{{ student.name or "Student Report" }}</strong>
+          <div style="opacity:.8; margin-top:4px;">{{ report_type_label }}{% if report_meta.status %} | {{ report_meta.status }}{% endif %}</div>
+        </div>
+        {% if report_meta.pdf_download_url %}
+        <a href="{{ report_meta.pdf_download_url }}?download=1" target="_blank">Download PDF</a>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <div class="document">
+        <section class="page">
+          <div class="topline">
+            <div class="brand">
+              {% if logo_uri %}<img src="{{ logo_uri }}" alt="Logo" />{% endif %}
+              <div>
+                <h1>iEnglish</h1>
+              </div>
+            </div>
+            <div class="doc-meta">
+              <h2>{{ report_type_label }}</h2>
+            </div>
+          </div>
+
+          <div class="hero">
+            <div>
+              <div class="eyebrow">Student Progress Report</div>
+              <div class="hero-title">{{ student.name or "Student" }}</div>
+              <div class="hero-sub">{{ executive_summary }}</div>
+            </div>
+            <div class="score-box">
+              <div class="label">Overall Academic Standing</div>
+              <div class="value">{{ overall_score }}/10</div>
+              <div class="caption">{{ performance_band }} performance level with strongest performance in {{ strongest_skill.label }} and current support priority in {{ weakest_skill.label }}.</div>
+            </div>
+          </div>
+
+          <div class="meta-grid">
+            <div class="info-card"><div class="k">Teacher</div><div class="v">{{ student.teacher or "-" }}</div></div>
+            <div class="info-card"><div class="k">Branch</div><div class="v">{{ student.branch or "-" }}</div></div>
+            <div class="info-card"><div class="k">Course</div><div class="v">{{ student.course or "-" }}</div></div>
+            <div class="info-card"><div class="k">Level</div><div class="v">{{ student.level or "-" }}</div></div>
+            <div class="info-card"><div class="k">Phone</div><div class="v">{{ student.phone or "-" }}</div></div>
+            <div class="info-card"><div class="k">Email</div><div class="v">{{ student.email or "-" }}</div></div>
+          </div>
+
+          <div class="card-grid">
+            <div class="metric-card metric-navy"><div class="small">Overall Score</div><div class="big">{{ overall_score }}/10</div></div>
+            <div class="metric-card metric-blue"><div class="small">Performance Band</div><div class="big">{{ performance_band }}</div></div>
+            <div class="metric-card metric-teal"><div class="small">Strongest Skill</div><div class="big">{{ strongest_skill.label }}</div></div>
+            <div class="metric-card metric-warm"><div class="small">Growth Priority</div><div class="big">{{ weakest_skill.label }}</div></div>
+          </div>
+
+          <div class="summary-card">
+            <h4>Executive Summary</h4>
+            <p>{{ executive_summary }}</p>
+          </div>
+        </section>
+
+        <section class="page">
+          <div class="topline">
+            <div class="brand">
+              <div>
+                <h1>Performance Dashboard</h1>
+              </div>
+            </div>
+            <div class="doc-meta">
+              <h2>{{ student.name or "Student" }}</h2>
+            </div>
+          </div>
+
+          <div class="stat-grid">
+            <div class="summary-card snapshot-chart">
+              <h4>Attendance & Assignment</h4>
+              <img src="{{ snapshot_chart_uri }}" alt="Snapshot chart" />
+            </div>
+
+            <div class="summary-card chart-panel">
+              <h4>Core Skill Performance</h4>
+              <img src="{{ skills_chart_uri }}" alt="Skills chart" />
+            </div>
+          </div>
+
+          <div class="focus-grid">
+            <div class="stat-card">
+              <div class="eyeline">Strongest</div>
+              <div class="headline">{{ strongest_skill.label }} - {{ strongest_skill.value }}/10</div>
+            </div>
+            <div class="stat-card">
+              <div class="eyeline">Focus Area</div>
+              <div class="headline">{{ weakest_skill.label }} - {{ weakest_skill.value }}/10</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="page analysis-page">
+          <div class="topline">
+            <div class="brand">
+              <div class="page-heading">
+                <h1>Detailed Teacher Analysis</h1>
+              </div>
+            </div>
+            <div class="doc-meta">
+              <h2>{{ student.name or "Student" }}</h2>
+            </div>
+          </div>
+
+          <div class="analysis-grid">
+            {% for section in analysis_sections if section.content %}
+            <div class="panel">
+              <div class="tag">{{ section.title }}</div>
+              <p>{{ section.content }}</p>
+            </div>
+            {% endfor %}
+          </div>
+        </section>
+
+        <section class="page action-page">
+          <div class="topline">
+            <div class="brand">
+              <div class="page-heading">
+                <h1>Action Plan & Recommendation</h1>
+              </div>
+            </div>
+            <div class="doc-meta">
+              <h2>{{ performance_band }}</h2>
+            </div>
+          </div>
+
+          <div class="duo-grid">
+            <div class="panel sea-panel">
+              <div class="tag" style="background:#dff3ef; color:var(--green);">Strengths to Maintain</div>
+              <p>{{ sections_map.get("STRENGTHS") if sections_map.get("STRENGTHS") else strongest_skill.label ~ " is currently the student's strongest academic area." }}</p>
+            </div>
+            <div class="panel warm-panel">
+              <div class="tag" style="background:#ffe8d3; color:var(--warm-ink);">Areas for Improvement</div>
+              <p>{{ sections_map.get("AREAS FOR IMPROVEMENT") if sections_map.get("AREAS FOR IMPROVEMENT") else weakest_skill.label ~ " should remain the main focus for the coming cycle." }}</p>
+            </div>
+          </div>
+
+          <div class="recommendation-panel">
+            <h4>Final Recommendation</h4>
+            <p>{{ sections_map.get("FINAL RECOMMENDATION", "") }}</p>
+          </div>
+
+          <div class="steps-grid">
+            {% for step in next_steps %}
+            <div class="step-card">
+              <div class="step-number">{{ loop.index }}</div>
+              <p>{{ step }}</p>
+            </div>
+            {% endfor %}
+          </div>
+        </section>
+      </div>
+    </div>
+  </body>
+</html>

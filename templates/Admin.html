@@ -1,0 +1,136 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <meta charset="UTF-8" />
+    <title>Admin Dashboard</title>
+    <style>
+      body { font-family: Arial, sans-serif; background: #eef2f7; margin: 0; }
+      .container { max-width: 1220px; margin: 32px auto; background: white; padding: 24px; border-radius: 12px; }
+      .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
+      .card { padding: 16px; border-radius: 10px; color: white; font-weight: bold; }
+      .draft { background: #475569; }
+      .pending_operation { background: #d97706; }
+      .approved { background: #2563eb; }
+      .delivered { background: #16a34a; }
+      .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+      .search-wrap { display: flex; align-items: stretch; }
+      .search-wrap input { border-radius: 6px 0 0 6px; min-width: 230px; }
+      .search-wrap button { border-radius: 0 6px 6px 0; background: #2563eb; color: white; font-weight: 700; }
+      input, select, button { padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: left; }
+      th { background: #f8fafc; }
+      @media (max-width: 900px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    </style>
+  </head>
+  <body>
+    {% include "_navbar.html" %}
+    <div class="container">
+      <h1>Admin Dashboard</h1>
+
+      <div class="stats">
+        <div class="card draft">Draft: <span id="draftCount">0</span></div>
+        <div class="card pending_operation">Pending Operation: <span id="pendingCount">0</span></div>
+        <div class="card approved">Approved: <span id="approvedCount">0</span></div>
+        <div class="card delivered">Delivered: <span id="deliveredCount">0</span></div>
+      </div>
+
+      <div class="filters">
+        <div class="search-wrap">
+          <input id="phoneFilter" placeholder="Search by student phone" />
+          <button onclick="load()">Search</button>
+        </div>
+        <select id="teacherFilter" onchange="load()">
+          <option value="">All teachers</option>
+        </select>
+        <select id="statusFilter" onchange="load()">
+          <option value="">All statuses</option>
+          <option value="draft">Draft</option>
+          <option value="pending_operation">Pending operation</option>
+          <option value="approved">Approved</option>
+          <option value="delivered">Delivered</option>
+        </select>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Phone</th>
+            <th>Student</th>
+            <th>Teacher</th>
+            <th>Educational Consultant</th>
+            <th>Level</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Delivered</th>
+            <th>View</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <script>
+      let allRows = [];
+
+      async function load() {
+        const phone = document.getElementById("phoneFilter").value.trim();
+        const teacher = document.getElementById("teacherFilter").value;
+        const status = document.getElementById("statusFilter").value;
+        const query = new URLSearchParams();
+        if (phone) query.set("phone", phone);
+        if (teacher) query.set("teacher_id", teacher);
+        if (status) query.set("status", status);
+        const response = await fetch(`/admin/reports?${query.toString()}`);
+        allRows = await response.json();
+        render();
+      }
+
+      function render() {
+        const counts = { draft: 0, pending_operation: 0, approved: 0, delivered: 0 };
+        const tbody = document.getElementById("tableBody");
+        tbody.innerHTML = "";
+        allRows.forEach((row) => {
+          counts[row.status] = (counts[row.status] || 0) + 1;
+          tbody.innerHTML += `
+            <tr>
+              <td>${row.id}</td>
+              <td>${row.student_id}</td>
+              <td>${row.student_name}</td>
+              <td>${row.teacher_name}</td>
+              <td>${row.sales_name || "-"}</td>
+              <td>${row.level || "-"}</td>
+              <td>${row.report_type}</td>
+              <td>${row.status}</td>
+              <td>${row.created_at}</td>
+              <td>${row.sent_at || "-"}</td>
+              <td><a href="/view/${row.id}" target="_blank">Preview</a></td>
+            </tr>
+          `;
+        });
+        document.getElementById("draftCount").innerText = counts.draft;
+        document.getElementById("pendingCount").innerText = counts.pending_operation;
+        document.getElementById("approvedCount").innerText = counts.approved;
+        document.getElementById("deliveredCount").innerText = counts.delivered;
+      }
+
+      async function loadTeachers() {
+        const response = await fetch("/api/users?role=teacher");
+        const teachers = await response.json();
+        const select = document.getElementById("teacherFilter");
+        teachers.forEach((teacher) => {
+          select.innerHTML += `<option value="${teacher.id}">${teacher.name}</option>`;
+        });
+      }
+
+      document.getElementById("phoneFilter").addEventListener("keydown", (event) => {
+        if (event.key === "Enter") load();
+      });
+
+      loadTeachers().then(load);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,292 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <meta charset="UTF-8" />
+    <title>Teacher Workspace</title>
+    <style>
+      body { font-family: Arial, sans-serif; background: #eef2f7; margin: 0; }
+      .container { max-width: 980px; margin: 32px auto; background: white; padding: 26px; border-radius: 12px; }
+      h1 { margin-top: 0; text-align: center; }
+      .section { margin-bottom: 22px; }
+      .section h3 { margin-bottom: 12px; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; }
+      .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+      .subgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      .field { display: flex; flex-direction: column; }
+      .field label { font-size: 12px; color: #4b5563; margin-bottom: 4px; }
+      input, textarea, select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; box-sizing: border-box; }
+      textarea { min-height: 90px; }
+      button { padding: 12px; border: none; border-radius: 6px; cursor: pointer; }
+      .generate { width: 100%; background: #2563eb; color: white; font-size: 15px; }
+      .add-btn { background: #e2e8f0; margin-top: 8px; }
+      .status { margin-top: 10px; font-size: 13px; color: #2563eb; }
+      @media (max-width: 760px) { .grid, .subgrid { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    {% include "_navbar.html" %}
+    <div class="container">
+      <h1>Teacher Report Workspace</h1>
+
+      <div class="section">
+        <h3>Student Profile</h3>
+        <div class="grid">
+          <div class="field"><label>Student Name</label><input id="name" /></div>
+          <div class="field">
+            <label>Branch</label>
+            <select id="branch">
+              <option value="">Select branch</option>
+              <option value="AlAin" {% if user_branch == 'AlAin' %}selected{% endif %}>AlAin</option>
+              <option value="Abu Dhabi" {% if user_branch == 'Abu Dhabi' %}selected{% endif %}>Abu Dhabi</option>
+            </select>
+          </div>
+          <div class="field"><label>Educational Consultant</label><select id="sales_id"></select></div>
+          <div class="field"><label>Teacher Name</label><input id="teacher" value="{{ user_name }}" readonly /></div>
+          <div class="field"><label>Level</label><input id="level" /></div>
+          <div class="field"><label>Course</label><input id="course" /></div>
+          <div class="field">
+            <label>Report Type</label>
+            <select id="report_type">
+              <option value="midterm">Midterm</option>
+              <option value="final">Final</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Attendance & Assignment</h3>
+        <div class="grid">
+          <div class="field"><label>Attendance</label><select id="attendance"></select></div>
+          <div class="field"><label>Assignment</label><select id="assignment"></select></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Language Skills</h3>
+        <div class="grid">
+          <select id="reading"></select>
+          <select id="writing"></select>
+          <select id="listening"></select>
+          <select id="speaking"></select>
+          <select id="vocab"></select>
+          <select id="grammar"></select>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Communication Topics</h3>
+        <div id="commBox" class="subgrid">
+          <div class="field"><label>Fluency</label><input /></div>
+          <div class="field"><label>Interaction</label><input /></div>
+          <div class="field"><label>Confidence</label><input /></div>
+          <div class="field"><label>Pronunciation</label><input /></div>
+          <div class="field"><label>Coherence</label><input /></div>
+        </div>
+        <button class="add-btn" onclick="addField('commBox')">Add Topic</button>
+      </div>
+
+      <div class="section">
+        <h3>Vocabulary Topics</h3>
+        <div id="vocabBox" class="subgrid">
+          <div class="field"><label>Range</label><input /></div>
+          <div class="field"><label>Accuracy</label><input /></div>
+          <div class="field"><label>Topic Vocabulary</label><input /></div>
+          <div class="field"><label>Collocations</label><input /></div>
+          <div class="field"><label>Word Choice</label><input /></div>
+        </div>
+        <button class="add-btn" onclick="addField('vocabBox')">Add Topic</button>
+      </div>
+
+      <div class="section">
+        <h3>Grammar Topics</h3>
+        <div id="grammarBox" class="subgrid">
+          <div class="field"><label>Tenses</label><input /></div>
+          <div class="field"><label>Sentence Structure</label><input /></div>
+          <div class="field"><label>Articles & Prepositions</label><input /></div>
+          <div class="field"><label>Verb Forms</label><input /></div>
+          <div class="field"><label>Agreement</label><input /></div>
+        </div>
+        <button class="add-btn" onclick="addField('grammarBox')">Add Topic</button>
+      </div>
+
+      <div class="section">
+        <h3>Evaluation Notes</h3>
+        <div id="strengthBox">
+          <div class="field"><label>Strength</label><input /></div>
+        </div>
+        <button class="add-btn" onclick="addField('strengthBox')">Add Strength</button>
+
+        <div id="weaknessBox" style="margin-top: 10px">
+          <div class="field"><label>Weakness</label><input /></div>
+        </div>
+        <button class="add-btn" onclick="addField('weaknessBox')">Add Weakness</button>
+
+        <div class="field" style="margin-top: 12px">
+          <label>General Note</label>
+          <textarea id="note"></textarea>
+        </div>
+      </div>
+
+      <button id="generateBtn" class="generate" onclick="generateReport()">Generate Draft Report</button>
+    </div>
+
+    <script>
+      function fill(id) {
+        const element = document.getElementById(id);
+        element.innerHTML = `<option value="">${id}</option>`;
+        for (let i = 1; i <= 10; i++) element.innerHTML += `<option value="${i}">${i}</option>`;
+      }
+
+      function addField(id) {
+        const div = document.createElement("div");
+        div.className = "field";
+        div.innerHTML = `<label>Extra</label><input />`;
+        document.getElementById(id).appendChild(div);
+      }
+
+      function collectLabeled(id) {
+        return Array.from(document.querySelectorAll("#" + id + " .field")).map((field) => {
+          const label = field.querySelector("label")?.innerText || "";
+          const value = field.querySelector("input")?.value || "";
+          return value ? `${label}: ${value}` : "";
+        });
+      }
+
+      async function parseJsonResponse(response) {
+        const contentType = response.headers.get("content-type") || "";
+        const rawText = await response.text();
+        if (!contentType.includes("application/json")) {
+          if (rawText.includes("<!doctype") || rawText.includes("<html")) {
+            throw new Error("The server returned an HTML error page instead of JSON. Check the Flask error log.");
+          }
+          throw new Error(rawText || "The server returned an unexpected response.");
+        }
+
+        try {
+          return JSON.parse(rawText);
+        } catch (error) {
+          throw new Error("The server returned invalid JSON.");
+        }
+      }
+
+      function restoreSection(boxId, values) {
+        const box = document.getElementById(boxId);
+        if (!box) return;
+        const labels = Array.from(box.querySelectorAll(".field label")).map((item) => item.innerText);
+        box.innerHTML = "";
+        (values || []).forEach((value, index) => {
+          const labelText = labels[index] || "Extra";
+          const displayValue = value.split(":").slice(1).join(":").trim();
+          const div = document.createElement("div");
+          div.className = "field";
+          div.innerHTML = `<label>${labelText}</label><input />`;
+          div.querySelector("input").value = displayValue;
+          box.appendChild(div);
+        });
+        if (!values || values.length === 0) {
+          labels.forEach((labelText) => {
+            const div = document.createElement("div");
+            div.className = "field";
+            div.innerHTML = `<label>${labelText}</label><input />`;
+            box.appendChild(div);
+          });
+        }
+      }
+
+      function isValid() {
+        const required = ["name", "attendance", "assignment", "reading", "writing", "listening", "speaking", "vocab", "grammar"];
+        return required.every((id) => {
+          const element = document.getElementById(id);
+          return element && element.value && element.value.toString().trim() !== "";
+        });
+      }
+
+      function updateButton() { document.getElementById("generateBtn").disabled = !isValid(); }
+
+      async function loadEducationalConsultants() {
+        const response = await fetch("/api/users?role=sales");
+        const users = await response.json();
+        const select = document.getElementById("sales_id");
+        select.innerHTML = `<option value="">Unassigned</option>`;
+        users.forEach((user) => { select.innerHTML += `<option value="${user.id}">${user.name}</option>`; });
+      }
+
+      function buildPayload() {
+        return {
+          report_type: document.getElementById("report_type").value,
+          student: {
+            name: document.getElementById("name").value.trim(),
+            branch: document.getElementById("branch").value.trim(),
+            sales_id: document.getElementById("sales_id").value || null,
+            teacher: document.getElementById("teacher").value.trim(),
+            level: document.getElementById("level").value.trim(),
+            course: document.getElementById("course").value.trim(),
+          },
+          performance: {
+            attendance: document.getElementById("attendance").value,
+            assignment: document.getElementById("assignment").value,
+          },
+          skills: {
+            reading: document.getElementById("reading").value,
+            writing: document.getElementById("writing").value,
+            listening: document.getElementById("listening").value,
+            speaking: document.getElementById("speaking").value,
+            vocab: document.getElementById("vocab").value,
+            grammar: document.getElementById("grammar").value,
+          },
+          sections: {
+            communication: collectLabeled("commBox"),
+            vocabulary: collectLabeled("vocabBox"),
+            grammar: collectLabeled("grammarBox"),
+            strengths: collectLabeled("strengthBox"),
+            weaknesses: collectLabeled("weaknessBox"),
+            final_note: document.getElementById("note").value,
+          },
+        };
+      }
+
+      async function generateReport() {
+        const button = document.getElementById("generateBtn");
+        if (!isValid()) { alert("Please complete the required fields first."); return; }
+        button.disabled = true;
+        button.innerText = "Generating...";
+        const payload = buildPayload();
+        try {
+          const response = await fetch("/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const data = await parseJsonResponse(response);
+          if (!response.ok) throw new Error(data.error || "Generation failed");
+          data.performance = payload.performance;
+          data.skills = payload.skills;
+          localStorage.setItem("report", JSON.stringify(data));
+          window.location.href = "/report";
+        } catch (error) {
+          alert(error.message);
+          button.disabled = false;
+          button.innerText = "Generate Draft Report";
+        }
+      }
+
+      window.onload = async function () {
+        localStorage.removeItem("formData");
+        localStorage.removeItem("report");
+        ["reading", "writing", "listening", "speaking", "vocab", "grammar", "attendance", "assignment"].forEach(fill);
+        await loadEducationalConsultants();
+        restoreSection("commBox", []);
+        restoreSection("vocabBox", []);
+        restoreSection("grammarBox", []);
+        restoreSection("strengthBox", []);
+        restoreSection("weaknessBox", []);
+        updateButton();
+        document.querySelectorAll("input, select, textarea").forEach((element) => {
+          element.addEventListener("input", updateButton);
+          element.addEventListener("change", updateButton);
+        });
+      };
+    </script>
+  </body>
+</html>
