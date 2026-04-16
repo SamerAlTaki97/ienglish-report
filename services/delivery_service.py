@@ -1,4 +1,5 @@
 import json
+import os
 import urllib.request
 from datetime import datetime
 
@@ -88,17 +89,32 @@ def send(report_id, channel, actor, recipient=None, delivery_target=None):
 def _send_email_delivery(report, recipient):
     student_name = report["student_name"]
     pdf_url = report.get("pdf_path") or report_service._build_public_pdf_url(report["id"])
+    pdf_bytes = None
+    filename = f"report_{report['id']}.pdf"
+
+    try:
+        report_service.refresh_report_pdf(report["id"])
+        pdf_payload = report_service.get_public_report_pdf(report["id"])
+        document = pdf_payload["document"]
+        pdf_bytes = document.get("content")
+        filename = os.path.basename(document.get("storage_key") or filename) or filename
+    except Exception as exc:
+        raise RuntimeError(f"PDF attachment is not available: {exc}") from exc
+
+    if not pdf_bytes:
+        raise RuntimeError("PDF attachment is not available")
+
     send_email(
         to_email=recipient,
         subject="Student Progress Report",
         body=(
             f"Hello,\n\n"
-            f"Your academic report for {student_name} is ready.\n"
-            f"You can view or download it here:\n{pdf_url}\n\n"
+            f"Your academic report for {student_name} is attached as a PDF.\n"
+            f"If the attachment is unavailable in your email app, you can also view it here:\n{pdf_url}\n\n"
             f"Regards."
         ),
-        file_bytes=None,
-        filename=None,
+        file_bytes=pdf_bytes,
+        filename=filename,
     )
 
 
