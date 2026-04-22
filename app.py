@@ -1,32 +1,30 @@
 import io
-import os
 from functools import wraps
 
 from flask import Flask, Response, jsonify, redirect, render_template, request, send_file, session, url_for
 
+from config import AppConfig
 from database import init_db
 from services import ServiceError
-from services import delivery_service, evaluation_service, report_service, user_service
+from services import delivery_service, report_service, user_service
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "dev_secret_change_me")
-app.config.update(
-    OPENAI_API_KEY=os.environ.get("OPENAI_API_KEY"),
-    OPENAI_MODEL=os.environ.get("OPENAI_MODEL", "gpt-4o-mini"),
-    PUBLIC_BASE_URL=os.environ.get("PUBLIC_BASE_URL"),
-    STORAGE_PROVIDER=os.environ.get("STORAGE_PROVIDER", "database"),
-    S3_BUCKET_NAME=os.environ.get("S3_BUCKET_NAME"),
-    S3_ENDPOINT_URL=os.environ.get("S3_ENDPOINT_URL"),
-    S3_PUBLIC_BASE_URL=os.environ.get("S3_PUBLIC_BASE_URL"),
-    AWS_ACCESS_KEY_ID=os.environ.get("AWS_ACCESS_KEY_ID"),
-    AWS_SECRET_ACCESS_KEY=os.environ.get("AWS_SECRET_ACCESS_KEY"),
-    AWS_REGION=os.environ.get("AWS_REGION"),
-    WHATSAPP_API_URL=os.environ.get("WHATSAPP_API_URL"),
-    WHATSAPP_API_TOKEN=os.environ.get("WHATSAPP_API_TOKEN"),
-    WHATSAPP_DRY_RUN=os.environ.get("WHATSAPP_DRY_RUN", "true").lower() != "false",
-)
+app.config.from_object(AppConfig)
+app.secret_key = app.config["SECRET_KEY"]
 
 init_db()
+
+DISPLAY_MR_NAMES = {
+    "samer",
+    "haider",
+    "hussam",
+    "fouad",
+    "mazen",
+    "zain",
+    "amin",
+    "karam",
+    "omar",
+}
 
 
 @app.errorhandler(ServiceError)
@@ -42,6 +40,10 @@ def login_required(view):
             if request.accept_mimetypes.accept_json or request.path.startswith(("/api/", "/reports/", "/generate")):
                 return jsonify({"error": "Your session expired. Please log in again."}), 401
             return redirect(url_for("login"))
+        if user.get("must_change_password") and request.endpoint not in {"change_password", "logout"}:
+            if request.accept_mimetypes.accept_json or request.path.startswith(("/api/", "/reports/", "/generate")):
+                return jsonify({"error": "Password change is required before continuing."}), 403
+            return redirect(url_for("change_password"))
         return view(*args, **kwargs)
 
     return wrapper
@@ -56,9 +58,11 @@ def role_required(*roles):
                 if request.accept_mimetypes.accept_json or request.path.startswith(("/api/", "/reports/", "/generate")):
                     return jsonify({"error": "Your session expired. Please log in again."}), 401
                 return redirect(url_for("login"))
-            if user["role"] == "superadmin":
-                return view(*args, **kwargs)
-            if user["role"] not in roles:
+            if user.get("must_change_password") and request.endpoint not in {"change_password", "logout"}:
+                if request.accept_mimetypes.accept_json or request.path.startswith(("/api/", "/reports/", "/generate")):
+                    return jsonify({"error": "Password change is required before continuing."}), 403
+                return redirect(url_for("change_password"))
+            if user["role"] != "superadmin" and user["role"] not in roles:
                 if request.accept_mimetypes.accept_json or request.path.startswith(("/api/", "/reports/", "/generate")):
                     return jsonify({"error": "Forbidden"}), 403
                 return "Forbidden", 403
@@ -81,14 +85,43 @@ def current_user():
 
 def render_with_user(template_name, **context):
     user = current_user()
+    raw_name = (user or {}).get("name")
     return render_template(
         template_name,
-        user_name=(user or {}).get("name"),
+        user_name=raw_name,
+        display_user_name=format_display_name(raw_name),
         user_id=(user or {}).get("id"),
         role=(user or {}).get("role"),
         user_branch=(user or {}).get("branch"),
         **context,
     )
+
+
+def format_display_name(name):
+    clean_name = str(name or "").strip()
+    if not clean_name:
+        return ""
+    if clean_name.lower().startswith(("mr. ", "ms. ")):
+        return clean_name
+    first_name = clean_name.split()[0].lower()
+    prefix = "Mr." if first_name in DISPLAY_MR_NAMES else "Ms."
+    return f"{prefix} {clean_name}"
+
+
+def redirect_for_role(user):
+    if user.get("must_change_password"):
+        return redirect(url_for("change_password"))
+    if user["role"] == "superadmin":
+        return redirect(url_for("admin_teachers_page"))
+    if user["role"] == "manager":
+        return redirect(url_for("admin"))
+    if user["role"] == "admin":
+        return redirect(url_for("admin"))
+    if user["role"] == "operation":
+        return redirect(url_for("operation"))
+    if user["role"] == "sales":
+        return redirect(url_for("sales"))
+    return redirect(url_for("teacher"))
 
 
 @app.route("/")
@@ -98,7 +131,7 @@ def home():
 
 @app.route("/teacher")
 @login_required
-@role_required("teacher")
+@role_required("teacher", "manager")
 def teacher():
     user = current_user()
     return render_with_user("form.html")
@@ -106,29 +139,21 @@ def teacher():
 
 @app.route("/report")
 @login_required
-@role_required("teacher")
+@role_required("teacher", "manager")
 def report():
     return render_with_user("report.html")
 
 
 @app.route("/operation")
 @login_required
-@role_required("operation")
+@role_required("operation", "manager")
 def operation():
     return render_with_user("operation.html")
 
 
-@app.route("/operation/evaluate/<int:report_id>")
-@login_required
-@role_required("operation")
-def operation_evaluate(report_id):
-    report = report_service.get_report_for_user(report_id, current_user(), include_json=False)
-    return render_with_user("evaluation.html", report=report)
-
-
 @app.route("/admin")
 @login_required
-@role_required("admin")
+@role_required("admin", "manager")
 def admin():
     return render_with_user("Admin.html")
 
@@ -158,15 +183,28 @@ def login():
 
     session["user_id"] = user["id"]
 
-    if user["role"] == "superadmin":
-        return redirect(url_for("admin"))
-    if user["role"] == "admin":
-        return redirect(url_for("admin"))
-    if user["role"] == "operation":
-        return redirect(url_for("operation"))
-    if user["role"] == "sales":
-        return redirect(url_for("sales"))
-    return redirect(url_for("teacher"))
+    return redirect_for_role(user)
+
+
+@app.route("/change-password", methods=["GET", "POST"])
+@login_required
+def change_password():
+    user = current_user()
+    if request.method == "GET":
+        return render_template("change_password.html", user_name=user.get("name"))
+
+    try:
+        user_service.change_own_password(
+            user,
+            request.form.get("new_password", ""),
+            request.form.get("confirm_password", ""),
+        )
+    except ServiceError as error:
+        return render_template("change_password.html", user_name=user.get("name"), error=error.message), error.status_code
+
+    session["user_id"] = user["id"]
+    updated_user = user_service.get_user(user["id"])
+    return redirect_for_role(updated_user)
 
 
 @app.route("/logout")
@@ -194,26 +232,28 @@ def students_search():
 
 @app.route("/admin/reports")
 @login_required
-@role_required("admin")
+@role_required("admin", "manager")
 def admin_reports():
     reports = report_service.list_reports_for_user(
         current_user(),
         phone=request.args.get("phone"),
         status=request.args.get("status"),
         teacher_id=request.args.get("teacher_id"),
+        branch=request.args.get("branch"),
     )
     return jsonify(reports)
 
 
 @app.route("/operation/reports")
 @login_required
-@role_required("operation")
+@role_required("operation", "manager")
 def operation_reports():
     reports = report_service.list_reports_for_user(
         current_user(),
         phone=request.args.get("phone"),
         status=request.args.get("status"),
         teacher_id=request.args.get("teacher_id"),
+        branch=request.args.get("branch"),
     )
     return jsonify(reports)
 
@@ -238,7 +278,7 @@ def report_detail(report_id):
 
 @app.route("/generate", methods=["POST"])
 @login_required
-@role_required("teacher")
+@role_required("teacher", "manager")
 def generate():
     try:
         report = report_service.generate_report(request.get_json() or {}, current_user())
@@ -257,7 +297,7 @@ def generate():
 
 @app.route("/reports/<int:report_id>/edit", methods=["PUT"])
 @login_required
-@role_required("teacher")
+@role_required("teacher", "manager")
 def edit_report(report_id):
     report = report_service.update_report(report_id, request.get_json() or {}, current_user())
     payload = dict(report["report_json"])
@@ -269,7 +309,7 @@ def edit_report(report_id):
 
 @app.route("/reports/<int:report_id>/submit", methods=["POST"])
 @login_required
-@role_required("teacher")
+@role_required("teacher", "manager")
 def submit_report(report_id):
     report = report_service.submit_report(report_id, current_user())
     return jsonify(
@@ -282,7 +322,7 @@ def submit_report(report_id):
 
 @app.route("/reports/<int:report_id>/approve", methods=["POST"])
 @login_required
-@role_required("operation")
+@role_required("operation", "manager")
 def approve_report(report_id):
     report = report_service.approve_report(report_id, current_user())
     return jsonify({"status": report["status"], "report_id": report["id"]})
@@ -290,7 +330,7 @@ def approve_report(report_id):
 
 @app.route("/reports/<int:report_id>/contact", methods=["PATCH"])
 @login_required
-@role_required("operation")
+@role_required("operation", "manager")
 def update_report_contact(report_id):
     data = request.get_json() or {}
     report = report_service.update_student_contact(
@@ -313,7 +353,7 @@ def update_report_contact(report_id):
 
 @app.route("/reports/<int:report_id>/deliver", methods=["POST"])
 @login_required
-@role_required("operation")
+@role_required("operation", "manager")
 def deliver_report(report_id):
     data = request.get_json() or {}
     if "student_phone" in data or "student_email" in data:
@@ -326,10 +366,10 @@ def deliver_report(report_id):
         )
     result = delivery_service.send(
         report_id=report_id,
-        channel=data.get("channel", "email"),
+        channel="email",
         actor=current_user(),
         recipient=data.get("recipient"),
-        delivery_target=data.get("target"),
+        delivery_target="student_email",
     )
     return jsonify(
         {
@@ -341,35 +381,9 @@ def deliver_report(report_id):
     )
 
 
-@app.route("/reports/<int:report_id>/evaluate", methods=["POST"])
-@login_required
-@role_required("operation")
-def create_evaluation(report_id):
-    try:
-        evaluation = evaluation_service.create_evaluation(
-            report_id,
-            request.get_json() or {},
-            current_user(),
-        )
-    except ServiceError:
-        raise
-    except Exception as error:
-        app.logger.exception("Unexpected error while creating evaluation")
-        return jsonify({"error": f"Evaluation failed: {error}"}), 500
-
-    return jsonify(evaluation)
-
-
-@app.route("/reports/<int:report_id>/evaluation")
-@login_required
-@role_required("operation")
-def get_evaluation(report_id):
-    return jsonify(evaluation_service.get_evaluation(report_id, current_user()))
-
-
 @app.route("/send/<int:report_id>", methods=["POST"])
 @login_required
-@role_required("operation")
+@role_required("operation", "manager")
 def send_report(report_id):
     data = request.get_json() or {}
     if "student_phone" in data or "student_email" in data:
@@ -382,10 +396,10 @@ def send_report(report_id):
         )
     result = delivery_service.send(
         report_id=report_id,
-        channel=data.get("channel", "email"),
+        channel="email",
         actor=current_user(),
         recipient=data.get("email") or data.get("recipient"),
-        delivery_target=data.get("target"),
+        delivery_target="student_email",
     )
     return jsonify(
         {
@@ -436,21 +450,27 @@ def public_report_pdf(report_id):
 
 @app.route("/admin/teachers")
 @login_required
-@role_required("admin")
+@role_required("superadmin")
 def admin_teachers():
-    return jsonify(user_service.list_visible_users(current_user(), role=request.args.get("role")))
+    return jsonify(
+        user_service.list_visible_users(
+            current_user(),
+            role=request.args.get("role"),
+            branch=request.args.get("branch"),
+        )
+    )
 
 
 @app.route("/admin_teachers")
 @login_required
-@role_required("admin")
+@role_required("superadmin")
 def admin_teachers_page():
     return render_with_user("admin_teachers.html")
 
 
 @app.route("/admin/teachers/add", methods=["POST"])
 @login_required
-@role_required("admin")
+@role_required("superadmin")
 def admin_add_teacher():
     data = request.get_json() or {}
     user = user_service.create_user_account(
@@ -464,23 +484,32 @@ def admin_add_teacher():
     return jsonify(user)
 
 
-@app.route("/admin/users/reveal-passwords", methods=["POST"])
+@app.route("/admin/users/<int:user_id>/reset-password", methods=["POST"])
 @login_required
-@role_required("admin")
-def admin_reveal_passwords():
+@role_required("superadmin")
+def admin_reset_password(user_id):
     data = request.get_json() or {}
     return jsonify(
-        user_service.reveal_user_password(
+        user_service.reset_user_password(
             current_user(),
-            data.get("admin_password", ""),
-            data.get("user_id"),
+            data.get("account_password", ""),
+            user_id,
+            data.get("new_password", ""),
         )
     )
 
 
+@app.route("/admin/users/<int:user_id>/branch", methods=["PATCH"])
+@login_required
+@role_required("superadmin")
+def admin_update_user_branch(user_id):
+    data = request.get_json() or {}
+    return jsonify(user_service.update_user_branch(current_user(), user_id, data.get("branch")))
+
+
 @app.route("/admin/users/<int:user_id>", methods=["DELETE"])
 @login_required
-@role_required("admin")
+@role_required("superadmin")
 def admin_delete_user(user_id):
     data = request.get_json() or {}
     return jsonify(

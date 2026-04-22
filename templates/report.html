@@ -36,13 +36,14 @@
         <div>
           Student: <b id="name"></b><br />
           Phone: <b id="phone"></b><br />
-          Teacher: <b id="teacher"></b><br />
-          Branch: <b id="branch"></b>
+          Teacher: <b id="teacher"></b>
         </div>
         <div>
-          Level: <b id="level"></b><br />
           Course: <b id="course"></b><br />
+          Level: <b id="level"></b><br />
+          Class Type: <b id="classType"></b><br />
           Report Type: <b id="reportType"></b><br />
+          Exam Score: <b id="examScore"></b><br />
           Status: <b id="status"></b>
         </div>
       </div>
@@ -66,10 +67,11 @@
       document.getElementById("name").innerText = data.student?.name || "";
       document.getElementById("phone").innerText = data.student?.phone || "";
       document.getElementById("teacher").innerText = data.student?.teacher || "";
-      document.getElementById("branch").innerText = data.student?.branch || "";
-      document.getElementById("level").innerText = data.student?.level || "";
       document.getElementById("course").innerText = data.student?.course || "";
+      document.getElementById("level").innerText = data.student?.level || "";
+      document.getElementById("classType").innerText = data.student?.class_type || "";
       document.getElementById("reportType").innerText = data.report_type || "midterm";
+      document.getElementById("examScore").innerText = data.performance?.exam_score ? `${data.performance.exam_score}/100` : "";
       document.getElementById("status").innerText = data.status || "draft";
       document.getElementById("viewPdfLink").href = `/view/${data.report_id}`;
 

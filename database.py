@@ -9,10 +9,10 @@ PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "http://localhost:5000").rst
     "/"
 )
 
-USER_ROLES = ("teacher", "operation", "admin", "sales", "superadmin")
+USER_ROLES = ("teacher", "operation", "admin", "sales", "manager", "superadmin")
 REPORT_TYPES = ("midterm", "final")
 REPORT_STATUSES = ("draft", "pending_operation", "approved", "delivered")
-DELIVERY_CHANNELS = ("email", "whatsapp")
+DELIVERY_CHANNELS = ("email",)
 DELIVERY_STATUSES = ("pending", "sent", "failed")
 
 
@@ -65,6 +65,7 @@ def _migrate_users(cursor):
             password_plain TEXT,
             role TEXT NOT NULL CHECK(role IN {_as_sql_tuple(USER_ROLES)}),
             branch TEXT,
+            must_change_password INTEGER DEFAULT 0,
             is_active INTEGER DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -89,6 +90,13 @@ def _migrate_users(cursor):
             else generate_password_hash("123")
         )
         is_active = row["is_active"] if "is_active" in legacy_columns else 1
+        must_change_password = (
+            row["must_change_password"]
+            if "must_change_password" in legacy_columns
+            else 0
+            if role == "superadmin"
+            else 1
+        )
         branch = row["branch"] if "branch" in legacy_columns else None
         created_at = row["created_at"] if "created_at" in legacy_columns else None
         username = (
@@ -103,8 +111,8 @@ def _migrate_users(cursor):
 
         cursor.execute(
             """
-            INSERT INTO users (id, name, username, email, password_hash, password_plain, role, branch, is_active, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE(?, CURRENT_TIMESTAMP))
+            INSERT INTO users (id, name, username, email, password_hash, password_plain, role, branch, must_change_password, is_active, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE(?, CURRENT_TIMESTAMP))
             """,
             (
                 row["id"],
@@ -115,6 +123,7 @@ def _migrate_users(cursor):
                 password_plain,
                 role,
                 branch,
+                must_change_password,
                 is_active,
                 created_at,
             ),
@@ -473,16 +482,71 @@ def _create_indexes(cursor):
 
 
 def _seed_default_users(cursor):
+    username_aliases = {
+        "teacher.hussam": "hussam",
+        "teacher.fouad": "fouad",
+        "teacher.sara": "sara",
+        "teacher.sabrina": "sabrina",
+        "teacher.fatima": "fatima",
+        "teacher.somaya": "somaya",
+        "teacher.nourhan": "nourhan",
+        "teacher.rama": "rama",
+        "teacher.rose": "rose",
+        "sales.sarah": "sarah",
+        "sales.israa": "israa",
+        "sales.hajar": "hajar",
+        "sales.mai": "mai",
+        "sales.somar": "somar",
+        "sales.mazen": "mazen",
+        "sales.zain": "zain",
+        "sales.amin": "amin",
+        "sales.rana": "rana",
+        "sales.karam": "karam",
+        "sales.omar": "omar",
+    }
+    for old_username, new_username in username_aliases.items():
+        old_user = cursor.execute(
+            "SELECT id FROM users WHERE lower(username)=lower(?)",
+            (old_username,),
+        ).fetchone()
+        if not old_user:
+            continue
+        new_user = cursor.execute(
+            "SELECT id FROM users WHERE lower(username)=lower(?)",
+            (new_username,),
+        ).fetchone()
+        if new_user:
+            cursor.execute("UPDATE users SET is_active=0 WHERE id=?", (old_user["id"],))
+        else:
+            cursor.execute("UPDATE users SET username=? WHERE id=?", (new_username, old_user["id"]))
+
     seeds = [
-        ("System Manager", "manager", None, "123", "superadmin", None),
+        ("Samer", "samer", None, "S@mer-2026!R9p#L4", "superadmin", None),
+        ("Haider", "haider", None, "123", "manager", "AlAin"),
         ("Admin", "admin", "admin@test.com", "123", "admin", "AlAin"),
         ("Operation", "operation", "op@test.com", "123", "operation", "AlAin"),
-        ("Teacher AlAin", "teacheralain", "teacher.alain@test.com", "123", "teacher", "AlAin"),
-        ("Sales AlAin", "salesalain", "sales.alain@test.com", "123", "sales", "AlAin"),
+        ("Hussam", "hussam", None, "123", "teacher", "AlAin"),
+        ("Fouad", "fouad", None, "123", "teacher", "AlAin"),
+        ("Sara", "sara", None, "123", "teacher", "AlAin"),
+        ("Sabrina", "sabrina", None, "123", "teacher", "AlAin"),
+        ("Fatima", "fatima", None, "123", "teacher", "AlAin"),
+        ("Somaya", "somaya", None, "123", "teacher", "AlAin"),
+        ("Nourhan", "nourhan", None, "123", "teacher", "AlAin"),
+        ("Rama", "rama", None, "123", "teacher", "AlAin"),
+        ("Rose", "rose", None, "123", "teacher", "AlAin"),
+        ("Sarah", "sarah", None, "123", "sales", "AlAin"),
+        ("Israa", "israa", None, "123", "sales", "AlAin"),
+        ("Hajar", "hajar", None, "123", "sales", "AlAin"),
+        ("Mai", "mai", None, "123", "sales", "AlAin"),
+        ("Somar", "somar", None, "123", "sales", "AlAin"),
+        ("Mazen", "mazen", None, "123", "sales", "AlAin"),
+        ("Zain", "zain", None, "123", "sales", "AlAin"),
+        ("Amin", "amin", None, "123", "sales", "AlAin"),
+        ("Rana", "rana", None, "123", "sales", "AlAin"),
+        ("Karam", "karam", None, "123", "sales", "AlAin"),
+        ("Omar", "omar", None, "123", "sales", "AlAin"),
         ("Admin Abu Dhabi", "adminabudhabi", "admin.abudhabi@test.com", "123", "admin", "Abu Dhabi"),
         ("Operation Abu Dhabi", "operationabudhabi", "operation.abudhabi@test.com", "123", "operation", "Abu Dhabi"),
-        ("Teacher Abu Dhabi", "teacherabudhabi", "teacher.abudhabi@test.com", "123", "teacher", "Abu Dhabi"),
-        ("Sales Abu Dhabi", "salesabudhabi", "sales.abudhabi@test.com", "123", "sales", "Abu Dhabi"),
     ]
 
     for name, username, email, password, role, branch in seeds:
@@ -500,20 +564,44 @@ def _seed_default_users(cursor):
                     """
                     UPDATE users
                     SET username=?,
-                        password_plain=COALESCE(password_plain, ?)
+                        password_plain=NULL
                     WHERE id=?
                     """,
-                    (username, password, existing["id"]),
+                    (username, existing["id"]),
                 )
             continue
 
         cursor.execute(
             """
-            INSERT INTO users (name, username, email, password_hash, password_plain, role, branch, is_active)
-            VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+            INSERT INTO users (name, username, email, password_hash, password_plain, role, branch, must_change_password, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
             """,
-            (name, username, email, generate_password_hash(password), password, role, branch),
+            (
+                name,
+                username,
+                email,
+                generate_password_hash(password),
+                None,
+                role,
+                branch,
+                0 if role == "superadmin" else 1,
+            ),
         )
+
+    cursor.execute("UPDATE users SET password_plain=NULL")
+    cursor.execute("UPDATE users SET is_active=0 WHERE role='superadmin' AND lower(username) <> 'samer'")
+    cursor.execute(
+        """
+        UPDATE users
+        SET is_active=0
+        WHERE lower(username) IN (
+            'teacheralain',
+            'teacherabudhabi',
+            'salesalain',
+            'salesabudhabi'
+        )
+        """
+    )
 
 
 def _cleanup_legacy_tables(cursor):
@@ -529,9 +617,10 @@ def _users_table_is_current(cursor):
     columns = _get_table_columns(cursor, "users")
     sql = (_get_table_sql(cursor, "users") or "").lower()
     return (
-        {"id", "name", "username", "email", "password_hash", "password_plain", "role", "branch", "is_active", "created_at"}
+        {"id", "name", "username", "email", "password_hash", "password_plain", "role", "branch", "must_change_password", "is_active", "created_at"}
         .issubset(columns)
         and "sales" in sql
+        and "manager" in sql
         and "superadmin" in sql
     )
 
@@ -763,7 +852,10 @@ def _resolve_teacher_id(cursor, created_by, teacher_name):
 def _resolve_sales_id(cursor, sales_id):
     if sales_id and _user_has_role(cursor, sales_id, ("sales",)):
         return sales_id
-    return 3 if _user_has_role(cursor, 3, ("sales",)) else None
+    row = cursor.execute(
+        "SELECT id FROM users WHERE role='sales' AND is_active=1 ORDER BY id LIMIT 1"
+    ).fetchone()
+    return row["id"] if row else None
 
 
 def _user_has_role(cursor, user_id, roles):

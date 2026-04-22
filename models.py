@@ -3,15 +3,35 @@ import json
 from database import get_connection
 
 
-def create_user(name, username, password_hash, role, branch=None, is_active=1, password_plain=None, email=None):
+def create_user(
+    name,
+    username,
+    password_hash,
+    role,
+    branch=None,
+    is_active=1,
+    password_plain=None,
+    email=None,
+    must_change_password=1,
+):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
         """
-        INSERT INTO users (name, username, email, password_hash, password_plain, role, branch, is_active)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO users (name, username, email, password_hash, password_plain, role, branch, must_change_password, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (name, username, email, password_hash, password_plain, role, branch, is_active),
+        (
+            name,
+            username,
+            email,
+            password_hash,
+            password_plain,
+            role,
+            branch,
+            must_change_password,
+            is_active,
+        ),
     )
     conn.commit()
     user_id = cursor.lastrowid
@@ -78,6 +98,54 @@ def deactivate_user(user_id):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("UPDATE users SET is_active=0 WHERE id=?", (user_id,))
+    conn.commit()
+    changed = cursor.rowcount
+    conn.close()
+    return changed > 0
+
+
+def reset_user_password(user_id, password_hash):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        UPDATE users
+        SET password_hash=?,
+            password_plain=NULL,
+            must_change_password=1
+        WHERE id=?
+        """,
+        (password_hash, user_id),
+    )
+    conn.commit()
+    changed = cursor.rowcount
+    conn.close()
+    return changed > 0
+
+
+def change_user_password(user_id, password_hash):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        UPDATE users
+        SET password_hash=?,
+            password_plain=NULL,
+            must_change_password=0
+        WHERE id=?
+        """,
+        (password_hash, user_id),
+    )
+    conn.commit()
+    changed = cursor.rowcount
+    conn.close()
+    return changed > 0
+
+
+def update_user_branch(user_id, branch):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET branch=? WHERE id=?", (branch, user_id))
     conn.commit()
     changed = cursor.rowcount
     conn.close()
@@ -260,18 +328,7 @@ def get_report_detail(report_id, include_json=True):
             EXISTS(
                 SELECT 1 FROM delivery_logs dl
                 WHERE dl.report_id = r.id AND dl.status = 'sent' AND dl.delivery_target = 'student_email'
-            ) AS sent_student_email,
-            EXISTS(
-                SELECT 1 FROM delivery_logs dl
-                WHERE dl.report_id = r.id AND dl.status = 'sent' AND dl.delivery_target = 'student_whatsapp'
-            ) AS sent_student_whatsapp,
-            EXISTS(
-                SELECT 1 FROM delivery_logs dl
-                WHERE dl.report_id = r.id AND dl.status = 'sent' AND dl.delivery_target = 'sales_whatsapp'
-            ) AS sent_sales_whatsapp,
-            EXISTS(
-                SELECT 1 FROM evaluations e WHERE e.report_id = r.id
-            ) AS has_evaluation
+            ) AS sent_student_email
         FROM reports r
         LEFT JOIN students s ON s.phone = r.student_id
         JOIN users teacher ON teacher.id = r.teacher_id
@@ -321,18 +378,7 @@ def list_reports(phone=None, status=None, teacher_id=None, sales_id=None, create
             EXISTS(
                 SELECT 1 FROM delivery_logs dl
                 WHERE dl.report_id = r.id AND dl.status = 'sent' AND dl.delivery_target = 'student_email'
-            ) AS sent_student_email,
-            EXISTS(
-                SELECT 1 FROM delivery_logs dl
-                WHERE dl.report_id = r.id AND dl.status = 'sent' AND dl.delivery_target = 'student_whatsapp'
-            ) AS sent_student_whatsapp,
-            EXISTS(
-                SELECT 1 FROM delivery_logs dl
-                WHERE dl.report_id = r.id AND dl.status = 'sent' AND dl.delivery_target = 'sales_whatsapp'
-            ) AS sent_sales_whatsapp,
-            EXISTS(
-                SELECT 1 FROM evaluations e WHERE e.report_id = r.id
-            ) AS has_evaluation
+            ) AS sent_student_email
         FROM reports r
         LEFT JOIN students s ON s.phone = r.student_id
         JOIN users teacher ON teacher.id = r.teacher_id

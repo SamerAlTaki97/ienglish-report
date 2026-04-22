@@ -513,9 +513,10 @@
 
           <div class="meta-grid">
             <div class="info-card"><div class="k">Teacher</div><div class="v">{{ student.teacher or "-" }}</div></div>
-            <div class="info-card"><div class="k">Branch</div><div class="v">{{ student.branch or "-" }}</div></div>
             <div class="info-card"><div class="k">Course</div><div class="v">{{ student.course or "-" }}</div></div>
             <div class="info-card"><div class="k">Level</div><div class="v">{{ student.level or "-" }}</div></div>
+            <div class="info-card"><div class="k">Class Type</div><div class="v">{{ student.class_type or "-" }}</div></div>
+            <div class="info-card"><div class="k">Exam Score</div><div class="v">{% if exam_score %}{{ exam_score }}/100{% else %}-{% endif %}</div></div>
             <div class="info-card"><div class="k">Phone</div><div class="v">{{ student.phone or "-" }}</div></div>
             <div class="info-card"><div class="k">Email</div><div class="v">{{ student.email or "-" }}</div></div>
           </div>

@@ -11,16 +11,19 @@
       .section { margin-bottom: 22px; }
       .section h3 { margin-bottom: 12px; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; }
       .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+      .triple-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; grid-column: 1 / -1; }
       .subgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
       .field { display: flex; flex-direction: column; }
       .field label { font-size: 12px; color: #4b5563; margin-bottom: 4px; }
       input, textarea, select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; box-sizing: border-box; }
       textarea { min-height: 90px; }
       button { padding: 12px; border: none; border-radius: 6px; cursor: pointer; }
-      .generate { width: 100%; background: #2563eb; color: white; font-size: 15px; }
-      .add-btn { background: #e2e8f0; margin-top: 8px; }
+      .generate { width: 100%; background: #c1121f; color: white; font-size: 15px; }
+      .generate.is-disabled { background: #f3a4aa; cursor: not-allowed; }
+      .add-btn { background: #fee2e2; color: #991b1b; margin-top: 8px; }
       .status { margin-top: 10px; font-size: 13px; color: #2563eb; }
-      @media (max-width: 760px) { .grid, .subgrid { grid-template-columns: 1fr; } }
+      .form-message { margin-top: 10px; color: #991b1b; font-size: 13px; min-height: 18px; }
+      @media (max-width: 760px) { .grid, .triple-grid, .subgrid { grid-template-columns: 1fr; } }
     </style>
   </head>
   <body>
@@ -31,25 +34,44 @@
       <div class="section">
         <h3>Student Profile</h3>
         <div class="grid">
-          <div class="field"><label>Student Name</label><input id="name" /></div>
-          <div class="field">
-            <label>Branch</label>
-            <select id="branch">
-              <option value="">Select branch</option>
-              <option value="AlAin" {% if user_branch == 'AlAin' %}selected{% endif %}>AlAin</option>
-              <option value="Abu Dhabi" {% if user_branch == 'Abu Dhabi' %}selected{% endif %}>Abu Dhabi</option>
-            </select>
-          </div>
+          <div class="field"><label>Student Name</label><input id="name" autocomplete="off" /></div>
           <div class="field"><label>Educational Consultant</label><select id="sales_id"></select></div>
-          <div class="field"><label>Teacher Name</label><input id="teacher" value="{{ user_name }}" readonly /></div>
-          <div class="field"><label>Level</label><input id="level" /></div>
-          <div class="field"><label>Course</label><input id="course" /></div>
+          <div class="field"><label>Teacher Name</label><input id="teacher" value="{{ user_name }}" readonly autocomplete="off" /></div>
+          <div class="triple-grid">
+            <div class="field">
+              <label>Course</label>
+              <select id="course_type">
+                <option value="">Select course</option>
+                <option value="general_english">General English</option>
+                <option value="ielts">IELTS</option>
+                <option value="sat">SAT</option>
+                <option value="other">Other</option>
+              </select>
+              <input id="course_other" placeholder="Enter course type" style="display:none; margin-top: 8px;" autocomplete="off" />
+            </div>
+            <div class="field"><label>Level</label><input id="level" placeholder="Select General English first" disabled autocomplete="off" /></div>
+            <div class="field">
+              <label>Class Type</label>
+              <select id="class_type">
+                <option value="">Select class type</option>
+                <option value="Group Adult">Group Adult</option>
+                <option value="VIP Adult">VIP Adult</option>
+                <option value="Group Kids">Group Kids</option>
+                <option value="VIP Kid">VIP Kid</option>
+              </select>
+            </div>
+          </div>
           <div class="field">
             <label>Report Type</label>
             <select id="report_type">
+              <option value="">Select report type</option>
               <option value="midterm">Midterm</option>
               <option value="final">Final</option>
             </select>
+          </div>
+          <div class="field">
+            <label>Exam Score</label>
+            <input id="exam_score" type="number" min="0" max="100" step="0.01" placeholder="Select report type first" disabled autocomplete="off" />
           </div>
         </div>
       </div>
@@ -65,23 +87,41 @@
       <div class="section">
         <h3>Language Skills</h3>
         <div class="grid">
-          <select id="reading"></select>
-          <select id="writing"></select>
-          <select id="listening"></select>
-          <select id="speaking"></select>
-          <select id="vocab"></select>
-          <select id="grammar"></select>
+          <div class="field">
+            <label>Reading</label>
+            <select id="reading"></select>
+          </div>
+          <div class="field">
+            <label>Writing</label>
+            <select id="writing"></select>
+          </div>
+          <div class="field">
+            <label>Listening</label>
+            <select id="listening"></select>
+          </div>
+          <div class="field">
+            <label>Speaking</label>
+            <select id="speaking"></select>
+          </div>
+          <div class="field">
+            <label>Vocabulary</label>
+            <select id="vocab"></select>
+          </div>
+          <div class="field">
+            <label>Grammar</label>
+            <select id="grammar"></select>
+          </div>
         </div>
       </div>
 
       <div class="section">
         <h3>Communication Topics</h3>
         <div id="commBox" class="subgrid">
-          <div class="field"><label>Fluency</label><input /></div>
-          <div class="field"><label>Interaction</label><input /></div>
-          <div class="field"><label>Confidence</label><input /></div>
-          <div class="field"><label>Pronunciation</label><input /></div>
-          <div class="field"><label>Coherence</label><input /></div>
+          <div class="field"><label>Fluency</label><input autocomplete="off" /></div>
+          <div class="field"><label>Interaction</label><input autocomplete="off" /></div>
+          <div class="field"><label>Confidence</label><input autocomplete="off" /></div>
+          <div class="field"><label>Pronunciation</label><input autocomplete="off" /></div>
+          <div class="field"><label>Coherence</label><input autocomplete="off" /></div>
         </div>
         <button class="add-btn" onclick="addField('commBox')">Add Topic</button>
       </div>
@@ -89,11 +129,11 @@
       <div class="section">
         <h3>Vocabulary Topics</h3>
         <div id="vocabBox" class="subgrid">
-          <div class="field"><label>Range</label><input /></div>
-          <div class="field"><label>Accuracy</label><input /></div>
-          <div class="field"><label>Topic Vocabulary</label><input /></div>
-          <div class="field"><label>Collocations</label><input /></div>
-          <div class="field"><label>Word Choice</label><input /></div>
+          <div class="field"><label>Range</label><input autocomplete="off" /></div>
+          <div class="field"><label>Accuracy</label><input autocomplete="off" /></div>
+          <div class="field"><label>Topic Vocabulary</label><input autocomplete="off" /></div>
+          <div class="field"><label>Collocations</label><input autocomplete="off" /></div>
+          <div class="field"><label>Word Choice</label><input autocomplete="off" /></div>
         </div>
         <button class="add-btn" onclick="addField('vocabBox')">Add Topic</button>
       </div>
@@ -101,11 +141,11 @@
       <div class="section">
         <h3>Grammar Topics</h3>
         <div id="grammarBox" class="subgrid">
-          <div class="field"><label>Tenses</label><input /></div>
-          <div class="field"><label>Sentence Structure</label><input /></div>
-          <div class="field"><label>Articles & Prepositions</label><input /></div>
-          <div class="field"><label>Verb Forms</label><input /></div>
-          <div class="field"><label>Agreement</label><input /></div>
+          <div class="field"><label>Tenses</label><input autocomplete="off" /></div>
+          <div class="field"><label>Sentence Structure</label><input autocomplete="off" /></div>
+          <div class="field"><label>Articles & Prepositions</label><input autocomplete="off" /></div>
+          <div class="field"><label>Verb Forms</label><input autocomplete="off" /></div>
+          <div class="field"><label>Agreement</label><input autocomplete="off" /></div>
         </div>
         <button class="add-btn" onclick="addField('grammarBox')">Add Topic</button>
       </div>
@@ -113,12 +153,12 @@
       <div class="section">
         <h3>Evaluation Notes</h3>
         <div id="strengthBox">
-          <div class="field"><label>Strength</label><input /></div>
+          <div class="field"><label>Strength</label><input autocomplete="off" /></div>
         </div>
         <button class="add-btn" onclick="addField('strengthBox')">Add Strength</button>
 
         <div id="weaknessBox" style="margin-top: 10px">
-          <div class="field"><label>Weakness</label><input /></div>
+          <div class="field"><label>Weakness</label><input autocomplete="off" /></div>
         </div>
         <button class="add-btn" onclick="addField('weaknessBox')">Add Weakness</button>
 
@@ -128,7 +168,8 @@
         </div>
       </div>
 
-      <button id="generateBtn" class="generate" onclick="generateReport()">Generate Draft Report</button>
+      <button id="generateBtn" class="generate" type="button" onclick="generateReport()">Generate Draft Report</button>
+      <div id="formMessage" class="form-message"></div>
     </div>
 
     <script>
@@ -138,11 +179,23 @@
         for (let i = 1; i <= 10; i++) element.innerHTML += `<option value="${i}">${i}</option>`;
       }
 
+      function prepareManualInput(element) {
+        element.setAttribute("autocomplete", "off");
+        element.setAttribute("spellcheck", "false");
+        if ((element.tagName === "INPUT" || element.tagName === "TEXTAREA") && !element.name) {
+          element.name = `manual_${element.id || "field"}_${Math.random().toString(36).slice(2)}`;
+        }
+        element.addEventListener("input", updateButton);
+        element.addEventListener("change", updateButton);
+      }
+
       function addField(id) {
         const div = document.createElement("div");
         div.className = "field";
-        div.innerHTML = `<label>Extra</label><input />`;
+        div.innerHTML = `<label>Extra</label><input autocomplete="off" />`;
         document.getElementById(id).appendChild(div);
+        prepareManualInput(div.querySelector("input"));
+        updateButton();
       }
 
       function collectLabeled(id) {
@@ -180,29 +233,104 @@
           const displayValue = value.split(":").slice(1).join(":").trim();
           const div = document.createElement("div");
           div.className = "field";
-          div.innerHTML = `<label>${labelText}</label><input />`;
-          div.querySelector("input").value = displayValue;
+          div.innerHTML = `<label>${labelText}</label><input autocomplete="off" />`;
+          const input = div.querySelector("input");
+          input.value = displayValue;
+          prepareManualInput(input);
           box.appendChild(div);
         });
         if (!values || values.length === 0) {
           labels.forEach((labelText) => {
             const div = document.createElement("div");
             div.className = "field";
-            div.innerHTML = `<label>${labelText}</label><input />`;
+            div.innerHTML = `<label>${labelText}</label><input autocomplete="off" />`;
+            prepareManualInput(div.querySelector("input"));
             box.appendChild(div);
           });
         }
       }
 
-      function isValid() {
-        const required = ["name", "attendance", "assignment", "reading", "writing", "listening", "speaking", "vocab", "grammar"];
-        return required.every((id) => {
-          const element = document.getElementById(id);
-          return element && element.value && element.value.toString().trim() !== "";
+      function hasSectionEntry(boxId) {
+        return Array.from(document.querySelectorAll(`#${boxId} input, #${boxId} textarea`)).some((element) => {
+          return element.value && element.value.trim() !== "";
         });
       }
 
-      function updateButton() { document.getElementById("generateBtn").disabled = !isValid(); }
+      function getMissingFields() {
+        const labels = {
+          name: "Student Name",
+          course_type: "Course",
+          class_type: "Class Type",
+          report_type: "Report Type",
+          exam_score: "Exam Score",
+          attendance: "Attendance",
+          assignment: "Assignment",
+          reading: "Reading",
+          writing: "Writing",
+          listening: "Listening",
+          speaking: "Speaking",
+          vocab: "Vocabulary",
+          grammar: "Grammar",
+        };
+        const required = Object.keys(labels);
+        const missing = required.filter((id) => {
+          const element = document.getElementById(id);
+          return !element || !element.value || element.value.toString().trim() === "";
+        });
+        const courseType = document.getElementById("course_type").value;
+        if (courseType === "other" && !document.getElementById("course_other").value.trim()) missing.push("course_other");
+        if (!hasSectionEntry("commBox")) missing.push("Communication Topics");
+        if (!hasSectionEntry("vocabBox")) missing.push("Vocabulary Topics");
+        if (!hasSectionEntry("grammarBox")) missing.push("Grammar Topics");
+        const evaluationComplete = hasSectionEntry("strengthBox") || hasSectionEntry("weaknessBox") || document.getElementById("note").value.trim() !== "";
+        if (!evaluationComplete) missing.push("Evaluation Notes");
+        return missing.map((item) => labels[item] || item);
+      }
+
+      function isValid() { return getMissingFields().length === 0; }
+
+      function updateButton() {
+        const button = document.getElementById("generateBtn");
+        const message = document.getElementById("formMessage");
+        const missing = getMissingFields();
+        const valid = missing.length === 0;
+        button.classList.toggle("is-disabled", !valid);
+        button.setAttribute("aria-disabled", valid ? "false" : "true");
+        button.title = valid ? "" : `Missing: ${missing.slice(0, 4).join(", ")}`;
+        message.innerText = valid ? "" : `Complete required fields: ${missing.slice(0, 5).join(", ")}${missing.length > 5 ? "..." : ""}`;
+      }
+
+      function updateExamScoreState() {
+        const reportType = document.getElementById("report_type").value;
+        const examScore = document.getElementById("exam_score");
+        examScore.disabled = !reportType;
+        examScore.placeholder = reportType ? "Enter exam score" : "Select report type first";
+        if (!reportType) examScore.value = "";
+        updateButton();
+      }
+
+      function updateCourseState() {
+        const courseType = document.getElementById("course_type").value;
+        const courseOther = document.getElementById("course_other");
+        const level = document.getElementById("level");
+
+        courseOther.style.display = courseType === "other" ? "block" : "none";
+        if (courseType !== "other") courseOther.value = "";
+
+        level.disabled = courseType !== "general_english";
+        level.placeholder = courseType === "general_english" ? "Enter level" : "Available for General English only";
+        if (courseType !== "general_english") level.value = "";
+        updateButton();
+      }
+
+      function selectedCourseName() {
+        const courseType = document.getElementById("course_type").value;
+        if (courseType === "general_english") return "General English";
+        if (courseType === "ielts") return "IELTS";
+        if (courseType === "sat") return "SAT";
+        if (courseType === "other") return document.getElementById("course_other").value.trim();
+        return "";
+      }
 
       async function loadEducationalConsultants() {
         const response = await fetch("/api/users?role=sales");
@@ -217,15 +345,17 @@
           report_type: document.getElementById("report_type").value,
           student: {
             name: document.getElementById("name").value.trim(),
-            branch: document.getElementById("branch").value.trim(),
             sales_id: document.getElementById("sales_id").value || null,
             teacher: document.getElementById("teacher").value.trim(),
             level: document.getElementById("level").value.trim(),
-            course: document.getElementById("course").value.trim(),
+            course: selectedCourseName(),
+            course_type: document.getElementById("course_type").value,
+            class_type: document.getElementById("class_type").value,
           },
           performance: {
             attendance: document.getElementById("attendance").value,
             assignment: document.getElementById("assignment").value,
+            exam_score: document.getElementById("exam_score").value,
           },
           skills: {
             reading: document.getElementById("reading").value,
@@ -248,9 +378,14 @@
 
       async function generateReport() {
         const button = document.getElementById("generateBtn");
-        if (!isValid()) { alert("Please complete the required fields first."); return; }
-        button.disabled = true;
-        button.innerText = "Generating...";
+        const missing = getMissingFields();
+        if (missing.length) {
+          document.getElementById("formMessage").innerText = `Complete required fields: ${missing.join(", ")}`;
+          return;
+        }
+        button.classList.add("is-disabled");
+        button.setAttribute("aria-disabled", "true");
+        button.innerText = "Generating report";
         const payload = buildPayload();
         try {
           const response = await fetch("/generate", {
@@ -265,8 +400,9 @@
           localStorage.setItem("report", JSON.stringify(data));
           window.location.href = "/report";
         } catch (error) {
-          alert(error.message);
-          button.disabled = false;
+          document.getElementById("formMessage").innerText = error.message;
+          button.classList.remove("is-disabled");
+          button.setAttribute("aria-disabled", "false");
           button.innerText = "Generate Draft Report";
         }
       }
@@ -282,9 +418,13 @@
         restoreSection("strengthBox", []);
         restoreSection("weaknessBox", []);
         updateButton();
+        updateExamScoreState();
+        updateCourseState();
+        document.getElementById("report_type").addEventListener("change", updateExamScoreState);
+        document.getElementById("course_type").addEventListener("change", updateCourseState);
+        document.getElementById("course_other").addEventListener("input", updateButton);
         document.querySelectorAll("input, select, textarea").forEach((element) => {
-          element.addEventListener("input", updateButton);
-          element.addEventListener("change", updateButton);
+          prepareManualInput(element);
         });
       };
     </script>

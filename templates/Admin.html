@@ -14,9 +14,7 @@
       .approved { background: #2563eb; }
       .delivered { background: #16a34a; }
       .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
-      .search-wrap { display: flex; align-items: stretch; }
-      .search-wrap input { border-radius: 6px 0 0 6px; min-width: 230px; }
-      .search-wrap button { border-radius: 0 6px 6px 0; background: #2563eb; color: white; font-weight: 700; }
+      .search-wrap input { min-width: 230px; }
       input, select, button { padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; }
       table { width: 100%; border-collapse: collapse; }
       th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: left; }
@@ -27,7 +25,7 @@
   <body>
     {% include "_navbar.html" %}
     <div class="container">
-      <h1>Admin Dashboard</h1>
+      <h1>Admin Operation Monitor</h1>
 
       <div class="stats">
         <div class="card draft">Draft: <span id="draftCount">0</span></div>
@@ -39,11 +37,17 @@
       <div class="filters">
         <div class="search-wrap">
           <input id="phoneFilter" placeholder="Search by student phone" />
-          <button onclick="load()">Search</button>
         </div>
         <select id="teacherFilter" onchange="load()">
           <option value="">All teachers</option>
         </select>
+        {% if role == 'manager' %}
+        <select id="branchFilter" onchange="handleBranchChange()">
+          <option value="">All branches</option>
+          <option value="AlAin">AlAin</option>
+          <option value="Abu Dhabi">Abu Dhabi</option>
+        </select>
+        {% endif %}
         <select id="statusFilter" onchange="load()">
           <option value="">All statuses</option>
           <option value="draft">Draft</option>
@@ -58,14 +62,16 @@
           <tr>
             <th>ID</th>
             <th>Phone</th>
+            <th>Email</th>
             <th>Student</th>
             <th>Teacher</th>
-            <th>Educational Consultant</th>
+            <th>Branch</th>
             <th>Level</th>
             <th>Type</th>
             <th>Status</th>
-            <th>Created</th>
-            <th>Delivered</th>
+            <th>Received</th>
+            <th>Email Sent</th>
+            <th>Sent At</th>
             <th>View</th>
           </tr>
         </thead>
@@ -80,10 +86,13 @@
         const phone = document.getElementById("phoneFilter").value.trim();
         const teacher = document.getElementById("teacherFilter").value;
         const status = document.getElementById("statusFilter").value;
+        const branchFilter = document.getElementById("branchFilter");
+        const branch = branchFilter ? branchFilter.value : "";
         const query = new URLSearchParams();
         if (phone) query.set("phone", phone);
         if (teacher) query.set("teacher_id", teacher);
         if (status) query.set("status", status);
+        if (branch) query.set("branch", branch);
         const response = await fetch(`/admin/reports?${query.toString()}`);
         allRows = await response.json();
         render();
@@ -99,13 +108,15 @@
             <tr>
               <td>${row.id}</td>
               <td>${row.student_id}</td>
+              <td>${row.student_email || "-"}</td>
               <td>${row.student_name}</td>
               <td>${row.teacher_name}</td>
-              <td>${row.sales_name || "-"}</td>
+              <td>${row.student_branch || row.teacher_branch || "-"}</td>
               <td>${row.level || "-"}</td>
               <td>${row.report_type}</td>
               <td>${row.status}</td>
               <td>${row.created_at}</td>
+              <td>${row.sent_student_email ? "Yes" : "No"}</td>
               <td>${row.sent_at || "-"}</td>
               <td><a href="/view/${row.id}" target="_blank">Preview</a></td>
             </tr>
@@ -118,16 +129,26 @@
       }
 
       async function loadTeachers() {
-        const response = await fetch("/api/users?role=teacher");
+        const branchFilter = document.getElementById("branchFilter");
+        const query = new URLSearchParams({ role: "teacher" });
+        if (branchFilter && branchFilter.value) query.set("branch", branchFilter.value);
+        const response = await fetch(`/api/users?${query.toString()}`);
         const teachers = await response.json();
         const select = document.getElementById("teacherFilter");
+        select.innerHTML = '<option value="">All teachers</option>';
         teachers.forEach((teacher) => {
           select.innerHTML += `<option value="${teacher.id}">${teacher.name}</option>`;
         });
       }
 
-      document.getElementById("phoneFilter").addEventListener("keydown", (event) => {
-        if (event.key === "Enter") load();
+      function handleBranchChange() {
+        loadTeachers().then(load);
+      }
+
+      let searchTimer = null;
+      document.getElementById("phoneFilter").addEventListener("input", () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(load, 250);
       });
 
       loadTeachers().then(load);

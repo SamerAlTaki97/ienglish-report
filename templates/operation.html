@@ -6,89 +6,53 @@
     <title>Operation Panel</title>
     <style>
       body { font-family: Arial, sans-serif; background: #eef2f7; margin: 0; color: #0f172a; }
-      .container { max-width: 1380px; margin: 32px auto; background: white; padding: 24px; border-radius: 16px; box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08); }
+      .container { max-width: 1280px; margin: 32px auto; background: white; padding: 24px; border-radius: 16px; box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08); }
       .page-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 18px; }
-      .page-head h1 { margin: 0; font-size: 28px; }
+      h1 { margin: 0; font-size: 28px; }
       .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
-      .search-wrap { display: flex; align-items: stretch; }
-      .search-wrap input { border-radius: 10px 0 0 10px; min-width: 240px; }
-      .search-wrap button { border-radius: 0 10px 10px 0; }
+      .search-wrap input { min-width: 240px; }
       input, select, button { padding: 10px 12px; border-radius: 10px; border: 1px solid #cbd5e1; box-sizing: border-box; font: inherit; }
-      button { cursor: pointer; }
-      .table-wrap { border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; }
-      table { width: 100%; border-collapse: collapse; }
-      th, td { padding: 14px 12px; border-bottom: 1px solid #eef2f7; text-align: left; vertical-align: middle; }
-      th { background: #f8fafc; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: #475569; }
-      tr:hover td { background: #fcfdff; }
+      button { cursor: pointer; font-weight: 700; }
+      .btn-primary { background: #14213d; color: white; border-color: #14213d; }
+      .btn-blue { background: #2563eb; color: white; border-color: #2563eb; }
+      .btn-green { background: #16a34a; color: white; border-color: #16a34a; }
+      .btn-outline { background: white; color: #0f172a; border-color: #cbd5e1; }
+      .btn-disabled { background: #f8fafc; color: #64748b; border-color: #e2e8f0; cursor: not-allowed; }
       .status { display: inline-flex; align-items: center; padding: 5px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; text-transform: capitalize; }
       .draft { background: #e2e8f0; color: #334155; }
       .pending_operation { background: #fef3c7; color: #92400e; }
       .approved { background: #dbeafe; color: #1d4ed8; }
       .delivered { background: #dcfce7; color: #166534; }
-      .delivery-stack { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #475569; }
+      .table-wrap { border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 13px 12px; border-bottom: 1px solid #eef2f7; text-align: left; vertical-align: middle; }
+      th { background: #f8fafc; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: #475569; }
       .delivery-done { color: #166534; font-weight: 700; }
       .delivery-pending { color: #64748b; }
-      .btn-view, .btn-action, .btn-modal, .btn-outline, .btn-soft, .btn-evaluate { border: 1px solid transparent; text-decoration: none; display: inline-flex; justify-content: center; align-items: center; gap: 8px; font-weight: 700; }
-      .btn-view { padding: 10px 12px; background: white; color: #0f172a; border-color: #cbd5e1; border-radius: 10px; }
-      .btn-action { padding: 10px 12px; background: #14213d; color: white; border-radius: 10px; }
-      .btn-evaluate { padding: 10px 12px; background: #1d4ed8; color: white; border-color: #1d4ed8; border-radius: 10px; }
-      .btn-modal { background: #2563eb; color: white; }
-      .btn-outline { background: white; color: #0f172a; border-color: #cbd5e1; }
-      .btn-soft { background: #e0f2fe; color: #075985; border-color: #bae6fd; }
-      .btn-success { background: #dcfce7; color: #166534; border-color: #86efac; }
-      .btn-disabled { background: #fff7ed; color: #9a3412; border-color: #fed7aa; cursor: not-allowed; }
       .empty-state { padding: 28px; text-align: center; color: #64748b; }
       .modal-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); display: none; align-items: center; justify-content: center; padding: 22px; z-index: 1000; }
       .modal-backdrop.open { display: flex; }
-      .modal { width: min(860px, 100%); max-height: calc(100vh - 48px); overflow: auto; background: white; border-radius: 20px; box-shadow: 0 28px 60px rgba(15, 23, 42, 0.25); }
-      .evaluation-modal { width: min(720px, 100%); }
-      .modal-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; padding: 24px 24px 18px; border-bottom: 1px solid #e2e8f0; }
+      .modal { width: min(720px, 100%); background: white; border-radius: 18px; box-shadow: 0 28px 60px rgba(15, 23, 42, 0.25); overflow: hidden; }
+      .modal-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; padding: 22px 24px 16px; border-bottom: 1px solid #e2e8f0; }
       .modal-title { margin: 0; font-size: 24px; }
-      .modal-subtitle { margin: 6px 0 0; color: #64748b; font-size: 14px; }
-      .modal-body { padding: 24px; display: grid; gap: 18px; }
-      .panel { border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px; background: #fbfdff; }
-      .panel h3 { margin: 0 0 6px; font-size: 17px; }
+      .modal-subtitle { margin-top: 6px; color: #64748b; font-size: 14px; }
+      .modal-body { padding: 24px; display: grid; gap: 16px; }
+      .panel { border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; background: #fbfdff; }
+      .panel h3 { margin: 0 0 12px; }
       .field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-      .contact-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-      .contact-card { border: 1px solid #e2e8f0; border-radius: 14px; background: white; padding: 14px; display: grid; gap: 10px; }
       .field { display: flex; flex-direction: column; gap: 6px; }
       .field label { font-size: 12px; color: #475569; font-weight: 700; }
-      .field input[readonly] { background: #f8fafc; color: #475569; }
+      .field-actions { display: flex; gap: 8px; flex-wrap: wrap; }
       .button-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
-      .send-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-      .send-card { border: 1px solid #e2e8f0; border-radius: 14px; background: white; padding: 16px; display: grid; gap: 10px; }
-      .send-card h4 { margin: 0; font-size: 15px; }
-      .send-state { font-size: 12px; font-weight: 700; min-height: 16px; }
-      .send-state.ready { color: #2563eb; }
-      .send-state.done { color: #166534; }
-      .send-state.warn { color: #b45309; }
-      .consultant-card { margin-top: 14px; }
-      .consultant-list { display: flex; flex-direction: column; gap: 10px; }
-      .consultant-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: start; }
-      .phone-wrap { display: flex; flex-direction: column; gap: 6px; }
-      .preview { min-height: 16px; font-size: 12px; color: #475569; }
-      .preview.invalid { color: #b91c1c; }
-      .modal-feedback { min-height: 18px; font-size: 13px; font-weight: 700; color: #166534; }
-      .modal-feedback.error { color: #b91c1c; }
-      .close-btn { background: white; border-color: #cbd5e1; color: #334155; }
-      .evaluation-summary { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; color: #334155; line-height: 1.7; }
-      .evaluation-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-      .evaluation-field { display: grid; gap: 6px; }
-      .evaluation-field.full { grid-column: 1 / -1; }
-      .evaluation-field label { color: #334155; font-size: 13px; font-weight: 700; }
-      .evaluation-field textarea { min-height: 110px; resize: vertical; }
-      .evaluation-actions { display: flex; justify-content: flex-end; gap: 10px; }
-      @media (max-width: 1100px) {
-        .send-grid { grid-template-columns: 1fr; }
-      }
+      .feedback { min-height: 18px; font-size: 13px; font-weight: 700; color: #166534; }
+      .feedback.error { color: #b91c1c; }
       @media (max-width: 900px) {
         table, thead, tbody, th, td, tr { display: block; }
         thead { display: none; }
         tr { border-bottom: 1px solid #e2e8f0; }
         td { display: flex; justify-content: space-between; gap: 16px; }
         td::before { content: attr(data-label); font-weight: 700; color: #475569; }
-        .field-grid, .contact-grid, .evaluation-grid { grid-template-columns: 1fr; }
-        .evaluation-field.full { grid-column: auto; }
+        .field-grid { grid-template-columns: 1fr; }
         .page-head { flex-direction: column; align-items: flex-start; }
       }
     </style>
@@ -97,22 +61,25 @@
     {% include "_navbar.html" %}
     <div class="container">
       <div class="page-head">
-        <div>
-          <h1>Operation Panel</h1>
-        </div>
+        <h1>Operation Panel</h1>
       </div>
 
       <div class="filters">
         <div class="search-wrap">
           <input id="phoneFilter" placeholder="Search by student phone" />
-          <button class="btn-modal" onclick="load()">Search</button>
         </div>
         <select id="teacherFilter" onchange="load()">
           <option value="">All teachers</option>
         </select>
+        {% if role == 'manager' %}
+        <select id="branchFilter" onchange="handleBranchChange()">
+          <option value="">All branches</option>
+          <option value="AlAin">AlAin</option>
+          <option value="Abu Dhabi">Abu Dhabi</option>
+        </select>
+        {% endif %}
         <select id="statusFilter" onchange="load()">
           <option value="">All statuses</option>
-          <option value="draft">Draft</option>
           <option value="pending_operation">Pending operation</option>
           <option value="approved">Approved</option>
           <option value="delivered">Delivered</option>
@@ -125,16 +92,16 @@
             <tr>
               <th>ID</th>
               <th>Phone</th>
+              <th>Email</th>
               <th>Student</th>
               <th>Teacher</th>
-              <th>Level</th>
-              <th>Educational Consultant</th>
-              <th>Type</th>
+              <th>Branch</th>
               <th>Status</th>
-              <th>Delivery</th>
+              <th>Email Delivery</th>
+              <th>Received</th>
+              <th>Sent</th>
               <th>View</th>
               <th>Action</th>
-              <th>Evaluate</th>
             </tr>
           </thead>
           <tbody id="tableBody"></tbody>
@@ -147,140 +114,50 @@
       <div class="modal">
         <div class="modal-header">
           <div>
-            <h2 class="modal-title" id="modalTitle">Make Action</h2>
+            <h2 class="modal-title" id="modalTitle">Report Action</h2>
             <div class="modal-subtitle" id="modalSubtitle"></div>
           </div>
-          <button class="close-btn" type="button" onclick="closeModal()">Close</button>
+          <button class="btn-outline" type="button" onclick="closeModal()">Close</button>
         </div>
         <div class="modal-body">
-          <div class="panel">
-            <h3>Approve Report</h3>
-            <div class="button-row">
-              <button id="approveBtn" class="btn-soft" type="button" onclick="approveCurrentReport()">Approve Report</button>
-            </div>
-          </div>
-
           <div class="panel">
             <h3>Student Contact</h3>
-            <div class="contact-grid">
-              <div class="contact-card">
-                <div class="field">
-                  <label>Student Phone</label>
-                  <input id="modalStudentPhone" placeholder="05XXXXXXXX or +9715XXXXXXXX" />
-                </div>
-                <div class="button-row">
-                  <button id="savePhoneBtn" class="btn-modal" type="button" onclick="saveStudentPhone()">Save Phone</button>
-                  <button id="editPhoneBtn" class="btn-outline" type="button" onclick="enablePhoneEditing()">Edit Phone</button>
+            <div class="field-grid">
+              <div class="field">
+                <label>Student Phone</label>
+                <input id="modalStudentPhone" placeholder="05XXXXXXXX or +9715XXXXXXXX" />
+                <div class="field-actions">
+                  <button id="editPhoneBtn" class="btn-outline" type="button" onclick="editContactField('phone')">Edit</button>
+                  <button id="savePhoneBtn" class="btn-blue" type="button" onclick="savePhone()">Save Phone</button>
                 </div>
               </div>
-              <div class="contact-card">
-                <div class="field">
-                  <label>Student Email</label>
-                  <input id="modalStudentEmail" placeholder="student@email.com" />
-                </div>
-                <div class="button-row">
-                  <button id="saveEmailBtn" class="btn-modal" type="button" onclick="saveStudentEmail()">Save Email</button>
-                  <button id="editEmailBtn" class="btn-outline" type="button" onclick="enableEmailEditing()">Edit Email</button>
-                </div>
-              </div>
-              <div class="contact-card">
-                <div class="field">
-                  <label>Educational Consultant</label>
-                  <select id="modalSalesId">
-                    <option value="">Unassigned</option>
-                  </select>
-                </div>
-                <div class="button-row">
-                  <button id="saveSalesBtn" class="btn-modal" type="button" onclick="saveEducationalConsultant()">Save Consultant</button>
-                  <button id="editSalesBtn" class="btn-outline" type="button" onclick="enableConsultantEditing()">Edit Consultant</button>
+              <div class="field">
+                <label>Student Email</label>
+                <input id="modalStudentEmail" placeholder="student@email.com" />
+                <div class="field-actions">
+                  <button id="editEmailBtn" class="btn-outline" type="button" onclick="editContactField('email')">Edit</button>
+                  <button id="saveEmailBtn" class="btn-blue" type="button" onclick="saveEmail()">Save Email</button>
                 </div>
               </div>
             </div>
           </div>
 
           <div class="panel">
-            <h3>Delivery Actions</h3>
-            <div class="send-grid">
-              <div class="send-card">
-                <h4>Student Email</h4>
-                <div id="stateStudentEmail" class="send-state"></div>
-                <button id="sendStudentEmailBtn" class="btn-modal" type="button" onclick="sendCurrent('email', 'student_email')">Send Email</button>
-              </div>
-
-              <div class="send-card">
-                <h4>Student WhatsApp</h4>
-                <div id="stateStudentWhatsapp" class="send-state"></div>
-                <button id="sendStudentWhatsappBtn" class="btn-modal" type="button" onclick="sendCurrent('whatsapp', 'student_whatsapp')">Send WhatsApp</button>
-              </div>
-            </div>
-
-            <div class="send-card consultant-card">
-              <h4>Educational Consultant WhatsApp</h4>
-              <div class="consultant-list" id="consultantList"></div>
-              <button class="btn-outline" type="button" onclick="addConsultantField()">Add Another Number</button>
-              <div id="stateSalesWhatsapp" class="send-state"></div>
-              <button id="sendSalesWhatsappBtn" class="btn-modal" type="button" onclick="sendCurrent('whatsapp', 'sales_whatsapp')">Send Consultant WhatsApp</button>
+            <h3>Approval</h3>
+            <div class="button-row">
+              <button id="approveBtn" class="btn-primary" type="button" onclick="approveCurrentReport()">Approve Report</button>
             </div>
           </div>
 
-          <div id="modalFeedback" class="modal-feedback"></div>
-        </div>
-      </div>
-    </div>
-
-    <div id="evaluationModal" class="modal-backdrop" onclick="maybeCloseEvaluationModal(event)">
-      <div class="modal evaluation-modal">
-        <div class="modal-header">
-          <div>
-            <h2 class="modal-title">Operation Evaluation</h2>
-            <div class="modal-subtitle" id="evaluationSubtitle"></div>
-          </div>
-          <button class="close-btn" type="button" onclick="closeEvaluationModal()">Close</button>
-        </div>
-        <div class="modal-body">
-          <div id="evaluationSummary" class="evaluation-summary"></div>
-
-          <div class="evaluation-grid">
-            <div class="evaluation-field">
-              <label>Teacher Rating</label>
-              <select id="evaluationTeacherRating">
-                <option value="">Select rating</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-              </select>
-            </div>
-
-            <div class="evaluation-field">
-              <label>Educational Consultant Rating</label>
-              <select id="evaluationSalesRating">
-                <option value="">Select rating</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-              </select>
-            </div>
-
-            <div class="evaluation-field full">
-              <label>Teacher Notes</label>
-              <textarea id="evaluationTeacherNotes"></textarea>
-            </div>
-
-            <div class="evaluation-field full">
-              <label>Educational Consultant Notes</label>
-              <textarea id="evaluationSalesNotes"></textarea>
+          <div class="panel">
+            <h3>Email Delivery</h3>
+            <div id="emailState" class="delivery-pending"></div>
+            <div class="button-row">
+              <button id="sendEmailBtn" class="btn-green" type="button" onclick="sendEmail()">Send Email</button>
             </div>
           </div>
 
-          <div id="evaluationFeedback" class="modal-feedback"></div>
-          <div class="evaluation-actions">
-            <button class="btn-outline" type="button" onclick="closeEvaluationModal()">Cancel</button>
-            <button class="btn-evaluate" type="button" onclick="submitEvaluationModal()">Save Evaluation</button>
-          </div>
+          <div id="modalFeedback" class="feedback"></div>
         </div>
       </div>
     </div>
@@ -288,19 +165,12 @@
     <script>
       let rowsById = {};
       let currentReportId = null;
-      let currentEvaluationReportId = null;
-      let phoneLocked = false;
-      let emailLocked = false;
-      let consultantLocked = false;
-      let consultantOptions = [];
+      let contactEditState = { phone: true, email: true };
 
       function parseJson(response) {
         return response.text().then((raw) => {
-          try {
-            return raw ? JSON.parse(raw) : {};
-          } catch (error) {
-            return { error: "The server returned an invalid response." };
-          }
+          try { return raw ? JSON.parse(raw) : {}; }
+          catch (error) { return { error: "The server returned an invalid response." }; }
         });
       }
 
@@ -308,10 +178,13 @@
         const phone = document.getElementById("phoneFilter").value.trim();
         const teacher = document.getElementById("teacherFilter").value;
         const status = document.getElementById("statusFilter").value;
+        const branchFilter = document.getElementById("branchFilter");
+        const branch = branchFilter ? branchFilter.value : "";
         const query = new URLSearchParams();
         if (phone) query.set("phone", phone);
         if (teacher) query.set("teacher_id", teacher);
         if (status) query.set("status", status);
+        if (branch) query.set("branch", branch);
 
         const response = await fetch(`/operation/reports?${query.toString()}`);
         const rows = await response.json();
@@ -326,16 +199,16 @@
             <tr>
               <td data-label="ID">${row.id}</td>
               <td data-label="Phone">${row.student_id || "-"}</td>
+              <td data-label="Email">${row.student_email || "-"}</td>
               <td data-label="Student">${row.student_name || "-"}</td>
               <td data-label="Teacher">${row.teacher_name || "-"}</td>
-              <td data-label="Level">${row.level || "-"}</td>
-              <td data-label="Educational Consultant">${row.sales_name || "-"}</td>
-              <td data-label="Type">${row.report_type}</td>
+              <td data-label="Branch">${row.student_branch || row.teacher_branch || "-"}</td>
               <td data-label="Status"><span class="status ${row.status}">${row.status.replaceAll("_", " ")}</span></td>
-              <td data-label="Delivery">${renderDeliverySummary(row)}</td>
-              <td data-label="View"><a class="btn-view" href="/view/${row.id}" target="_blank">Preview</a></td>
-              <td data-label="Action"><button class="btn-action" type="button" onclick="openActionModal(${row.id})">Make Action</button></td>
-              <td data-label="Evaluate">${renderEvaluationAction(row)}</td>
+              <td data-label="Email Delivery">${row.sent_student_email ? '<span class="delivery-done">Sent</span>' : '<span class="delivery-pending">Not sent</span>'}</td>
+              <td data-label="Received">${row.created_at || "-"}</td>
+              <td data-label="Sent">${row.sent_at || "-"}</td>
+              <td data-label="View"><a class="btn-outline" href="/view/${row.id}" target="_blank">Preview</a></td>
+              <td data-label="Action"><button class="btn-primary" type="button" onclick="openActionModal(${row.id})">Action</button></td>
             </tr>
           `;
         });
@@ -343,113 +216,21 @@
         empty.style.display = rows.length ? "none" : "block";
       }
 
-      async function loadEducationalConsultants() {
-        const response = await fetch("/api/users?role=sales");
-        consultantOptions = await response.json();
-        fillConsultantSelect();
-      }
-
       async function loadTeachers() {
-        const response = await fetch("/api/users?role=teacher");
+        const branchFilter = document.getElementById("branchFilter");
+        const query = new URLSearchParams({ role: "teacher" });
+        if (branchFilter && branchFilter.value) query.set("branch", branchFilter.value);
+        const response = await fetch(`/api/users?${query.toString()}`);
         const teachers = await response.json();
         const select = document.getElementById("teacherFilter");
+        select.innerHTML = '<option value="">All teachers</option>';
         teachers.forEach((teacher) => {
           select.innerHTML += `<option value="${teacher.id}">${teacher.name}</option>`;
         });
       }
 
-      function fillConsultantSelect(selectedValue = "") {
-        const select = document.getElementById("modalSalesId");
-        if (!select) return;
-        select.innerHTML = `<option value="">Unassigned</option>`;
-        consultantOptions.forEach((user) => {
-          select.innerHTML += `<option value="${user.id}">${user.name}</option>`;
-        });
-        select.value = selectedValue ? String(selectedValue) : "";
-      }
-
-      function renderDeliverySummary(row) {
-        return `
-          <div class="delivery-stack">
-            <span class="${row.sent_student_email ? "delivery-done" : "delivery-pending"}">Student Email: ${row.sent_student_email ? "Sent" : "Not sent"}</span>
-            <span class="${row.sent_student_whatsapp ? "delivery-done" : "delivery-pending"}">Student WhatsApp: ${row.sent_student_whatsapp ? "Sent" : "Not sent"}</span>
-            <span class="${row.sent_sales_whatsapp ? "delivery-done" : "delivery-pending"}">Consultant WhatsApp: ${row.sent_sales_whatsapp ? "Sent" : "Not sent"}</span>
-          </div>
-        `;
-      }
-
-      function renderEvaluationAction(row) {
-        if (row.has_evaluation) {
-          return `<button class="btn-success" type="button" disabled>Evaluation Completed</button>`;
-        }
-        if (row.status !== "delivered") {
-          return `<button class="btn-disabled" type="button" disabled>Evaluate After Delivery</button>`;
-        }
-        return `<button class="btn-evaluate" type="button" onclick="openEvaluationModal(${row.id})">Evaluate</button>`;
-      }
-
-      function openEvaluationModal(reportId) {
-        const row = rowsById[reportId];
-        if (!row || row.status !== "delivered" || row.has_evaluation) return;
-
-        currentEvaluationReportId = reportId;
-        document.getElementById("evaluationSubtitle").innerText = `Report #${row.id} - ${row.student_name || "Student"}`;
-        document.getElementById("evaluationSummary").innerHTML = `
-          <b>Report #${row.id}</b><br />
-          Student: ${row.student_name || "-"}<br />
-          Phone: ${row.student_id || "-"}<br />
-          Teacher: ${row.teacher_name || "-"}<br />
-          Educational Consultant: ${row.sales_name || "Unassigned"}<br />
-          Status: ${row.status.replaceAll("_", " ")}
-        `;
-        document.getElementById("evaluationTeacherRating").value = "";
-        document.getElementById("evaluationSalesRating").value = "";
-        document.getElementById("evaluationTeacherNotes").value = "";
-        document.getElementById("evaluationSalesNotes").value = "";
-        setEvaluationFeedback("");
-        document.getElementById("evaluationModal").classList.add("open");
-      }
-
-      function closeEvaluationModal() {
-        document.getElementById("evaluationModal").classList.remove("open");
-        currentEvaluationReportId = null;
-      }
-
-      function maybeCloseEvaluationModal(event) {
-        if (event.target.id === "evaluationModal") {
-          closeEvaluationModal();
-        }
-      }
-
-      function setEvaluationFeedback(message, isError = false) {
-        const feedback = document.getElementById("evaluationFeedback");
-        feedback.innerText = message || "";
-        feedback.classList.toggle("error", isError);
-      }
-
-      async function submitEvaluationModal() {
-        if (!currentEvaluationReportId) return;
-
-        const response = await fetch(`/reports/${currentEvaluationReportId}/evaluate`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            rating_teacher: document.getElementById("evaluationTeacherRating").value || null,
-            rating_sales: document.getElementById("evaluationSalesRating").value || null,
-            teacher_notes: document.getElementById("evaluationTeacherNotes").value,
-            sales_notes: document.getElementById("evaluationSalesNotes").value,
-          }),
-        });
-        const payload = await parseJson(response);
-        if (!response.ok) {
-          setEvaluationFeedback(payload.error || "Evaluation failed.", true);
-          return;
-        }
-
-        rowsById[currentEvaluationReportId].has_evaluation = true;
-        setEvaluationFeedback("Evaluation saved successfully.");
-        await load();
-        window.setTimeout(closeEvaluationModal, 650);
+      function handleBranchChange() {
+        loadTeachers().then(load);
       }
 
       function openActionModal(reportId, feedbackMessage = "", isError = false) {
@@ -457,17 +238,12 @@
         const row = rowsById[reportId];
         if (!row) return;
 
-        document.getElementById("modalTitle").innerText = `Make Action • Report #${row.id}`;
-        document.getElementById("modalSubtitle").innerText = `${row.student_name || "Student"} • ${row.teacher_name || "-"} • ${row.report_type}`;
+        document.getElementById("modalTitle").innerText = `Report #${row.id}`;
+        document.getElementById("modalSubtitle").innerText = `${row.student_name || "Student"} | ${row.teacher_name || "-"} | ${row.report_type}`;
         document.getElementById("modalStudentPhone").value = row.student_id || "";
         document.getElementById("modalStudentEmail").value = row.student_email || "";
-        fillConsultantSelect(row.sales_id || "");
+        contactEditState = { phone: !row.student_id, email: !row.student_email };
         setFeedback(feedbackMessage, isError);
-        document.getElementById("consultantList").innerHTML = "";
-        addConsultantField();
-        setPhoneLock(Boolean(row.student_id));
-        setEmailLock(Boolean(row.student_email));
-        setConsultantLock(Boolean(row.sales_id));
         renderModalState();
         document.getElementById("actionModal").classList.add("open");
       }
@@ -478,9 +254,7 @@
       }
 
       function maybeCloseModal(event) {
-        if (event.target.id === "actionModal") {
-          closeModal();
-        }
+        if (event.target.id === "actionModal") closeModal();
       }
 
       function setFeedback(message, isError = false) {
@@ -489,173 +263,84 @@
         feedback.classList.toggle("error", isError);
       }
 
-      function setPhoneLock(locked) {
-        phoneLocked = locked;
-        document.getElementById("modalStudentPhone").readOnly = locked;
-        const saveBtn = document.getElementById("savePhoneBtn");
-        const editBtn = document.getElementById("editPhoneBtn");
-        saveBtn.innerText = locked ? "Phone Saved" : "Save Phone";
-        saveBtn.className = locked ? "btn-success" : "btn-modal";
-        editBtn.style.display = locked ? "inline-flex" : "none";
-      }
-
-      function setEmailLock(locked) {
-        emailLocked = locked;
-        document.getElementById("modalStudentEmail").readOnly = locked;
-        const saveBtn = document.getElementById("saveEmailBtn");
-        const editBtn = document.getElementById("editEmailBtn");
-        saveBtn.innerText = locked ? "Email Saved" : "Save Email";
-        saveBtn.className = locked ? "btn-success" : "btn-modal";
-        editBtn.style.display = locked ? "inline-flex" : "none";
-      }
-
-      function setConsultantLock(locked) {
-        consultantLocked = locked;
-        document.getElementById("modalSalesId").disabled = locked;
-        const saveBtn = document.getElementById("saveSalesBtn");
-        const editBtn = document.getElementById("editSalesBtn");
-        saveBtn.innerText = locked ? "Consultant Saved" : "Save Consultant";
-        saveBtn.className = locked ? "btn-success" : "btn-modal";
-        editBtn.style.display = locked ? "inline-flex" : "none";
-      }
-
       function renderModalState() {
         const row = rowsById[currentReportId];
         if (!row) return;
 
         const canApprove = row.status === "pending_operation";
-        const canDeliver = row.status === "approved" || row.status === "delivered";
-
+        const canSend = (row.status === "approved" || row.status === "delivered") && Boolean(row.student_email);
         document.getElementById("approveBtn").style.display = canApprove ? "inline-flex" : "none";
-
-        updateSendButton(
-          "sendStudentEmailBtn",
-          "stateStudentEmail",
-          row.sent_student_email,
-          canDeliver && Boolean(row.student_email),
-          row.student_email ? `Ready for ${row.student_email}` : "Save an email first."
-        );
-        updateSendButton(
-          "sendStudentWhatsappBtn",
-          "stateStudentWhatsapp",
-          row.sent_student_whatsapp,
-          canDeliver && Boolean(row.student_id),
-          row.student_id ? `Ready for ${normalizeWhatsappPreview(row.student_id).text.replace("Will send to: ", "") || row.student_id}` : "Save a phone number first."
-        );
-        updateSendButton(
-          "sendSalesWhatsappBtn",
-          "stateSalesWhatsapp",
-          row.sent_sales_whatsapp,
-          canDeliver,
-          "Add consultant WhatsApp number(s) below."
-        );
+        document.getElementById("sendEmailBtn").disabled = !canSend;
+        document.getElementById("sendEmailBtn").className = canSend ? "btn-green" : "btn-disabled";
+        document.getElementById("sendEmailBtn").innerText = row.sent_student_email ? "Send Again" : "Send Email";
+        document.getElementById("emailState").className = row.sent_student_email ? "delivery-done" : "delivery-pending";
+        document.getElementById("emailState").innerText = row.sent_student_email
+          ? "Email already sent. You can resend it."
+          : (row.student_email ? "Ready to send by email." : "Save student email before sending.");
+        renderContactFieldState("phone");
+        renderContactFieldState("email");
       }
 
-      function updateSendButton(buttonId, stateId, alreadySent, enabled, readyText) {
-        const button = document.getElementById(buttonId);
-        const state = document.getElementById(stateId);
-        if (!button.dataset.defaultLabel) {
-          button.dataset.defaultLabel = button.innerText;
-        }
+      function editContactField(field) {
+        contactEditState[field] = true;
+        renderContactFieldState(field);
+        const input = document.getElementById(field === "phone" ? "modalStudentPhone" : "modalStudentEmail");
+        input.focus();
+        input.select();
+      }
 
-        if (alreadySent) {
-          button.disabled = !enabled;
-          button.className = "btn-success";
-          button.innerText = "Send Again";
-          state.className = "send-state done";
-          state.innerText = enabled ? "Already sent. You can resend." : "Already sent.";
+      function renderContactFieldState(field) {
+        const isPhone = field === "phone";
+        const input = document.getElementById(isPhone ? "modalStudentPhone" : "modalStudentEmail");
+        const editBtn = document.getElementById(isPhone ? "editPhoneBtn" : "editEmailBtn");
+        const saveBtn = document.getElementById(isPhone ? "savePhoneBtn" : "saveEmailBtn");
+        const hasValue = input.value.trim() !== "";
+        const editing = contactEditState[field] || !hasValue;
+        input.readOnly = !editing;
+        editBtn.style.display = hasValue && !editing ? "inline-flex" : "none";
+        saveBtn.style.display = editing ? "inline-flex" : "none";
+      }
+
+      async function refreshCurrentReport(reportId, feedbackMessage = "", isError = false) {
+        await load();
+        if (rowsById[reportId]) {
+          openActionModal(reportId, feedbackMessage, isError);
           return;
         }
-        button.disabled = !enabled;
-        button.className = enabled ? "btn-modal" : "btn-disabled";
-        button.innerText = button.dataset.defaultLabel;
-        state.className = enabled ? "send-state ready" : "send-state warn";
-        state.innerText = readyText;
+        closeModal();
+        setFeedback(feedbackMessage, isError);
       }
 
-      function enablePhoneEditing() {
-        setPhoneLock(false);
-        setFeedback("Phone editing enabled. Save the phone again after changing it.");
-      }
-
-      function enableEmailEditing() {
-        setEmailLock(false);
-        setFeedback("Email editing enabled. Save the email again after changing it.");
-      }
-
-      function enableConsultantEditing() {
-        setConsultantLock(false);
-        setFeedback("Consultant editing enabled. Save the consultant again after changing it.");
-      }
-
-      async function saveStudentPhone() {
+      async function saveContactField(field) {
         if (!currentReportId) return;
+        const isPhone = field === "phone";
+        const value = document.getElementById(isPhone ? "modalStudentPhone" : "modalStudentEmail").value.trim();
+        if (!value) {
+          setFeedback(isPhone ? "Student phone is required before saving." : "Student email is required before saving.", true);
+          return;
+        }
+        const body = isPhone ? { student_phone: value } : { student_email: value };
         const response = await fetch(`/reports/${currentReportId}/contact`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            student_phone: document.getElementById("modalStudentPhone").value.trim(),
-          }),
+          body: JSON.stringify(body),
         });
         const payload = await parseJson(response);
         if (!response.ok) {
-          setFeedback(payload.error || "Unable to save student phone.", true);
+          setFeedback(payload.error || `Unable to save ${isPhone ? "phone" : "email"}.`, true);
           return;
         }
-
         const reportId = currentReportId;
-        const row = rowsById[reportId];
-        row.student_id = payload.student_id || "";
-        setPhoneLock(true);
-        await load();
-        openActionModal(reportId, "Student phone saved successfully.");
+        contactEditState[field] = false;
+        await refreshCurrentReport(reportId, `${isPhone ? "Phone" : "Email"} saved successfully.`);
       }
 
-      async function saveStudentEmail() {
-        if (!currentReportId) return;
-        const response = await fetch(`/reports/${currentReportId}/contact`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            student_email: document.getElementById("modalStudentEmail").value.trim(),
-          }),
-        });
-        const payload = await parseJson(response);
-        if (!response.ok) {
-          setFeedback(payload.error || "Unable to save student email.", true);
-          return;
-        }
-
-        const reportId = currentReportId;
-        const row = rowsById[reportId];
-        row.student_email = payload.student_email || "";
-        setEmailLock(true);
-        await load();
-        openActionModal(reportId, "Student email saved successfully.");
+      function savePhone() {
+        saveContactField("phone");
       }
 
-      async function saveEducationalConsultant() {
-        if (!currentReportId) return;
-        const response = await fetch(`/reports/${currentReportId}/contact`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            sales_id: document.getElementById("modalSalesId").value,
-          }),
-        });
-        const payload = await parseJson(response);
-        if (!response.ok) {
-          setFeedback(payload.error || "Unable to save educational consultant.", true);
-          return;
-        }
-
-        const reportId = currentReportId;
-        const row = rowsById[reportId];
-        row.sales_id = payload.sales_id || null;
-        row.sales_name = payload.sales_name || "";
-        setConsultantLock(Boolean(payload.sales_id));
-        await load();
-        openActionModal(reportId, "Educational consultant saved successfully.");
+      function saveEmail() {
+        saveContactField("email");
       }
 
       async function approveCurrentReport() {
@@ -666,149 +351,39 @@
           setFeedback(payload.error || "Approval failed.", true);
           return;
         }
-
         const reportId = currentReportId;
-        rowsById[reportId].status = payload.status;
         await load();
         openActionModal(reportId, "Report approved.");
       }
 
-      function normalizeWhatsappPreview(value) {
-        const cleaned = String(value || "").trim();
-        if (!cleaned) return { ok: false, text: "" };
-
-        const compact = cleaned.replace(/\s+/g, "").replaceAll("-", "").replaceAll("(", "").replaceAll(")", "");
-        let normalized = compact;
-
-        if (normalized.startsWith("00")) {
-          normalized = "+" + normalized.slice(2);
-        }
-
-        if (normalized.startsWith("+")) {
-          normalized = "+" + normalized.slice(1).replace(/\D/g, "");
-        } else {
-          const digits = normalized.replace(/\D/g, "");
-          if (digits.startsWith("971")) {
-            normalized = "+" + digits;
-          } else if (digits.startsWith("05") && digits.length === 10) {
-            normalized = "+971" + digits.slice(1);
-          } else if (digits.startsWith("5") && digits.length === 9) {
-            normalized = "+971" + digits;
-          } else {
-            return { ok: false, text: "Enter a UAE number like 05XXXXXXXX or +9715XXXXXXXX" };
-          }
-        }
-
-        if (!normalized.startsWith("+") || normalized.length < 11) {
-          return { ok: false, text: "The number is not valid yet." };
-        }
-
-        return { ok: true, text: `Will send to: ${normalized}` };
-      }
-
-      function createConsultantField(value = "") {
-        const row = document.createElement("div");
-        row.className = "consultant-row";
-        row.innerHTML = `
-          <div class="phone-wrap">
-            <input type="text" class="consultant-input" placeholder="+9715XXXXXXXX or 05XXXXXXXX" value="${value}" />
-            <div class="preview"></div>
-          </div>
-          <button class="btn-outline" type="button">Remove</button>
-        `;
-        const input = row.querySelector(".consultant-input");
-        input.addEventListener("input", () => updateConsultantPreview(input));
-        row.querySelector("button").addEventListener("click", () => {
-          row.remove();
-          if (!document.querySelector("#consultantList .consultant-input")) {
-            addConsultantField();
-          }
-        });
-        updateConsultantPreview(input);
-        return row;
-      }
-
-      function addConsultantField(value = "") {
-        document.getElementById("consultantList").appendChild(createConsultantField(value));
-      }
-
-      function updateConsultantPreview(input) {
-        const preview = input.parentElement.querySelector(".preview");
-        const result = normalizeWhatsappPreview(input.value);
-        preview.innerText = result.text;
-        preview.classList.toggle("invalid", Boolean(result.text) && !result.ok);
-      }
-
-      function getConsultantRecipients() {
-        return Array.from(document.querySelectorAll("#consultantList .consultant-input"))
-          .map((input) => input.value.trim())
-          .filter(Boolean);
-      }
-
-      async function sendCurrent(channel, target) {
+      async function sendEmail() {
         if (!currentReportId) return;
-
-        const sentFlagByTarget = {
-          student_email: "sent_student_email",
-          student_whatsapp: "sent_student_whatsapp",
-          sales_whatsapp: "sent_sales_whatsapp",
-        };
-        const wasAlreadySent = Boolean(rowsById[currentReportId]?.[sentFlagByTarget[target]]);
-        const studentPhone = document.getElementById("modalStudentPhone").value.trim();
-        const studentEmail = document.getElementById("modalStudentEmail").value.trim();
-        let recipient = "";
-
-        if (target === "student_email") {
-          recipient = studentEmail;
-        } else if (target === "student_whatsapp") {
-          recipient = studentPhone;
-        } else {
-          recipient = getConsultantRecipients();
-        }
-
-        if (!recipient || (Array.isArray(recipient) && recipient.length === 0)) {
-          setFeedback("Please enter the recipient before sending.", true);
-          return;
-        }
-
         const response = await fetch(`/reports/${currentReportId}/deliver`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            channel,
-            target,
-            recipient,
-            student_phone: studentPhone,
-            student_email: studentEmail,
+            recipient: document.getElementById("modalStudentEmail").value.trim(),
+            student_phone: document.getElementById("modalStudentPhone").value.trim(),
+            student_email: document.getElementById("modalStudentEmail").value.trim(),
           }),
         });
         const payload = await parseJson(response);
         if (!response.ok) {
-          setFeedback(payload.error || "Delivery failed.", true);
+          setFeedback(payload.error || "Email delivery failed.", true);
           return;
         }
-
         const reportId = currentReportId;
-        const row = rowsById[reportId];
-        if (target === "student_email") row.sent_student_email = true;
-        if (target === "student_whatsapp") row.sent_student_whatsapp = true;
-        if (target === "sales_whatsapp") row.sent_sales_whatsapp = true;
-        row.status = payload.status;
-
         await load();
-        const repeatedNotice = wasAlreadySent ? " This method had already been sent before, and it was sent again." : "";
-        if (payload.delivery_mode === "dry_run") {
-          openActionModal(reportId, `WhatsApp is in dry-run mode. The system simulated the send, but no real message was delivered to the phone.${repeatedNotice}`);
-        } else {
-          openActionModal(reportId, `Delivery completed successfully.${repeatedNotice}`);
-        }
+        openActionModal(reportId, payload.delivery_mode === "live" ? "Email sent successfully." : "Email queued successfully.");
       }
 
-      document.getElementById("phoneFilter").addEventListener("keydown", (event) => {
-        if (event.key === "Enter") load();
+      let searchTimer = null;
+      document.getElementById("phoneFilter").addEventListener("input", () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(load, 250);
       });
 
-      Promise.all([loadEducationalConsultants(), loadTeachers()]).then(load);
+      loadTeachers().then(load);
     </script>
   </body>
 </html>

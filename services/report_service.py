@@ -13,6 +13,7 @@ import models
 from database import REPORT_STATUSES
 
 from . import ServiceError
+from . import ai_client
 from .user_service import user_has_role
 
 ALLOWED_TRANSITIONS = {
@@ -23,10 +24,18 @@ ALLOWED_TRANSITIONS = {
 }
 
 DATASET_FILE = "dataset.json"
+COURSE_TYPES = {
+    "general_english": "General English",
+    "ielts": "IELTS",
+    "sat": "SAT",
+    "other": "Other",
+}
+CLASS_TYPES = {"Group Adult", "VIP Adult", "Group Kids", "VIP Kid"}
+MR_NAMES = {"hussam", "fouad", "mazen", "zain", "amin", "karam", "omar"}
 
 
 def generate_report(data, actor):
-    if not user_has_role(actor, "teacher", "admin"):
+    if not user_has_role(actor, "teacher", "admin", "manager"):
         raise ServiceError("Only teachers can create reports", 403)
 
     submission = _normalize_submission(data, actor)
@@ -45,7 +54,7 @@ def update_report(report_id, data, actor):
     report = get_report_for_user(report_id, actor, include_json=True)
     if report["status"] != "draft":
         raise ServiceError("Only draft reports can be edited", 400)
-    if not (user_has_role(actor, "admin") or actor["id"] == report["teacher_id"]):
+    if not (user_has_role(actor, "admin", "manager") or actor["id"] == report["teacher_id"]):
         raise ServiceError("You cannot edit this report", 403)
 
     submission = _normalize_submission(data, actor, existing_report=report)
@@ -84,7 +93,7 @@ def update_report(report_id, data, actor):
 
 def submit_report(report_id, actor):
     report = get_report_for_user(report_id, actor, include_json=False)
-    if not (user_has_role(actor, "admin") or actor["id"] == report["teacher_id"]):
+    if not (user_has_role(actor, "admin", "manager") or actor["id"] == report["teacher_id"]):
         raise ServiceError("You cannot submit this report", 403)
     return _transition_report(
         report_id,
@@ -95,7 +104,7 @@ def submit_report(report_id, actor):
 
 
 def approve_report(report_id, actor):
-    if not user_has_role(actor, "operation", "admin"):
+    if not user_has_role(actor, "operation", "admin", "manager"):
         raise ServiceError("Only operation can approve reports", 403)
     return _transition_report(
         report_id,
@@ -106,7 +115,7 @@ def approve_report(report_id, actor):
 
 
 def mark_report_delivered(report_id, actor, note):
-    if not user_has_role(actor, "operation", "admin"):
+    if not user_has_role(actor, "operation", "admin", "manager"):
         raise ServiceError("Only operation can mark reports as delivered", 403)
     return _transition_report(report_id, actor, "delivered", note)
 
@@ -159,10 +168,17 @@ def refresh_report_pdf(report_id):
     return models.get_report_detail(report_id, include_json=False)
 
 
-def list_reports_for_user(actor, phone=None, status=None, teacher_id=None):
+def list_reports_for_user(actor, phone=None, status=None, teacher_id=None, branch=None):
     normalized_teacher_id = _normalize_id(teacher_id)
     if actor.get("role") == "superadmin":
-        reports = models.list_reports(phone=phone, status=status, teacher_id=normalized_teacher_id)
+        reports = models.list_reports(phone=phone, status=status, teacher_id=normalized_teacher_id, branch=branch)
+    elif user_has_role(actor, "manager"):
+        reports = models.list_reports(
+            phone=phone,
+            status=status,
+            teacher_id=normalized_teacher_id,
+            branch=branch,
+        )
     elif user_has_role(actor, "admin", "operation"):
         reports = models.list_reports(
             phone=phone,
@@ -181,7 +197,7 @@ def list_reports_for_user(actor, phone=None, status=None, teacher_id=None):
 
 
 def search_students(phone_query, actor):
-    if not user_has_role(actor, "teacher", "operation", "admin", "sales"):
+    if not user_has_role(actor, "teacher", "operation", "admin", "sales", "manager"):
         raise ServiceError("Forbidden", 403)
     return models.search_students_by_phone(phone_query)
 
@@ -203,6 +219,7 @@ def build_report_document_context(data, report_meta=None, preview_mode=False):
     student = data.get("student", {})
     skill_scores = _collect_skill_scores(data)
     snapshot_scores = _collect_snapshot_scores(data)
+    performance = data.get("performance") or {}
     overall_score = _compute_average(list(skill_scores.values()) + list(snapshot_scores.values()))
     strongest_skill, weakest_skill = _get_strength_markers(skill_scores)
     sections = {str(item.get("title") or "").strip().upper(): str(item.get("content") or "").strip() for item in data.get("sections", [])}
@@ -212,6 +229,7 @@ def build_report_document_context(data, report_meta=None, preview_mode=False):
         "report_type_label": _format_report_type(data.get("report_type")),
         "issue_date": time.strftime("%d %B %Y"),
         "student": student,
+        "exam_score": performance.get("exam_score"),
         "report_meta": report_meta or {},
         "overall_score": overall_score,
         "performance_band": _score_band(overall_score),
@@ -237,7 +255,7 @@ def build_report_document_context(data, report_meta=None, preview_mode=False):
 
 
 def update_student_contact(report_id, actor, phone=None, email=None, sales_id=None, refresh_pdf=True):
-    if not user_has_role(actor, "operation", "admin"):
+    if not user_has_role(actor, "operation", "admin", "manager"):
         raise ServiceError("Only operation can update student contact details", 403)
 
     report = models.get_report_detail(report_id, include_json=False)
@@ -365,13 +383,51 @@ def _normalize_submission(data, actor, existing_report=None):
     elif isinstance(sales_id, str) and sales_id.isdigit():
         sales_id = int(sales_id)
 
-    branch = student.get("branch") or actor.get("branch")
+    course_type = str(student.get("course_type") or "").strip()
+    course = str(student.get("course") or "").strip()
+    if course_type not in COURSE_TYPES:
+        raise ServiceError("Course must be General English, IELTS, SAT, or Other", 400)
+    if course_type == "other":
+        if not course:
+            raise ServiceError("Course name is required when Other is selected", 400)
+    else:
+        course = COURSE_TYPES[course_type]
+
+    class_type = str(student.get("class_type") or "").strip()
+    if class_type not in CLASS_TYPES:
+        raise ServiceError("Class type is required", 400)
+
+    level = str(student.get("level") or "").strip()
+    if course_type != "general_english":
+        level = ""
+
+    branch = actor.get("branch")
     student["phone"] = phone
     student["name"] = name
     student["branch"] = branch
+    student["course"] = course
+    student["course_type"] = course_type
+    student["class_type"] = class_type
+    student["level"] = level
     student["email"] = str(student.get("email") or "").strip() or None
     student["sales_id"] = sales_id
-    student["teacher"] = actor["name"]
+    student["teacher"] = _display_person_name(actor["name"])
+
+    performance = dict(data.get("performance") or {})
+    exam_score = str(performance.get("exam_score") or "").strip()
+    if not exam_score:
+        raise ServiceError("Exam score is required", 400)
+    try:
+        exam_score_value = float(exam_score)
+    except ValueError as exc:
+        raise ServiceError("Exam score must be a number", 400) from exc
+    if exam_score_value < 0 or exam_score_value > 100:
+        raise ServiceError("Exam score must be between 0 and 100", 400)
+    performance["exam_score"] = (
+        str(int(exam_score_value))
+        if exam_score_value.is_integer()
+        else str(exam_score_value).rstrip("0").rstrip(".")
+    )
 
     report_type = (
         data.get("report_type")
@@ -384,6 +440,7 @@ def _normalize_submission(data, actor, existing_report=None):
 
     normalized = dict(data)
     normalized["student"] = student
+    normalized["performance"] = performance
     normalized["report_type"] = report_type
     return normalized
 
@@ -399,16 +456,6 @@ def _compose_report_payload(submission, ai_payload):
 
 
 def _generate_ai_report(data):
-    try:
-        from openai import OpenAI
-    except ImportError:
-        return _generate_local_report(data)
-
-    try:
-        client = OpenAI(api_key=_resolve_openai_api_key())
-    except ServiceError:
-        return _generate_local_report(data)
-
     student = data.get("student", {})
     name = student["name"]
 
@@ -427,6 +474,8 @@ STRICT RULES:
 - Fully developed paragraphs
 - Use ONLY provided data
 - Use this exact name: {name}
+- Every sentence must end with a single period.
+- Do not use ellipses or three-dot endings.
 - No hallucination
 - Return valid JSON only
 
@@ -435,15 +484,15 @@ Return JSON:
   "student": {json.dumps(student, ensure_ascii=False)},
   "report_type": "{data['report_type']}",
   "sections": [
-    {{"title": "INTRODUCTION", "content": "..."}},
-    {{"title": "ATTENDANCE & PERFORMANCE", "content": "..."}},
-    {{"title": "COMMUNICATION SKILLS", "content": "..."}},
-    {{"title": "VOCABULARY DEVELOPMENT", "content": "..."}},
-    {{"title": "GRAMMAR ANALYSIS", "content": "..."}},
-    {{"title": "READING & WRITING", "content": "..."}},
-    {{"title": "STRENGTHS", "content": "..."}},
-    {{"title": "AREAS FOR IMPROVEMENT", "content": "..."}},
-    {{"title": "FINAL RECOMMENDATION", "content": "..."}}
+    {{"title": "INTRODUCTION", "content": "Generated paragraph."}},
+    {{"title": "ATTENDANCE & PERFORMANCE", "content": "Generated paragraph."}},
+    {{"title": "COMMUNICATION SKILLS", "content": "Generated paragraph."}},
+    {{"title": "VOCABULARY DEVELOPMENT", "content": "Generated paragraph."}},
+    {{"title": "GRAMMAR ANALYSIS", "content": "Generated paragraph."}},
+    {{"title": "READING & WRITING", "content": "Generated paragraph."}},
+    {{"title": "STRENGTHS", "content": "Generated paragraph."}},
+    {{"title": "AREAS FOR IMPROVEMENT", "content": "Generated paragraph."}},
+    {{"title": "FINAL RECOMMENDATION", "content": "Generated paragraph."}}
   ]
 }}
 
@@ -452,23 +501,16 @@ DATA:
 """
 
     try:
-        response = client.chat.completions.create(
-            model=current_app.config.get("OPENAI_MODEL", "gpt-4o-mini"),
-            messages=[
-                {"role": "system", "content": "Return ONLY valid JSON."},
-                {"role": "user", "content": prompt},
-            ],
-        )
-        raw = response.choices[0].message.content.strip()
+        raw = ai_client.generate_structured_text(prompt)
         report = json.loads(raw[raw.find("{") : raw.rfind("}") + 1])
     except Exception as exc:
-        current_app.logger.warning("OpenAI report generation failed; using local report fallback: %s", exc)
+        current_app.logger.warning("Remote text generation failed; using local report fallback: %s", exc)
         return _generate_local_report(data)
 
     for section in report.get("sections", []):
         content = section.get("content", "")
         content = content.replace("the student", name).replace("The student", name)
-        section["content"] = content
+        section["content"] = _normalize_report_content(content)
 
     report["student"] = dict(student)
     report["report_type"] = data["report_type"]
@@ -479,6 +521,8 @@ def _generate_local_report(data):
     student = data.get("student", {})
     name = str(student.get("name") or "Student").strip()
     report_type = data.get("report_type") or "midterm"
+    course = str(student.get("course") or "the selected course").strip()
+    class_type = str(student.get("class_type") or "the assigned class type").strip()
     performance = data.get("performance") or {}
     skills = data.get("skills") or {}
     input_sections = data.get("sections") or {}
@@ -490,6 +534,7 @@ def _generate_local_report(data):
 
     attendance = _score_phrase(performance.get("attendance"))
     assignment = _score_phrase(performance.get("assignment"))
+    exam_score = str(performance.get("exam_score") or "").strip()
     communication_notes = _join_notes(input_sections.get("communication"))
     vocabulary_notes = _join_notes(input_sections.get("vocabulary"))
     grammar_notes = _join_notes(input_sections.get("grammar"))
@@ -502,14 +547,15 @@ def _generate_local_report(data):
             "title": "INTRODUCTION",
             "content": (
                 f"{name} has completed the current {_format_report_type(report_type).lower()} cycle "
-                f"with an overall performance average of {overall_score}/10. The report reflects classroom "
-                f"performance, submitted work, and the core language skill scores provided by the teacher."
+                f"for {course} in a {class_type} class with an overall performance average of {overall_score}/10. "
+                "The report reflects classroom performance, submitted work, and the core language skill scores provided by the teacher."
             ),
         },
         {
             "title": "ATTENDANCE & PERFORMANCE",
             "content": (
-                f"{name}'s attendance is currently {attendance}, while assignment completion is {assignment}. "
+                f"{name}'s attendance is currently {attendance}, assignment completion is {assignment}, "
+                f"and the exam score is {exam_score}/100. "
                 "These indicators should be monitored together because consistent attendance and regular "
                 "assignment practice strongly support measurable language progress."
             ),
@@ -560,6 +606,9 @@ def _generate_local_report(data):
         },
     ]
 
+    for section in sections:
+        section["content"] = _normalize_report_content(section.get("content", ""))
+
     return {
         "student": dict(student),
         "report_type": report_type,
@@ -589,6 +638,37 @@ def _join_notes(items):
         return ""
     notes = [str(item or "").strip() for item in items]
     return " ".join(note for note in notes if note)
+
+
+def _normalize_report_content(content):
+    text = str(content or "").strip()
+    if not text:
+        return ""
+
+    text = text.replace("…", ".")
+    text = re.sub(r"\.{2,}", ".", text)
+    text = re.sub(r"[!?](?=\s|$)", ".", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return _ensure_period(text)
+
+
+def _display_person_name(name):
+    clean_name = str(name or "").strip()
+    if not clean_name:
+        return ""
+    if clean_name.lower().startswith(("mr. ", "ms. ")):
+        return clean_name
+    first_name = clean_name.split()[0].lower()
+    prefix = "Mr." if first_name in MR_NAMES else "Ms."
+    return f"{prefix} {clean_name}"
+
+
+def _ensure_period(text):
+    text = str(text or "").strip()
+    if not text:
+        return ""
+    text = text.rstrip(" .!?…")
+    return f"{text}."
 
 
 def generate_pdf_bytes(data):
@@ -834,13 +914,6 @@ def _build_public_pdf_url(report_id):
     return f"{base_url.rstrip('/')}/storage/reports/{report_id}/pdf"
 
 
-def _resolve_openai_api_key():
-    api_key = current_app.config.get("OPENAI_API_KEY") or os.environ.get("OPENAI_API_KEY")
-    if not api_key:
-        raise ServiceError("OPENAI_API_KEY is not configured", 500)
-    return api_key
-
-
 def _append_dataset_entry(input_data, output_data):
     entry = {"input": input_data, "output": output_data}
     try:
@@ -859,15 +932,14 @@ def _append_dataset_entry(input_data, output_data):
 
 def _serialize_listing(row):
     report = dict(row)
-    report["has_evaluation"] = bool(report.get("has_evaluation"))
     report["sent_student_email"] = bool(report.get("sent_student_email"))
-    report["sent_student_whatsapp"] = bool(report.get("sent_student_whatsapp"))
-    report["sent_sales_whatsapp"] = bool(report.get("sent_sales_whatsapp"))
     return report
 
 
 def _can_view_report(actor, report):
     if actor.get("role") == "superadmin":
+        return True
+    if user_has_role(actor, "manager"):
         return True
     if user_has_role(actor, "admin", "operation"):
         return report.get("student_branch") == actor.get("branch") or report.get("teacher_branch") == actor.get("branch")
@@ -967,9 +1039,9 @@ def _add_cover_page(document, student, report_type_label, issued_on, overall_sco
     meta_entries = [
         ("Student", student.get("name") or "-"),
         ("Teacher", student.get("teacher") or "-"),
-        ("Branch", student.get("branch") or "-"),
-        ("Level", student.get("level") or "-"),
         ("Course", student.get("course") or "-"),
+        ("Level", student.get("level") or "-"),
+        ("Class Type", student.get("class_type") or "-"),
         ("Issue Date", issued_on),
     ]
     for index, (label, value) in enumerate(meta_entries):
@@ -1253,9 +1325,9 @@ def _extract_section_content(data, title):
 def _shorten_text(text, limit):
     text = " ".join(str(text or "").split())
     if len(text) <= limit:
-        return text
+        return _normalize_report_content(text)
     trimmed = text[: limit - 1].rsplit(" ", 1)[0]
-    return f"{trimmed}..."
+    return _ensure_period(trimmed)
 
 
 def _derive_next_steps(data, strongest_skill, weakest_skill):

@@ -37,24 +37,25 @@
   </div>
 
   <div style="display: flex; gap: 14px; flex-wrap: wrap">
-    {% if role in ['teacher', 'superadmin'] %}
+    {% if role in ['teacher', 'manager', 'superadmin'] %}
     <a href="/teacher" style="color: #ffffff; text-decoration: none">Teacher</a>
-    {% endif %} {% if role in ['operation', 'superadmin'] %}
+    {% endif %} {% if role in ['operation', 'manager', 'superadmin'] %}
     <a href="/operation" style="color: #ffffff; text-decoration: none"
       >Operation</a
     >
-    {% endif %} {% if role in ['admin', 'superadmin'] %}
+    {% endif %} {% if role in ['admin', 'manager', 'superadmin'] %}
     <a href="/admin" style="color: #ffffff; text-decoration: none">Admin</a>
+    {% endif %} {% if role == 'superadmin' %}
     <a href="/admin_teachers" style="color: #ffffff; text-decoration: none"
-      >Users</a
+      >Owner Users</a
     >
-    {% endif %} {% if role in ['sales', 'superadmin'] %}
+    {% endif %} {% if role == 'sales' %}
     <a href="/sales" style="color: #ffffff; text-decoration: none">Educational Consultant</a>
     {% endif %}
   </div>
 
   <div style="display: flex; gap: 14px; align-items: center">
-    <span>{{ user_name }}{% if user_branch %} | {{ user_branch }}{% endif %}</span>
+    <span>{{ display_user_name or user_name }}{% if user_branch %} | {{ user_branch }}{% endif %}</span>
     <a href="/logout" style="color: #fca311; text-decoration: none">Logout</a>
   </div>
 </div>

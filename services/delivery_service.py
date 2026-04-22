@@ -1,7 +1,7 @@
-import json
 import os
-import urllib.request
 from datetime import datetime
+
+from flask import current_app, render_template
 
 import models
 from mail_service import send_email
@@ -13,16 +13,14 @@ from .user_service import user_has_role
 
 DELIVERY_TARGETS = {
     "student_email": {"channel": "email"},
-    "student_whatsapp": {"channel": "whatsapp"},
-    "sales_whatsapp": {"channel": "whatsapp"},
 }
 
 
 def send(report_id, channel, actor, recipient=None, delivery_target=None):
-    if not user_has_role(actor, "operation", "admin"):
+    if not user_has_role(actor, "operation", "admin", "manager"):
         raise ServiceError("Only operation can send reports", 403)
-    if channel not in {"email", "whatsapp"}:
-        raise ServiceError("Unsupported delivery channel", 400)
+    if channel != "email":
+        raise ServiceError("Only email delivery is supported", 400)
     if delivery_target not in DELIVERY_TARGETS:
         raise ServiceError("Unsupported delivery target", 400)
     if DELIVERY_TARGETS[delivery_target]["channel"] != channel:
@@ -31,8 +29,6 @@ def send(report_id, channel, actor, recipient=None, delivery_target=None):
     report = report_service.get_report_for_user(report_id, actor, include_json=True)
     if report["status"] not in {"approved", "delivered"}:
         raise ServiceError("Only approved or delivered reports can be sent", 400)
-    if channel != "email" and not report.get("pdf_path"):
-        raise ServiceError("Report PDF is not available", 400)
     recipients = _normalize_recipients(
         recipient or _default_recipient(report, channel),
         channel=channel,
@@ -53,12 +49,7 @@ def send(report_id, channel, actor, recipient=None, delivery_target=None):
         )
 
         try:
-            if channel == "email":
-                _send_email_delivery(report, single_recipient)
-            else:
-                outcome = _send_whatsapp_delivery(report, single_recipient)
-                if outcome == "dry_run":
-                    delivery_mode = "dry_run"
+            _send_email_delivery(report, single_recipient)
         except Exception as exc:
             models.update_delivery_log(log_id, "failed", str(exc), None)
             errors.append(f"{single_recipient}: {exc}")
@@ -104,60 +95,56 @@ def _send_email_delivery(report, recipient):
     if not pdf_bytes:
         raise RuntimeError("PDF attachment is not available")
 
+    text_body = _build_text_email_body(report, pdf_url)
+    html_body = _build_html_email_body(report, pdf_url)
+
     send_email(
         to_email=recipient,
         subject="Student Progress Report",
-        body=(
-            f"Hello,\n\n"
-            f"Your academic report for {student_name} is attached as a PDF.\n"
-            f"If the attachment is unavailable in your email app, you can also view it here:\n{pdf_url}\n\n"
-            f"Regards."
-        ),
+        body=text_body,
         file_bytes=pdf_bytes,
         filename=filename,
+        html_body=html_body,
     )
 
 
-def _send_whatsapp_delivery(report, recipient):
-    api_url = report_service.current_app.config.get("WHATSAPP_API_URL")
-    token = report_service.current_app.config.get("WHATSAPP_API_TOKEN")
-    dry_run = report_service.current_app.config.get("WHATSAPP_DRY_RUN", True)
-
-    payload = {
-        "to": recipient,
-        "type": "document",
-        "document": {
-            "link": report["pdf_path"],
-            "filename": f"report_{report['id']}.pdf",
-        },
-        "metadata": {
-            "report_id": report["id"],
-            "student_phone": report["student_id"],
-        },
-    }
-
-    if dry_run or not api_url:
-        return "dry_run"
-
-    request = urllib.request.Request(
-        api_url,
-        data=json.dumps(payload).encode("utf-8"),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {token}",
-        },
-        method="POST",
+def _build_text_email_body(report, pdf_url=None):
+    student_name = report.get("student_name") or "the student"
+    return (
+        f"Dear Parent/Guardian,\n\n"
+        f"We are pleased to share the latest academic progress report for {student_name}.\n"
+        f"The full report is attached as a PDF for your review and records.\n\n"
+        f"View report: {pdf_url or report_service._build_public_pdf_url(report['id'])}\n\n"
+        f"iEnglish Institute"
     )
-    with urllib.request.urlopen(request, timeout=20) as response:
-        if response.status >= 400:
-            raise RuntimeError(f"WhatsApp API responded with {response.status}")
-    return "live"
+
+
+def _build_html_email_body(report, pdf_url=None):
+    report_json = report.get("report_json") or {}
+    student = report_json.get("student") or {}
+    public_base = (current_app.config.get("PUBLIC_BASE_URL") or "").rstrip("/")
+    logo_url = os.environ.get("EMAIL_LOGO_URL")
+    if not logo_url and public_base:
+        logo_url = f"{public_base}/static/logo.png"
+    if not logo_url:
+        logo_url = "https://ienglish-crm-taki.com/static/logo.png"
+
+    report_type = report.get("report_type") or report_json.get("report_type") or ""
+    report_type_label = "Final" if report_type == "final" else "Midterm"
+    return render_template(
+        "email_report_body.html",
+        logo_url=logo_url,
+        student_name=report.get("student_name") or student.get("name") or "Student",
+        report_type_label=report_type_label,
+        course=report.get("course") or student.get("course") or "-",
+        class_type=student.get("class_type") or "-",
+        teacher_name=report.get("teacher_name") or student.get("teacher") or "-",
+        view_url=pdf_url or report_service._build_public_pdf_url(report["id"]),
+    )
 
 
 def _default_recipient(report, channel):
-    if channel == "email":
-        return report.get("student_email")
-    return report["student_id"]
+    return report.get("student_email")
 
 
 def _normalize_recipients(recipient, channel=None):
@@ -171,43 +158,6 @@ def _normalize_recipients(recipient, channel=None):
     recipients = []
     for value in raw_values:
         normalized = str(value).strip()
-        if channel == "whatsapp":
-            normalized = _normalize_whatsapp_number(normalized)
         if normalized and normalized not in recipients:
             recipients.append(normalized)
     return recipients
-
-
-def _normalize_whatsapp_number(number):
-    cleaned = str(number or "").strip()
-    if not cleaned:
-        return ""
-
-    cleaned = cleaned.replace(" ", "").replace("-", "").replace("(", "").replace(")", "")
-
-    if cleaned.startswith("00"):
-        cleaned = "+" + cleaned[2:]
-
-    if cleaned.startswith("+"):
-        digits = "+" + "".join(ch for ch in cleaned[1:] if ch.isdigit())
-    else:
-        digits_only = "".join(ch for ch in cleaned if ch.isdigit())
-        if digits_only.startswith("971"):
-            digits = "+" + digits_only
-        elif digits_only.startswith("05") and len(digits_only) == 10:
-            digits = "+971" + digits_only[1:]
-        elif digits_only.startswith("5") and len(digits_only) == 9:
-            digits = "+971" + digits_only
-        else:
-            raise ServiceError(
-                f"WhatsApp number '{number}' must be in international format like +9715XXXXXXXX or a valid UAE mobile number",
-                400,
-            )
-
-    if not digits.startswith("+") or len(digits) < 11:
-        raise ServiceError(
-            f"WhatsApp number '{number}' is invalid",
-            400,
-        )
-
-    return digits

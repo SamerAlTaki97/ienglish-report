@@ -22,14 +22,13 @@
 
       <div class="filters">
         <input id="phoneFilter" placeholder="Search by student phone" />
-        <select id="statusFilter">
+        <select id="statusFilter" onchange="load()">
           <option value="">All statuses</option>
           <option value="draft">Draft</option>
           <option value="pending_operation">Pending operation</option>
           <option value="approved">Approved</option>
           <option value="delivered">Delivered</option>
         </select>
-        <button onclick="load()">Search</button>
       </div>
 
       <table>
@@ -77,6 +76,12 @@
           `;
         });
       }
+
+      let searchTimer = null;
+      document.getElementById("phoneFilter").addEventListener("input", () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(load, 250);
+      });
 
       load();
     </script>
