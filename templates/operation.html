@@ -16,6 +16,8 @@
       .btn-primary { background: #14213d; color: white; border-color: #14213d; }
       .btn-blue { background: #2563eb; color: white; border-color: #2563eb; }
       .btn-green { background: #16a34a; color: white; border-color: #16a34a; }
+      .btn-red { background: #dc2626; color: white; border-color: #dc2626; }
+      .btn-danger { background: #991b1b; color: white; border-color: #991b1b; }
       .btn-outline { background: white; color: #0f172a; border-color: #cbd5e1; }
       .btn-disabled { background: #f8fafc; color: #64748b; border-color: #e2e8f0; cursor: not-allowed; }
       .status { display: inline-flex; align-items: center; padding: 5px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; text-transform: capitalize; }
@@ -23,6 +25,7 @@
       .pending_operation { background: #fef3c7; color: #92400e; }
       .approved { background: #dbeafe; color: #1d4ed8; }
       .delivered { background: #dcfce7; color: #166534; }
+      .rejected { background: #fee2e2; color: #991b1b; }
       .table-wrap { border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; }
       table { width: 100%; border-collapse: collapse; }
       th, td { padding: 13px 12px; border-bottom: 1px solid #eef2f7; text-align: left; vertical-align: middle; }
@@ -83,6 +86,7 @@
           <option value="pending_operation">Pending operation</option>
           <option value="approved">Approved</option>
           <option value="delivered">Delivered</option>
+          <option value="rejected">Not accepted</option>
         </select>
       </div>
 
@@ -120,7 +124,7 @@
           <button class="btn-outline" type="button" onclick="closeModal()">Close</button>
         </div>
         <div class="modal-body">
-          <div class="panel">
+          <div class="panel" id="contactPanel">
             <h3>Student Contact</h3>
             <div class="field-grid">
               <div class="field">
@@ -139,21 +143,38 @@
                   <button id="saveEmailBtn" class="btn-blue" type="button" onclick="saveEmail()">Save Email</button>
                 </div>
               </div>
+              <div class="field">
+                <label>Educational Consultant</label>
+                <select id="modalSalesId"></select>
+                <div class="field-actions">
+                  <button id="editSalesBtn" class="btn-outline" type="button" onclick="editContactField('sales')">Edit</button>
+                  <button id="saveSalesBtn" class="btn-blue" type="button" onclick="saveSales()">Save Consultant</button>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="panel">
-            <h3>Approval</h3>
+          <div class="panel" id="decisionPanel">
+            <h3>Decision</h3>
             <div class="button-row">
-              <button id="approveBtn" class="btn-primary" type="button" onclick="approveCurrentReport()">Approve Report</button>
+              <button id="approveBtn" class="btn-primary" type="button" onclick="approveCurrentReport()">Accept Report</button>
+              <button id="rejectBtn" class="btn-red" type="button" onclick="rejectCurrentReport()">Not Accepted</button>
             </div>
           </div>
 
-          <div class="panel">
+          <div class="panel" id="emailPanel">
             <h3>Email Delivery</h3>
             <div id="emailState" class="delivery-pending"></div>
             <div class="button-row">
               <button id="sendEmailBtn" class="btn-green" type="button" onclick="sendEmail()">Send Email</button>
+            </div>
+          </div>
+
+          <div class="panel" id="deletePanel">
+            <h3>Delete From Data</h3>
+            <div class="delivery-pending">This removes the report and its PDF, tracking, and delivery records from the database.</div>
+            <div class="button-row">
+              <button id="deleteReportBtn" class="btn-danger" type="button" onclick="deleteCurrentReport()">Delete Report</button>
             </div>
           </div>
 
@@ -165,7 +186,7 @@
     <script>
       let rowsById = {};
       let currentReportId = null;
-      let contactEditState = { phone: true, email: true };
+      let contactEditState = { phone: true, email: true, sales: true };
 
       function parseJson(response) {
         return response.text().then((raw) => {
@@ -230,7 +251,7 @@
       }
 
       function handleBranchChange() {
-        loadTeachers().then(load);
+        Promise.all([loadTeachers(), loadSalesConsultants()]).then(load);
       }
 
       function openActionModal(reportId, feedbackMessage = "", isError = false) {
@@ -242,7 +263,8 @@
         document.getElementById("modalSubtitle").innerText = `${row.student_name || "Student"} | ${row.teacher_name || "-"} | ${row.report_type}`;
         document.getElementById("modalStudentPhone").value = row.student_id || "";
         document.getElementById("modalStudentEmail").value = row.student_email || "";
-        contactEditState = { phone: !row.student_id, email: !row.student_email };
+        document.getElementById("modalSalesId").value = row.sales_id || "";
+        contactEditState = { phone: !row.student_id, email: !row.student_email, sales: !row.sales_id };
         setFeedback(feedbackMessage, isError);
         renderModalState();
         document.getElementById("actionModal").classList.add("open");
@@ -268,8 +290,16 @@
         if (!row) return;
 
         const canApprove = row.status === "pending_operation";
+        const canReject = row.status === "pending_operation";
         const canSend = (row.status === "approved" || row.status === "delivered") && Boolean(row.student_email);
+        const contactVisible = row.status === "approved" || row.status === "delivered";
+        const rejected = row.status === "rejected";
+        document.getElementById("contactPanel").style.display = contactVisible ? "block" : "none";
+        document.getElementById("decisionPanel").style.display = canApprove || canReject ? "block" : "none";
+        document.getElementById("emailPanel").style.display = contactVisible ? "block" : "none";
+        document.getElementById("deletePanel").style.display = rejected ? "block" : "none";
         document.getElementById("approveBtn").style.display = canApprove ? "inline-flex" : "none";
+        document.getElementById("rejectBtn").style.display = canReject ? "inline-flex" : "none";
         document.getElementById("sendEmailBtn").disabled = !canSend;
         document.getElementById("sendEmailBtn").className = canSend ? "btn-green" : "btn-disabled";
         document.getElementById("sendEmailBtn").innerText = row.sent_student_email ? "Send Again" : "Send Email";
@@ -279,24 +309,25 @@
           : (row.student_email ? "Ready to send by email." : "Save student email before sending.");
         renderContactFieldState("phone");
         renderContactFieldState("email");
+        renderContactFieldState("sales");
       }
 
       function editContactField(field) {
         contactEditState[field] = true;
         renderContactFieldState(field);
-        const input = document.getElementById(field === "phone" ? "modalStudentPhone" : "modalStudentEmail");
+        const input = document.getElementById(field === "phone" ? "modalStudentPhone" : field === "email" ? "modalStudentEmail" : "modalSalesId");
         input.focus();
-        input.select();
+        if (input.select) input.select();
       }
 
       function renderContactFieldState(field) {
-        const isPhone = field === "phone";
-        const input = document.getElementById(isPhone ? "modalStudentPhone" : "modalStudentEmail");
-        const editBtn = document.getElementById(isPhone ? "editPhoneBtn" : "editEmailBtn");
-        const saveBtn = document.getElementById(isPhone ? "savePhoneBtn" : "saveEmailBtn");
+        const input = document.getElementById(field === "phone" ? "modalStudentPhone" : field === "email" ? "modalStudentEmail" : "modalSalesId");
+        const editBtn = document.getElementById(field === "phone" ? "editPhoneBtn" : field === "email" ? "editEmailBtn" : "editSalesBtn");
+        const saveBtn = document.getElementById(field === "phone" ? "savePhoneBtn" : field === "email" ? "saveEmailBtn" : "saveSalesBtn");
         const hasValue = input.value.trim() !== "";
         const editing = contactEditState[field] || !hasValue;
         input.readOnly = !editing;
+        input.disabled = field === "sales" && !editing;
         editBtn.style.display = hasValue && !editing ? "inline-flex" : "none";
         saveBtn.style.display = editing ? "inline-flex" : "none";
       }
@@ -343,6 +374,28 @@
         saveContactField("email");
       }
 
+      async function saveSales() {
+        if (!currentReportId) return;
+        const value = document.getElementById("modalSalesId").value;
+        if (!value) {
+          setFeedback("Select an educational consultant before saving.", true);
+          return;
+        }
+        const response = await fetch(`/reports/${currentReportId}/contact`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sales_id: value }),
+        });
+        const payload = await parseJson(response);
+        if (!response.ok) {
+          setFeedback(payload.error || "Unable to save educational consultant.", true);
+          return;
+        }
+        const reportId = currentReportId;
+        contactEditState.sales = false;
+        await refreshCurrentReport(reportId, "Educational consultant saved successfully.");
+      }
+
       async function approveCurrentReport() {
         if (!currentReportId) return;
         const response = await fetch(`/reports/${currentReportId}/approve`, { method: "POST" });
@@ -354,6 +407,34 @@
         const reportId = currentReportId;
         await load();
         openActionModal(reportId, "Report approved.");
+      }
+
+      async function rejectCurrentReport() {
+        if (!currentReportId) return;
+        if (!confirm("Mark this report as not accepted?")) return;
+        const response = await fetch(`/reports/${currentReportId}/reject`, { method: "POST" });
+        const payload = await parseJson(response);
+        if (!response.ok) {
+          setFeedback(payload.error || "Unable to mark report as not accepted.", true);
+          return;
+        }
+        const reportId = currentReportId;
+        await load();
+        openActionModal(reportId, "Report marked as not accepted.");
+      }
+
+      async function deleteCurrentReport() {
+        if (!currentReportId) return;
+        if (!confirm("Delete this report permanently from the database?")) return;
+        const reportId = currentReportId;
+        const response = await fetch(`/reports/${reportId}`, { method: "DELETE" });
+        const payload = await parseJson(response);
+        if (!response.ok) {
+          setFeedback(payload.error || "Unable to delete report.", true);
+          return;
+        }
+        closeModal();
+        await load();
       }
 
       async function sendEmail() {
@@ -383,7 +464,20 @@
         searchTimer = setTimeout(load, 250);
       });
 
-      loadTeachers().then(load);
+      async function loadSalesConsultants() {
+        const branchFilter = document.getElementById("branchFilter");
+        const query = new URLSearchParams({ role: "sales" });
+        if (branchFilter && branchFilter.value) query.set("branch", branchFilter.value);
+        const response = await fetch(`/api/users?${query.toString()}`);
+        const users = await response.json();
+        const select = document.getElementById("modalSalesId");
+        select.innerHTML = '<option value="">Select consultant</option>';
+        users.forEach((user) => {
+          select.innerHTML += `<option value="${user.id}">${user.name}</option>`;
+        });
+      }
+
+      Promise.all([loadTeachers(), loadSalesConsultants()]).then(load);
     </script>
   </body>
 </html>

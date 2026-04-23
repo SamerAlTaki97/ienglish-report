@@ -116,4 +116,34 @@
       });
     }).observe(document.documentElement, { childList: true, subtree: true });
   })();
+
+  (function logoutWhenWindowCloses() {
+    if (!navigator.sendBeacon) return;
+
+    window.__internalNavigation = false;
+
+    document.addEventListener("click", (event) => {
+      const link = event.target.closest && event.target.closest("a[href]");
+      if (!link) return;
+      try {
+        const nextUrl = new URL(link.href, window.location.href);
+        if (nextUrl.origin === window.location.origin) {
+          window.__internalNavigation = true;
+        }
+      } catch (error) {}
+    });
+
+    document.addEventListener("submit", () => {
+      window.__internalNavigation = true;
+    });
+
+    window.addEventListener("pageshow", () => {
+      window.__internalNavigation = false;
+    });
+
+    window.addEventListener("pagehide", () => {
+      if (window.__internalNavigation) return;
+      navigator.sendBeacon("/logout-beacon", new Blob(["1"], { type: "text/plain" }));
+    });
+  })();
 </script>

@@ -9,10 +9,10 @@
       .container { max-width: 1220px; margin: 32px auto; background: white; padding: 24px; border-radius: 12px; }
       .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
       .card { padding: 16px; border-radius: 10px; color: white; font-weight: bold; }
-      .draft { background: #475569; }
       .pending_operation { background: #d97706; }
       .approved { background: #2563eb; }
       .delivered { background: #16a34a; }
+      .rejected { background: #991b1b; }
       .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
       .search-wrap input { min-width: 230px; }
       input, select, button { padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; }
@@ -28,10 +28,10 @@
       <h1>Admin Operation Monitor</h1>
 
       <div class="stats">
-        <div class="card draft">Draft: <span id="draftCount">0</span></div>
         <div class="card pending_operation">Pending Operation: <span id="pendingCount">0</span></div>
         <div class="card approved">Approved: <span id="approvedCount">0</span></div>
         <div class="card delivered">Delivered: <span id="deliveredCount">0</span></div>
+        <div class="card rejected">Not Accepted: <span id="rejectedCount">0</span></div>
       </div>
 
       <div class="filters">
@@ -50,10 +50,10 @@
         {% endif %}
         <select id="statusFilter" onchange="load()">
           <option value="">All statuses</option>
-          <option value="draft">Draft</option>
           <option value="pending_operation">Pending operation</option>
           <option value="approved">Approved</option>
           <option value="delivered">Delivered</option>
+          <option value="rejected">Not accepted</option>
         </select>
       </div>
 
@@ -99,7 +99,7 @@
       }
 
       function render() {
-        const counts = { draft: 0, pending_operation: 0, approved: 0, delivered: 0 };
+        const counts = { pending_operation: 0, approved: 0, delivered: 0, rejected: 0 };
         const tbody = document.getElementById("tableBody");
         tbody.innerHTML = "";
         allRows.forEach((row) => {
@@ -122,10 +122,10 @@
             </tr>
           `;
         });
-        document.getElementById("draftCount").innerText = counts.draft;
         document.getElementById("pendingCount").innerText = counts.pending_operation;
         document.getElementById("approvedCount").innerText = counts.approved;
         document.getElementById("deliveredCount").innerText = counts.delivered;
+        document.getElementById("rejectedCount").innerText = counts.rejected;
       }
 
       async function loadTeachers() {

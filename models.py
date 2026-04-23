@@ -284,6 +284,36 @@ def update_report_pdf_url(report_id, pdf_url):
     conn.close()
 
 
+def delete_report(report_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    report = cursor.execute(
+        "SELECT student_id FROM reports WHERE id=?",
+        (report_id,),
+    ).fetchone()
+    if not report:
+        conn.close()
+        return False
+
+    student_id = report["student_id"]
+    cursor.execute("DELETE FROM reports WHERE id=?", (report_id,))
+    if student_id:
+        still_used = cursor.execute(
+            "SELECT 1 FROM reports WHERE student_id=? LIMIT 1",
+            (student_id,),
+        ).fetchone()
+        if not still_used:
+            cursor.execute("DELETE FROM students WHERE phone=?", (student_id,))
+
+    _reset_autoincrement(cursor, "reports")
+    _reset_autoincrement(cursor, "report_tracking")
+    _reset_autoincrement(cursor, "delivery_logs")
+    _reset_autoincrement(cursor, "evaluations")
+    conn.commit()
+    conn.close()
+    return True
+
+
 def get_report(report_id, include_json=False):
     conn = get_connection()
     row = conn.execute("SELECT * FROM reports WHERE id=?", (report_id,)).fetchone()
@@ -359,6 +389,7 @@ def list_reports(phone=None, status=None, teacher_id=None, sales_id=None, create
             COALESCE(s.email, json_extract(r.report_json, '$.student.email')) AS student_email,
             COALESCE(s.sales_id, CAST(json_extract(r.report_json, '$.student.sales_id') AS INTEGER)) AS sales_id,
             teacher.name AS teacher_name,
+            teacher.branch AS teacher_branch,
             sales.name AS sales_name,
             creator.name AS created_by_name,
             (
@@ -743,3 +774,14 @@ def _deserialize_json(raw_value):
         return json.loads(raw_value)
     except (TypeError, json.JSONDecodeError):
         return {}
+
+
+def _reset_autoincrement(cursor, table_name):
+    max_id = cursor.execute(f"SELECT COALESCE(MAX(id), 0) FROM {table_name}").fetchone()[0]
+    if max_id:
+        cursor.execute(
+            "UPDATE sqlite_sequence SET seq=? WHERE name=?",
+            (max_id, table_name),
+        )
+    else:
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name=?", (table_name,))

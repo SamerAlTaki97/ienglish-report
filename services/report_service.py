@@ -17,10 +17,11 @@ from . import ai_client
 from .user_service import user_has_role
 
 ALLOWED_TRANSITIONS = {
-    "draft": "pending_operation",
-    "pending_operation": "approved",
-    "approved": "delivered",
-    "delivered": None,
+    "draft": {"pending_operation"},
+    "pending_operation": {"approved", "rejected"},
+    "approved": {"delivered"},
+    "delivered": set(),
+    "rejected": set(),
 }
 
 DATASET_FILE = "dataset.json"
@@ -114,10 +115,32 @@ def approve_report(report_id, actor):
     )
 
 
+def reject_report(report_id, actor):
+    if not user_has_role(actor, "operation", "admin", "manager"):
+        raise ServiceError("Only operation can reject reports", 403)
+    return _transition_report(
+        report_id,
+        actor,
+        "rejected",
+        "Operation marked report as not accepted",
+    )
+
+
 def mark_report_delivered(report_id, actor, note):
     if not user_has_role(actor, "operation", "admin", "manager"):
         raise ServiceError("Only operation can mark reports as delivered", 403)
     return _transition_report(report_id, actor, "delivered", note)
+
+
+def delete_report(report_id, actor):
+    if not user_has_role(actor, "operation", "admin", "manager"):
+        raise ServiceError("Only operation can delete reports", 403)
+    report = get_report_for_user(report_id, actor, include_json=False)
+    if report["status"] not in {"pending_operation", "rejected"}:
+        raise ServiceError("Only pending or not accepted reports can be deleted", 400)
+    if not models.delete_report(report_id):
+        raise ServiceError("Report not found", 404)
+    return {"id": report_id, "deleted": True}
 
 
 def get_report_for_user(report_id, actor, include_json=True):
@@ -168,7 +191,7 @@ def refresh_report_pdf(report_id):
     return models.get_report_detail(report_id, include_json=False)
 
 
-def list_reports_for_user(actor, phone=None, status=None, teacher_id=None, branch=None):
+def list_reports_for_user(actor, phone=None, status=None, teacher_id=None, branch=None, workflow_only=False):
     normalized_teacher_id = _normalize_id(teacher_id)
     if actor.get("role") == "superadmin":
         reports = models.list_reports(phone=phone, status=status, teacher_id=normalized_teacher_id, branch=branch)
@@ -193,6 +216,12 @@ def list_reports_for_user(actor, phone=None, status=None, teacher_id=None, branc
     else:
         raise ServiceError("Forbidden", 403)
 
+    if workflow_only:
+        reports = [
+            row for row in reports
+            if row.get("status") in {"pending_operation", "approved", "delivered", "rejected"}
+        ]
+
     return [_serialize_listing(row) for row in reports]
 
 
@@ -210,13 +239,18 @@ def generate_chart(data):
     return create_chart_bytes(data)
 
 
-def render_report_html(data, preview_mode=False, report_meta=None):
+def render_report_html(data, preview_mode=False, report_meta=None, template_context=None):
     context = build_report_document_context(data, report_meta=report_meta, preview_mode=preview_mode)
+    if template_context:
+        context.update(template_context)
     return render_template("report_document.html", **context)
 
 
 def build_report_document_context(data, report_meta=None, preview_mode=False):
-    student = data.get("student", {})
+    student = dict(data.get("student", {}) or {})
+    student["name"] = _format_name_words(student.get("name"))
+    if student.get("teacher"):
+        student["teacher"] = _display_person_name(student.get("teacher"))
     skill_scores = _collect_skill_scores(data)
     snapshot_scores = _collect_snapshot_scores(data)
     performance = data.get("performance") or {}
@@ -355,8 +389,8 @@ def _transition_report(report_id, actor, next_status, note):
         raise ServiceError("Report not found", 404)
 
     current_status = report["status"]
-    expected_next = ALLOWED_TRANSITIONS.get(current_status)
-    if expected_next != next_status:
+    allowed_next = ALLOWED_TRANSITIONS.get(current_status, set())
+    if next_status not in allowed_next:
         raise ServiceError(
             f"Invalid report transition: {current_status} -> {next_status}",
             400,
@@ -370,7 +404,7 @@ def _transition_report(report_id, actor, next_status, note):
 def _normalize_submission(data, actor, existing_report=None):
     student = dict(data.get("student") or {})
     phone = str(student.get("phone") or "").strip() or None
-    name = str(student.get("name") or "").strip()
+    name = _format_name_words(str(student.get("name") or "").strip())
 
     if not name:
         raise ServiceError("Student name is required", 400)
@@ -657,10 +691,19 @@ def _display_person_name(name):
     if not clean_name:
         return ""
     if clean_name.lower().startswith(("mr. ", "ms. ")):
-        return clean_name
+        prefix, rest = clean_name.split(" ", 1)
+        return f"{prefix[:1].upper()}{prefix[1:].lower()} {_format_name_words(rest)}"
     first_name = clean_name.split()[0].lower()
     prefix = "Mr." if first_name in MR_NAMES else "Ms."
-    return f"{prefix} {clean_name}"
+    return f"{prefix} {_format_name_words(clean_name)}"
+
+
+def _format_name_words(name):
+    return " ".join(_format_name_token(part) for part in str(name or "").split())
+
+
+def _format_name_token(token):
+    return "-".join(piece[:1].upper() + piece[1:].lower() if piece else "" for piece in token.split("-"))
 
 
 def _ensure_period(text):
@@ -933,6 +976,9 @@ def _append_dataset_entry(input_data, output_data):
 def _serialize_listing(row):
     report = dict(row)
     report["sent_student_email"] = bool(report.get("sent_student_email"))
+    for key in ("student_name", "teacher_name", "sales_name", "created_by_name"):
+        if report.get(key):
+            report[key] = _format_name_words(report[key])
     return report
 
 
@@ -942,6 +988,8 @@ def _can_view_report(actor, report):
     if user_has_role(actor, "manager"):
         return True
     if user_has_role(actor, "admin", "operation"):
+        if report.get("status") == "draft":
+            return False
         return report.get("student_branch") == actor.get("branch") or report.get("teacher_branch") == actor.get("branch")
     if user_has_role(actor, "teacher") and actor["id"] == report["teacher_id"]:
         return True

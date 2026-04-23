@@ -11,7 +11,7 @@ PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "http://localhost:5000").rst
 
 USER_ROLES = ("teacher", "operation", "admin", "sales", "manager", "superadmin")
 REPORT_TYPES = ("midterm", "final")
-REPORT_STATUSES = ("draft", "pending_operation", "approved", "delivered")
+REPORT_STATUSES = ("draft", "pending_operation", "approved", "delivered", "rejected")
 DELIVERY_CHANNELS = ("email",)
 DELIVERY_STATUSES = ("pending", "sent", "failed")
 
@@ -255,7 +255,8 @@ def _migrate_reports_table(cursor):
                 report_payload.get("report_type")
                 or report_payload.get("meta", {}).get("report_type")
             )
-            status = legacy_statuses.get(row["id"], "draft")
+            status_source = row["status"] if "status" in legacy_columns else legacy_statuses.get(row["id"])
+            status = _normalize_legacy_status(status_source)
             created_at = row["created_at"] if "created_at" in legacy_columns else None
 
             cursor.execute(
@@ -344,9 +345,15 @@ def _migrate_report_tracking_table(cursor):
 
             legacy_status = row["status"] if "status" in legacy_columns else None
             status = _normalize_legacy_status(legacy_status)
-            changed_by = row["assigned_to"] if "assigned_to" in legacy_columns else None
+            if "changed_by" in legacy_columns:
+                changed_by = row["changed_by"]
+            else:
+                changed_by = row["assigned_to"] if "assigned_to" in legacy_columns else None
             notes = row["notes"] if "notes" in legacy_columns else None
-            created_at = row["sent_at"] if "sent_at" in legacy_columns else None
+            if "created_at" in legacy_columns:
+                created_at = row["created_at"]
+            else:
+                created_at = row["sent_at"] if "sent_at" in legacy_columns else None
 
             cursor.execute(
                 """
@@ -653,6 +660,7 @@ def _reports_table_is_current(cursor):
         }.issubset(columns)
         and student_column is not None
         and student_column[3] == 0
+        and "rejected" in sql
         and not _table_references_legacy(cursor, "reports")
     )
 
@@ -670,7 +678,7 @@ def _tracking_table_is_current(cursor):
         "changed_by",
         "notes",
         "created_at",
-    }.issubset(columns) and not _table_references_legacy(cursor, "report_tracking")
+    }.issubset(columns) and "rejected" in sql and not _table_references_legacy(cursor, "report_tracking")
 
 
 def _migrate_existing_pdf_references(cursor):
@@ -889,6 +897,7 @@ def _normalize_legacy_status(value):
         "pending_operation": "pending_operation",
         "approved": "approved",
         "delivered": "delivered",
+        "rejected": "rejected",
     }
     return mapping.get(value, "draft")
 

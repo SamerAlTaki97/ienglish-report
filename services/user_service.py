@@ -27,6 +27,7 @@ def get_user(user_id):
 def list_users(role=None, branch=None):
     users = models.list_users(role=role, branch=branch)
     for user in users:
+        user["name"] = _format_name_words(user.get("name"))
         user.pop("password_hash", None)
         user.pop("password_plain", None)
         user.pop("email", None)
@@ -204,3 +205,11 @@ def update_user_branch(actor, user_id, branch):
 
 def user_has_role(user, *roles):
     return bool(user and (user.get("role") == "superadmin" or user.get("role") in roles))
+
+
+def _format_name_words(name):
+    return " ".join(_format_name_token(part) for part in str(name or "").split())
+
+
+def _format_name_token(token):
+    return "-".join(piece[:1].upper() + piece[1:].lower() if piece else "" for piece in token.split("-"))

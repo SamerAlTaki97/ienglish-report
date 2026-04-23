@@ -1,4 +1,3 @@
-import io
 from functools import wraps
 
 from flask import Flask, Response, jsonify, redirect, render_template, request, send_file, session, url_for
@@ -102,10 +101,19 @@ def format_display_name(name):
     if not clean_name:
         return ""
     if clean_name.lower().startswith(("mr. ", "ms. ")):
-        return clean_name
+        prefix, rest = clean_name.split(" ", 1)
+        return f"{prefix[:1].upper()}{prefix[1:].lower()} {_format_name_words(rest)}"
     first_name = clean_name.split()[0].lower()
     prefix = "Mr." if first_name in DISPLAY_MR_NAMES else "Ms."
-    return f"{prefix} {clean_name}"
+    return f"{prefix} {_format_name_words(clean_name)}"
+
+
+def _format_name_words(name):
+    return " ".join(_format_name_token(part) for part in str(name or "").split())
+
+
+def _format_name_token(token):
+    return "-".join(piece[:1].upper() + piece[1:].lower() if piece else "" for piece in token.split("-"))
 
 
 def redirect_for_role(user):
@@ -213,6 +221,12 @@ def logout():
     return redirect(url_for("login"))
 
 
+@app.route("/logout-beacon", methods=["POST"])
+def logout_beacon():
+    session.clear()
+    return ("", 204)
+
+
 @app.route("/api/users")
 @login_required
 def users_lookup():
@@ -240,6 +254,7 @@ def admin_reports():
         status=request.args.get("status"),
         teacher_id=request.args.get("teacher_id"),
         branch=request.args.get("branch"),
+        workflow_only=True,
     )
     return jsonify(reports)
 
@@ -254,6 +269,7 @@ def operation_reports():
         status=request.args.get("status"),
         teacher_id=request.args.get("teacher_id"),
         branch=request.args.get("branch"),
+        workflow_only=True,
     )
     return jsonify(reports)
 
@@ -326,6 +342,21 @@ def submit_report(report_id):
 def approve_report(report_id):
     report = report_service.approve_report(report_id, current_user())
     return jsonify({"status": report["status"], "report_id": report["id"]})
+
+
+@app.route("/reports/<int:report_id>/reject", methods=["POST"])
+@login_required
+@role_required("operation", "manager")
+def reject_report(report_id):
+    report = report_service.reject_report(report_id, current_user())
+    return jsonify({"status": report["status"], "report_id": report["id"]})
+
+
+@app.route("/reports/<int:report_id>", methods=["DELETE"])
+@login_required
+@role_required("operation", "manager")
+def delete_report(report_id):
+    return jsonify(report_service.delete_report(report_id, current_user()))
 
 
 @app.route("/reports/<int:report_id>/contact", methods=["PATCH"])
@@ -414,7 +445,15 @@ def send_report(report_id):
 @app.route("/view/<int:report_id>")
 @login_required
 def view_pdf(report_id):
-    report = report_service.get_report_for_user(report_id, current_user(), include_json=True)
+    user = current_user()
+    report = report_service.get_report_for_user(report_id, user, include_json=True)
+    can_teacher_actions = (
+        report["status"] == "draft"
+        and (
+            user.get("role") in {"manager", "superadmin"}
+            or user.get("id") == report.get("teacher_id")
+        )
+    )
     html = report_service.render_report_html(
         report["report_json"],
         preview_mode=True,
@@ -422,6 +461,16 @@ def view_pdf(report_id):
             "id": report["id"],
             "status": report["status"],
             "pdf_download_url": url_for("public_report_pdf", report_id=report_id),
+            "can_teacher_actions": can_teacher_actions,
+            "edit_url": url_for("teacher", edit_report_id=report_id),
+            "submit_url": url_for("submit_report", report_id=report_id),
+        },
+        template_context={
+            "user_name": user.get("name"),
+            "display_user_name": format_display_name(user.get("name")),
+            "user_id": user.get("id"),
+            "role": user.get("role"),
+            "user_branch": user.get("branch"),
         },
     )
     return html
@@ -518,20 +567,6 @@ def admin_delete_user(user_id):
             data.get("account_password", ""),
             user_id,
         )
-    )
-
-
-@app.route("/word", methods=["POST"])
-@login_required
-def word():
-    data = request.get_json() or {}
-    student = data.get("student", {})
-    docx_bytes = report_service.generate_word_document(data)
-    return send_file(
-        io.BytesIO(docx_bytes),
-        as_attachment=True,
-        download_name=f"{student.get('name', 'Student')}.docx",
-        mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     )
 
 

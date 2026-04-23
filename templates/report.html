@@ -51,7 +51,6 @@
       <div id="sections"></div>
 
       <div class="actions">
-        <button class="blue" onclick="downloadWord()">Download Word</button>
         <button class="amber" id="submitBtn" onclick="sendToOperation()">Send To Operation</button>
         <a class="action-link green" id="viewPdfLink" target="_blank">Preview Report</a>
         <button class="red" onclick="newReport()">New Report</button>
@@ -84,20 +83,6 @@
           </div>
         `;
       });
-
-      function downloadWord() {
-        fetch("/word", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        }).then((response) => response.blob()).then((blob) => {
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = "report.docx";
-          link.click();
-        });
-      }
 
       async function sendToOperation() {
         const response = await fetch(`/reports/${data.report_id}/submit`, { method: "POST" });

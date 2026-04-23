@@ -69,6 +69,29 @@
         font-weight: 700;
       }
 
+      .preview-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+      .preview-action {
+        color: white;
+        border: 0;
+        text-decoration: none;
+        padding: 10px 14px;
+        border-radius: 999px;
+        font-weight: 800;
+        cursor: pointer;
+        font: inherit;
+      }
+
+      .preview-action.edit { background: #2563eb; }
+      .preview-action.submit { background: #dc2626; }
+      .preview-action.download { background: #7c3aed; }
+      .preview-action:disabled { opacity: 0.65; cursor: not-allowed; }
+
       .document {
         width: 210mm;
         margin: 0 auto;
@@ -471,6 +494,9 @@
     </style>
   </head>
   <body>
+    {% if preview_mode %}
+    {% include "_navbar.html" %}
+    {% endif %}
     <div class="preview-shell">
       {% if preview_mode %}
       <div class="preview-bar">
@@ -478,9 +504,15 @@
           <strong>{{ student.name or "Student Report" }}</strong>
           <div style="opacity:.8; margin-top:4px;">{{ report_type_label }}{% if report_meta.status %} | {{ report_meta.status }}{% endif %}</div>
         </div>
-        {% if report_meta.pdf_download_url %}
-        <a href="{{ report_meta.pdf_download_url }}?download=1" target="_blank">Download PDF</a>
-        {% endif %}
+        <div class="preview-actions">
+          {% if report_meta.can_teacher_actions %}
+          <a class="preview-action edit" href="{{ report_meta.edit_url }}">Edit Values</a>
+          <button class="preview-action submit" id="submitDraftBtn" type="button" onclick="submitDraftReport()">Send To Operation</button>
+          {% endif %}
+          {% if report_meta.pdf_download_url %}
+          <a class="preview-action download" href="{{ report_meta.pdf_download_url }}?download=1" target="_blank">Download PDF</a>
+          {% endif %}
+        </div>
       </div>
       {% endif %}
 
@@ -631,5 +663,29 @@
         </section>
       </div>
     </div>
+    {% if preview_mode and report_meta.submit_url %}
+    <script>
+      async function submitDraftReport() {
+        const button = document.getElementById("submitDraftBtn");
+        if (!button || button.disabled) return;
+        button.disabled = true;
+        button.innerText = "Sending";
+        try {
+          const response = await fetch("{{ report_meta.submit_url }}", { method: "POST" });
+          const payload = await response.json();
+          if (!response.ok) throw new Error(payload.error || "Unable to send report to operation.");
+          button.innerText = "Sent To Operation";
+          localStorage.removeItem("report");
+          localStorage.removeItem("formData");
+          window.__internalNavigation = true;
+          window.setTimeout(() => { window.location.href = "/teacher?new=1"; }, 400);
+        } catch (error) {
+          alert(error.message);
+          button.disabled = false;
+          button.innerText = "Send To Operation";
+        }
+      }
+    </script>
+    {% endif %}
   </body>
 </html>

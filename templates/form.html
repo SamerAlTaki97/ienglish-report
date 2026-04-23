@@ -36,7 +36,7 @@
         <div class="grid">
           <div class="field"><label>Student Name</label><input id="name" autocomplete="off" /></div>
           <div class="field"><label>Educational Consultant</label><select id="sales_id"></select></div>
-          <div class="field"><label>Teacher Name</label><input id="teacher" value="{{ user_name }}" readonly autocomplete="off" /></div>
+          <div class="field"><label>Teacher Name</label><input id="teacher" value="{{ display_user_name or user_name }}" readonly autocomplete="off" /></div>
           <div class="triple-grid">
             <div class="field">
               <label>Course</label>
@@ -173,6 +173,9 @@
     </div>
 
     <script>
+      let editingReportId = null;
+      let isGenerating = false;
+
       function fill(id) {
         const element = document.getElementById(id);
         element.innerHTML = `<option value="">${id}</option>`;
@@ -378,18 +381,26 @@
 
       async function generateReport() {
         const button = document.getElementById("generateBtn");
+        if (isGenerating) {
+          document.getElementById("formMessage").innerText = "Report generation is already running. Please wait.";
+          return;
+        }
         const missing = getMissingFields();
         if (missing.length) {
           document.getElementById("formMessage").innerText = `Complete required fields: ${missing.join(", ")}`;
           return;
         }
+        isGenerating = true;
+        button.disabled = true;
         button.classList.add("is-disabled");
         button.setAttribute("aria-disabled", "true");
-        button.innerText = "Generating report";
+        button.innerText = editingReportId ? "Regenerating report" : "Generating report";
+        document.getElementById("formMessage").innerText = "Please wait. You can press Generate only once while the report is being created.";
         const payload = buildPayload();
         try {
-          const response = await fetch("/generate", {
-            method: "POST",
+          const url = editingReportId ? `/reports/${editingReportId}/edit` : "/generate";
+          const response = await fetch(url, {
+            method: editingReportId ? "PUT" : "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
           });
@@ -398,18 +409,85 @@
           data.performance = payload.performance;
           data.skills = payload.skills;
           localStorage.setItem("report", JSON.stringify(data));
-          window.location.href = "/report";
+          window.__internalNavigation = true;
+          window.location.href = `/view/${data.report_id}`;
         } catch (error) {
           document.getElementById("formMessage").innerText = error.message;
+          isGenerating = false;
+          button.disabled = false;
           button.classList.remove("is-disabled");
           button.setAttribute("aria-disabled", "false");
-          button.innerText = "Generate Draft Report";
+          button.innerText = editingReportId ? "Regenerate Draft Report" : "Generate Draft Report";
         }
       }
 
+      function setSelectValue(id, value) {
+        const element = document.getElementById(id);
+        if (!element) return;
+        element.value = value == null ? "" : String(value);
+      }
+
+      function detectCourseType(student) {
+        if (student.course_type) return student.course_type;
+        const course = String(student.course || "").trim().toLowerCase();
+        if (course === "general english") return "general_english";
+        if (course === "ielts") return "ielts";
+        if (course === "sat") return "sat";
+        return course ? "other" : "";
+      }
+
+      function populateFromReport(report) {
+        const reportJson = report.report_json || report;
+        const student = reportJson.student || {};
+        const performance = reportJson.performance || {};
+        const skills = reportJson.skills || {};
+        const sections = reportJson.input_sections || {};
+        editingReportId = report.id || reportJson.report_id;
+
+        document.getElementById("name").value = student.name || "";
+        document.getElementById("teacher").value = student.teacher || document.getElementById("teacher").value;
+        setSelectValue("sales_id", student.sales_id || report.sales_id || "");
+        setSelectValue("report_type", reportJson.report_type || report.report_type || "");
+        document.getElementById("exam_score").value = performance.exam_score || "";
+
+        const courseType = detectCourseType(student);
+        setSelectValue("course_type", courseType);
+        document.getElementById("course_other").value = courseType === "other" ? (student.course || "") : "";
+        document.getElementById("level").value = student.level || "";
+        setSelectValue("class_type", student.class_type || "");
+
+        setSelectValue("attendance", performance.attendance || "");
+        setSelectValue("assignment", performance.assignment || "");
+        ["reading", "writing", "listening", "speaking", "vocab", "grammar"].forEach((id) => {
+          setSelectValue(id, skills[id] || "");
+        });
+
+        restoreSection("commBox", sections.communication || []);
+        restoreSection("vocabBox", sections.vocabulary || []);
+        restoreSection("grammarBox", sections.grammar || []);
+        restoreSection("strengthBox", sections.strengths || []);
+        restoreSection("weaknessBox", sections.weaknesses || []);
+        document.getElementById("note").value = sections.final_note || "";
+
+        updateExamScoreState();
+        updateCourseState();
+        document.getElementById("generateBtn").innerText = "Regenerate Draft Report";
+      }
+
+      async function loadDraftForEdit(reportId) {
+        const response = await fetch(`/reports/${reportId}`);
+        const payload = await parseJsonResponse(response);
+        if (!response.ok) throw new Error(payload.error || "Unable to load report for editing.");
+        if (payload.status !== "draft") throw new Error("Only draft reports can be edited.");
+        populateFromReport(payload);
+      }
+
       window.onload = async function () {
-        localStorage.removeItem("formData");
-        localStorage.removeItem("report");
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("new") === "1") {
+          localStorage.removeItem("formData");
+          localStorage.removeItem("report");
+        }
         ["reading", "writing", "listening", "speaking", "vocab", "grammar", "attendance", "assignment"].forEach(fill);
         await loadEducationalConsultants();
         restoreSection("commBox", []);
@@ -417,6 +495,14 @@
         restoreSection("grammarBox", []);
         restoreSection("strengthBox", []);
         restoreSection("weaknessBox", []);
+        const editReportId = params.get("edit_report_id");
+        if (editReportId) {
+          try {
+            await loadDraftForEdit(editReportId);
+          } catch (error) {
+            document.getElementById("formMessage").innerText = error.message;
+          }
+        }
         updateButton();
         updateExamScoreState();
         updateCourseState();
