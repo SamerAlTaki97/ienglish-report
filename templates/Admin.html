@@ -49,7 +49,7 @@
         <select id="teacherFilter" onchange="load()">
           <option value="">All teachers</option>
         </select>
-        {% if role == 'manager' %}
+        {% if manager_view or role == 'manager' %}
         <select id="branchFilter" onchange="handleBranchChange()">
           <option value="">All branches</option>
           <option value="AlAin">AlAin</option>

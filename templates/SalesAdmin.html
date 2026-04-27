@@ -7,12 +7,6 @@
     <style>
       body { font-family: Arial, sans-serif; background: #eef2f7; margin: 0; }
       .container { max-width: 1220px; margin: 32px auto; background: white; padding: 24px; border-radius: 12px; }
-      .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
-      .card { padding: 16px; border-radius: 10px; color: white; font-weight: bold; }
-      .pending_operation { background: #d97706; }
-      .approved { background: #2563eb; }
-      .delivered { background: #16a34a; }
-      .rejected { background: #991b1b; }
       .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
       input, select { padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; }
       .table-wrap { border: 1px solid #e5e7eb; border-radius: 12px; overflow-x: auto; }
@@ -25,19 +19,12 @@
       .phone-col { min-width: 120px; max-width: 120px; }
       .view-col { min-width: 90px; }
       .phone-cell { max-width: 120px; white-space: normal; overflow-wrap: anywhere; word-break: break-word; text-align: center; }
-      @media (max-width: 900px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     </style>
   </head>
   <body>
     {% include "_navbar.html" %}
     <div class="container">
       <h1>Sales Admin Monitor</h1>
-      <div class="stats">
-        <div class="card pending_operation">Pending: <span id="pendingCount">0</span></div>
-        <div class="card approved">Approved: <span id="approvedCount">0</span></div>
-        <div class="card delivered">Delivered: <span id="deliveredCount">0</span></div>
-        <div class="card rejected">Not Accepted: <span id="rejectedCount">0</span></div>
-      </div>
 
       <div class="filters">
         <select id="salesFilter" onchange="load()">
@@ -85,11 +72,9 @@
       }
 
       function render() {
-        const counts = { pending_operation: 0, approved: 0, delivered: 0, rejected: 0 };
         const tbody = document.getElementById("tableBody");
         tbody.innerHTML = "";
         allRows.forEach((row) => {
-          counts[row.status] = (counts[row.status] || 0) + 1;
           tbody.innerHTML += `
             <tr>
               <td>${row.id}</td>
@@ -103,10 +88,6 @@
             </tr>
           `;
         });
-        document.getElementById("pendingCount").innerText = counts.pending_operation;
-        document.getElementById("approvedCount").innerText = counts.approved;
-        document.getElementById("deliveredCount").innerText = counts.delivered;
-        document.getElementById("rejectedCount").innerText = counts.rejected;
       }
 
       async function loadSalesStaff() {

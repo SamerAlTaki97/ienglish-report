@@ -191,6 +191,13 @@ def admin():
     return render_with_user("Admin.html")
 
 
+@app.route("/manager")
+@login_required
+@role_required("manager")
+def manager():
+    return render_with_user("Admin.html", manager_view=True)
+
+
 @app.route("/sales-admin")
 @login_required
 @role_required("sales_admin")

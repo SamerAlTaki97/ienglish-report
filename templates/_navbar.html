@@ -39,18 +39,20 @@
   <div style="display: flex; gap: 14px; flex-wrap: wrap">
     {% if role in ['teacher', 'manager', 'superadmin'] %}
     <a href="/teacher" style="color: #ffffff; text-decoration: none">Teacher</a>
+    {% endif %} {% if role in ['sales_admin', 'superadmin'] %}
+    <a href="/sales-admin" style="color: #ffffff; text-decoration: none">SalesAdmin</a>
     {% endif %} {% if role in ['operation', 'manager', 'superadmin'] %}
     <a href="/operation" style="color: #ffffff; text-decoration: none"
       >Operation</a
     >
     {% endif %} {% if role in ['admin', 'manager', 'superadmin'] %}
     <a href="/admin" style="color: #ffffff; text-decoration: none">Admin</a>
+    {% endif %} {% if role in ['manager', 'superadmin'] %}
+    <a href="/manager" style="color: #ffffff; text-decoration: none">Manager</a>
     {% endif %} {% if role == 'superadmin' %}
     <a href="/admin_teachers" style="color: #ffffff; text-decoration: none"
-      >Owner Users</a
+      >Users</a
     >
-    {% endif %} {% if role in ['sales_admin', 'superadmin'] %}
-    <a href="/sales-admin" style="color: #ffffff; text-decoration: none">Sales Admin</a>
     {% endif %} {% if role == 'sales' %}
     <a href="/sales" style="color: #ffffff; text-decoration: none">Educational Consultant</a>
     {% endif %}
