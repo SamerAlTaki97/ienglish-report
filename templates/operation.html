@@ -27,9 +27,11 @@
       .delivered { background: #dcfce7; color: #166534; }
       .rejected { background: #fee2e2; color: #991b1b; }
       .table-wrap { border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; }
-      table { width: 100%; border-collapse: collapse; }
+      table { width: 100%; border-collapse: collapse; table-layout: fixed; }
       th, td { padding: 13px 12px; border-bottom: 1px solid #eef2f7; text-align: left; vertical-align: middle; }
       th { background: #f8fafc; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: #475569; }
+      .phone-col, .email-col { width: 160px; max-width: 160px; }
+      .phone-cell, .email-cell { max-width: 160px; white-space: normal; overflow-wrap: anywhere; word-break: break-word; }
       .delivery-done { color: #166534; font-weight: 700; }
       .delivery-pending { color: #64748b; }
       .empty-state { padding: 28px; text-align: center; color: #64748b; }
@@ -97,15 +99,15 @@
           <thead>
             <tr>
               <th>ID</th>
-              <th>Phone</th>
-              <th>Email</th>
+              <th class="phone-col">Phone</th>
+              <th class="email-col">Email</th>
               <th>Student</th>
               <th>Teacher</th>
               <th>Educational Consultant</th>
               <th>Status</th>
               <th>Email Delivery</th>
-              <th>Received</th>
               <th>Sent</th>
+              <th>Received</th>
               <th>View</th>
               <th>Action</th>
             </tr>
@@ -222,15 +224,15 @@
           tbody.innerHTML += `
             <tr>
               <td data-label="ID">${row.id}</td>
-              <td data-label="Phone">${row.student_id || "-"}</td>
-              <td data-label="Email">${row.student_email || "-"}</td>
+              <td data-label="Phone" class="phone-cell">${row.student_id || "-"}</td>
+              <td data-label="Email" class="email-cell">${row.student_email || "-"}</td>
               <td data-label="Student">${row.student_name || "-"}</td>
               <td data-label="Teacher">${row.teacher_name || "-"}</td>
               <td data-label="Educational Consultant">${row.sales_name || "-"}</td>
               <td data-label="Status"><span class="status ${row.status}">${row.status.replaceAll("_", " ")}</span></td>
               <td data-label="Email Delivery">${row.sent_student_email ? '<span class="delivery-done">Sent</span>' : '<span class="delivery-pending">Not sent</span>'}</td>
-              <td data-label="Received">${row.created_at || "-"}</td>
               <td data-label="Sent">${row.sent_at || "-"}</td>
+              <td data-label="Received">${row.created_at || "-"}</td>
               <td data-label="View"><a class="btn-outline" href="/view/${row.id}" target="_blank">Preview</a></td>
               <td data-label="Action"><button class="btn-primary" type="button" onclick="openActionModal(${row.id})">Action</button></td>
             </tr>

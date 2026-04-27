@@ -1003,7 +1003,14 @@ def _append_dataset_entry(input_data, output_data):
 def _serialize_listing(row):
     report = dict(row)
     report["sent_student_email"] = bool(report.get("sent_student_email"))
-    report["student_id"] = report.get("display_student_phone") or report.get("student_id")
+    raw_student_id = str(report.get("student_id") or "").strip()
+    display_phone = str(report.get("display_student_phone") or "").strip()
+    if display_phone:
+        report["student_id"] = display_phone
+    elif raw_student_id.startswith("legacy-"):
+        report["student_id"] = "-"
+    else:
+        report["student_id"] = raw_student_id or "-"
     if report.get("sales_name") == DIRECT_SALES_LABEL:
         report["sales_name"] = DIRECT_SALES_LABEL
     for key in ("student_name", "teacher_name", "created_by_name"):
