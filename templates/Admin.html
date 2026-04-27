@@ -41,16 +41,23 @@
         <div class="search-wrap">
           <input id="phoneFilter" placeholder="Search by student phone" />
         </div>
+        {% if role == 'sales_admin' %}
+        <select id="salesFilter" onchange="load()">
+          <option value="">All sales staff</option>
+        </select>
+        {% else %}
         <select id="teacherFilter" onchange="load()">
           <option value="">All teachers</option>
         </select>
-        {% if role == 'manager' %}
+        {% endif %}
+        {% if role == 'manager' and role != 'sales_admin' %}
         <select id="branchFilter" onchange="handleBranchChange()">
           <option value="">All branches</option>
           <option value="AlAin">AlAin</option>
           <option value="Abu Dhabi">Abu Dhabi</option>
         </select>
         {% endif %}
+        {% if role != 'sales_admin' %}
         <select id="statusFilter" onchange="load()">
           <option value="">All statuses</option>
           <option value="pending_operation">Pending operation</option>
@@ -58,22 +65,21 @@
           <option value="delivered">Delivered</option>
           <option value="rejected">Not accepted</option>
         </select>
+        {% endif %}
       </div>
 
       <table>
         <thead>
           <tr>
             <th>ID</th>
-            <th>Phone</th>
-            <th>Email</th>
             <th>Student</th>
             <th>Teacher</th>
-            <th>Branch</th>
             <th>Level</th>
             <th>Type</th>
-            {% if role == 'sales_admin' %}
             <th>Educational Consultant</th>
-            {% else %}
+            {% if role != 'sales_admin' %}
+            <th>Phone</th>
+            <th>Email</th>
             <th>Status</th>
             <th>Received</th>
             <th>Email Sent</th>
@@ -92,13 +98,18 @@
 
       async function load() {
         const phone = document.getElementById("phoneFilter").value.trim();
-        const teacher = document.getElementById("teacherFilter").value;
-        const status = document.getElementById("statusFilter").value;
+        const teacherFilter = document.getElementById("teacherFilter");
+        const salesFilter = document.getElementById("salesFilter");
+        const statusFilter = document.getElementById("statusFilter");
+        const teacher = teacherFilter ? teacherFilter.value : "";
+        const sales = salesFilter ? salesFilter.value : "";
+        const status = statusFilter ? statusFilter.value : "";
         const branchFilter = document.getElementById("branchFilter");
         const branch = branchFilter ? branchFilter.value : "";
         const query = new URLSearchParams();
         if (phone) query.set("phone", phone);
         if (teacher) query.set("teacher_id", teacher);
+        if (sales) query.set("sales_id", sales);
         if (status) query.set("status", status);
         if (branch) query.set("branch", branch);
         const response = await fetch(`/admin/reports?${query.toString()}`);
@@ -115,20 +126,21 @@
           tbody.innerHTML += `
             <tr>
               <td>${row.id}</td>
-              <td>${row.student_id}</td>
-              <td>${row.student_email || "-"}</td>
               <td>${row.student_name}</td>
               <td>${row.teacher_name}</td>
-              <td>${row.student_branch || row.teacher_branch || "-"}</td>
               <td>${row.level || "-"}</td>
               <td>${row.report_type}</td>
               ${isSalesAdmin
-                ? `<td>${row.sales_name || "-"}</td>`
-                : `<td>${row.status}</td>
+                ? `<td>${row.sales_name || "-"}</td>
+                   <td><a href="/view/${row.id}" target="_blank">Preview</a></td>`
+                : `<td>${row.sales_name || "-"}</td>
+                   <td>${row.student_id || "-"}</td>
+                   <td>${row.student_email || "-"}</td>
+                   <td>${row.status}</td>
                    <td>${row.created_at}</td>
                    <td>${row.sent_student_email ? "Yes" : "No"}</td>
-                   <td>${row.sent_at || "-"}</td>`}
-              <td><a href="/view/${row.id}" target="_blank">Preview</a></td>
+                   <td>${row.sent_at || "-"}</td>
+                   <td><a href="/view/${row.id}" target="_blank">Preview</a></td>`}
             </tr>
           `;
         });
@@ -151,6 +163,18 @@
         });
       }
 
+      async function loadSalesStaff() {
+        const query = new URLSearchParams({ role: "sales" });
+        const response = await fetch(`/api/users?${query.toString()}`);
+        const users = await response.json();
+        const select = document.getElementById("salesFilter");
+        if (!select) return;
+        select.innerHTML = '<option value="">All sales staff</option>';
+        users.forEach((user) => {
+          select.innerHTML += `<option value="${user.id}">${user.name}</option>`;
+        });
+      }
+
       function handleBranchChange() {
         loadTeachers().then(load);
       }
@@ -161,7 +185,7 @@
         searchTimer = setTimeout(load, 250);
       });
 
-      loadTeachers().then(load);
+      (isSalesAdmin ? loadSalesStaff() : loadTeachers()).then(load);
     </script>
   </body>
 </html>

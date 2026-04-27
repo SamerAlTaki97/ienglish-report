@@ -101,7 +101,7 @@
               <th>Email</th>
               <th>Student</th>
               <th>Teacher</th>
-              <th>Branch</th>
+              <th>Educational Consultant</th>
               <th>Status</th>
               <th>Email Delivery</th>
               <th>Received</th>
@@ -226,7 +226,7 @@
               <td data-label="Email">${row.student_email || "-"}</td>
               <td data-label="Student">${row.student_name || "-"}</td>
               <td data-label="Teacher">${row.teacher_name || "-"}</td>
-              <td data-label="Branch">${row.student_branch || row.teacher_branch || "-"}</td>
+              <td data-label="Educational Consultant">${row.sales_name || "-"}</td>
               <td data-label="Status"><span class="status ${row.status}">${row.status.replaceAll("_", " ")}</span></td>
               <td data-label="Email Delivery">${row.sent_student_email ? '<span class="delivery-done">Sent</span>' : '<span class="delivery-pending">Not sent</span>'}</td>
               <td data-label="Received">${row.created_at || "-"}</td>

@@ -291,6 +291,7 @@ def admin_reports():
         phone=request.args.get("phone"),
         status=request.args.get("status"),
         teacher_id=request.args.get("teacher_id"),
+        sales_id=request.args.get("sales_id"),
         branch=request.args.get("branch"),
         workflow_only=True,
     )

@@ -333,6 +333,10 @@ def get_report_detail(report_id, include_json=True):
         """
         SELECT
             r.*,
+            CASE
+                WHEN r.student_id LIKE 'legacy-%' THEN COALESCE(json_extract(r.report_json, '$.student.phone'), r.student_id)
+                ELSE COALESCE(r.student_id, json_extract(r.report_json, '$.student.phone'))
+            END AS display_student_phone,
             COALESCE(s.name, json_extract(r.report_json, '$.student.name')) AS student_name,
             COALESCE(s.branch, json_extract(r.report_json, '$.student.branch')) AS student_branch,
             COALESCE(s.email, json_extract(r.report_json, '$.student.email')) AS student_email,
@@ -391,6 +395,10 @@ def list_reports(phone=None, status=None, teacher_id=None, sales_id=None, create
     query = """
         SELECT
             r.*,
+            CASE
+                WHEN r.student_id LIKE 'legacy-%' THEN COALESCE(json_extract(r.report_json, '$.student.phone'), r.student_id)
+                ELSE COALESCE(r.student_id, json_extract(r.report_json, '$.student.phone'))
+            END AS display_student_phone,
             COALESCE(s.name, json_extract(r.report_json, '$.student.name')) AS student_name,
             COALESCE(s.branch, json_extract(r.report_json, '$.student.branch')) AS student_branch,
             COALESCE(s.email, json_extract(r.report_json, '$.student.email')) AS student_email,
@@ -434,7 +442,7 @@ def list_reports(phone=None, status=None, teacher_id=None, sales_id=None, create
     params = []
 
     if phone:
-        query += " AND r.student_id LIKE ?"
+        query += " AND CASE WHEN r.student_id LIKE 'legacy-%' THEN COALESCE(json_extract(r.report_json, '$.student.phone'), r.student_id) ELSE COALESCE(r.student_id, json_extract(r.report_json, '$.student.phone')) END LIKE ?"
         params.append(f"%{phone}%")
     if status:
         query += " AND r.status=?"

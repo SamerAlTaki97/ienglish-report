@@ -51,7 +51,7 @@ def list_visible_users(actor, role=None, branch=None):
             users = models.list_users(role=selected_role, branch=branch or None)
         else:
             users = []
-    elif user_has_role(actor, "admin"):
+    elif user_has_role(actor, "admin", "sales_admin"):
         selected_role = role or None
         if selected_role in {"teacher", "operation", "sales"}:
             users = models.list_users(role=selected_role, branch=actor.get("branch"))
