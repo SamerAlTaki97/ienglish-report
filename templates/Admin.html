@@ -3,7 +3,7 @@
   <head>
     <link rel="stylesheet" href="/static/css/style.css" />
     <meta charset="UTF-8" />
-    <title>{% if role == 'sales_admin' %}Sales Admin Dashboard{% else %}Admin Dashboard{% endif %}</title>
+    <title>Admin Dashboard</title>
     <style>
       body { font-family: Arial, sans-serif; background: #eef2f7; margin: 0; }
       .container { max-width: 1220px; margin: 32px auto; background: white; padding: 24px; border-radius: 12px; }
@@ -16,22 +16,24 @@
       .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
       .search-wrap input { min-width: 230px; }
       input, select, button { padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; }
-      table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-      th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: left; }
-      th { background: #f8fafc; }
-      .phone-col, .email-col { width: 160px; max-width: 160px; }
-      .email-cell, .phone-cell { max-width: 160px; white-space: normal; overflow-wrap: anywhere; word-break: break-word; }
+      .table-wrap { border: 1px solid #e5e7eb; border-radius: 12px; overflow-x: auto; }
+      table { width: 100%; min-width: 1200px; border-collapse: collapse; }
+      th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: top; }
+      th { background: #f8fafc; white-space: nowrap; }
+      .student-col { min-width: 170px; }
+      .teacher-col { min-width: 120px; }
+      .consultant-col { min-width: 170px; }
+      .phone-col { min-width: 150px; max-width: 150px; }
+      .email-col { min-width: 180px; max-width: 180px; }
+      .status-col { min-width: 120px; }
+      .email-cell, .phone-cell, .status-cell { white-space: normal; overflow-wrap: anywhere; word-break: break-word; }
       @media (max-width: 900px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     </style>
   </head>
   <body>
     {% include "_navbar.html" %}
     <div class="container">
-      {% if role == 'sales_admin' %}
-      <h1>Sales Admin Monitor</h1>
-      {% else %}
       <h1>Admin Operation Monitor</h1>
-      {% endif %}
       <div class="stats">
         <div class="card pending_operation">Pending Operation: <span id="pendingCount">0</span></div>
         <div class="card approved">Approved: <span id="approvedCount">0</span></div>
@@ -40,28 +42,19 @@
       </div>
 
       <div class="filters">
-        {% if role != 'sales_admin' %}
         <div class="search-wrap">
           <input id="phoneFilter" placeholder="Search by student phone" />
         </div>
-        {% endif %}
-        {% if role == 'sales_admin' %}
-        <select id="salesFilter" onchange="load()">
-          <option value="">All sales staff</option>
-        </select>
-        {% else %}
         <select id="teacherFilter" onchange="load()">
           <option value="">All teachers</option>
         </select>
-        {% endif %}
-        {% if role == 'manager' and role != 'sales_admin' %}
+        {% if role == 'manager' %}
         <select id="branchFilter" onchange="handleBranchChange()">
           <option value="">All branches</option>
           <option value="AlAin">AlAin</option>
           <option value="Abu Dhabi">Abu Dhabi</option>
         </select>
         {% endif %}
-        {% if role != 'sales_admin' %}
         <select id="statusFilter" onchange="load()">
           <option value="">All statuses</option>
           <option value="pending_operation">Pending operation</option>
@@ -69,52 +62,49 @@
           <option value="delivered">Delivered</option>
           <option value="rejected">Not accepted</option>
         </select>
-        {% endif %}
       </div>
 
+      <div class="table-wrap">
       <table>
         <thead>
           <tr>
             <th>ID</th>
-            <th>Student</th>
-            <th>Teacher</th>
+            <th class="student-col">Student</th>
+            <th class="teacher-col">Teacher</th>
             <th>Level</th>
             <th>Type</th>
-            <th>Educational Consultant</th>
-            {% if role != 'sales_admin' %}
+            <th class="consultant-col">Educational Consultant</th>
             <th class="phone-col">Phone</th>
             <th class="email-col">Email</th>
-            <th>Status</th>
-            <th>Received</th>
+            <th class="status-col">Status</th>
             <th>Email Sent</th>
-            <th>Sent At</th>
-            {% endif %}
+            <th>Received</th>
             <th>View</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
       </table>
+      </div>
     </div>
 
     <script>
       let allRows = [];
-      const isSalesAdmin = {{ "true" if role == "sales_admin" else "false" }};
+
+      function displayPhone(row) {
+        const value = String(row.student_id || "").trim();
+        if (!value || value.startsWith("legacy-")) return "-";
+        return value;
+      }
 
       async function load() {
-        const phoneFilter = document.getElementById("phoneFilter");
-        const phone = phoneFilter ? phoneFilter.value.trim() : "";
-        const teacherFilter = document.getElementById("teacherFilter");
-        const salesFilter = document.getElementById("salesFilter");
-        const statusFilter = document.getElementById("statusFilter");
-        const teacher = teacherFilter ? teacherFilter.value : "";
-        const sales = salesFilter ? salesFilter.value : "";
-        const status = statusFilter ? statusFilter.value : "";
+        const phone = document.getElementById("phoneFilter").value.trim();
+        const teacher = document.getElementById("teacherFilter").value;
+        const status = document.getElementById("statusFilter").value;
         const branchFilter = document.getElementById("branchFilter");
         const branch = branchFilter ? branchFilter.value : "";
         const query = new URLSearchParams();
         if (phone) query.set("phone", phone);
         if (teacher) query.set("teacher_id", teacher);
-        if (sales) query.set("sales_id", sales);
         if (status) query.set("status", status);
         if (branch) query.set("branch", branch);
         const response = await fetch(`/admin/reports?${query.toString()}`);
@@ -135,17 +125,13 @@
               <td>${row.teacher_name}</td>
               <td>${row.level || "-"}</td>
               <td>${row.report_type}</td>
-              ${isSalesAdmin
-                ? `<td>${row.sales_name || "-"}</td>
-                   <td><a href="/view/${row.id}" target="_blank">Preview</a></td>`
-                : `<td>${row.sales_name || "-"}</td>
-                   <td class="phone-cell">${row.student_id || "-"}</td>
-                   <td class="email-cell">${row.student_email || "-"}</td>
-                   <td>${row.status}</td>
-                   <td>${row.created_at}</td>
-                   <td>${row.sent_student_email ? "Yes" : "No"}</td>
-                   <td>${row.sent_at || "-"}</td>
-                   <td><a href="/view/${row.id}" target="_blank">Preview</a></td>`}
+              <td>${row.sales_name || "-"}</td>
+              <td class="phone-cell">${displayPhone(row)}</td>
+              <td class="email-cell">${row.student_email || "-"}</td>
+              <td class="status-cell">${row.status || "-"}</td>
+              <td>${row.sent_student_email ? "Yes" : "No"}</td>
+              <td>${row.created_at || "-"}</td>
+              <td><a href="/view/${row.id}" target="_blank">Preview</a></td>
             </tr>
           `;
         });
@@ -168,32 +154,17 @@
         });
       }
 
-      async function loadSalesStaff() {
-        const query = new URLSearchParams({ role: "sales" });
-        const response = await fetch(`/api/users?${query.toString()}`);
-        const users = await response.json();
-        const select = document.getElementById("salesFilter");
-        if (!select) return;
-        select.innerHTML = '<option value="">All sales staff</option>';
-        users.forEach((user) => {
-          select.innerHTML += `<option value="${user.id}">${user.name}</option>`;
-        });
-      }
-
       function handleBranchChange() {
         loadTeachers().then(load);
       }
 
       let searchTimer = null;
-      const phoneFilterInput = document.getElementById("phoneFilter");
-      if (phoneFilterInput) {
-        phoneFilterInput.addEventListener("input", () => {
-          clearTimeout(searchTimer);
-          searchTimer = setTimeout(load, 250);
-        });
-      }
+      document.getElementById("phoneFilter").addEventListener("input", () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(load, 250);
+      });
 
-      (isSalesAdmin ? loadSalesStaff() : loadTeachers()).then(load);
+      loadTeachers().then(load);
     </script>
   </body>
 </html>

@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <meta charset="UTF-8" />
+    <title>Sales Admin Dashboard</title>
+    <style>
+      body { font-family: Arial, sans-serif; background: #eef2f7; margin: 0; }
+      .container { max-width: 1220px; margin: 32px auto; background: white; padding: 24px; border-radius: 12px; }
+      .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
+      .card { padding: 16px; border-radius: 10px; color: white; font-weight: bold; }
+      .pending_operation { background: #d97706; }
+      .approved { background: #2563eb; }
+      .delivered { background: #16a34a; }
+      .rejected { background: #991b1b; }
+      .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+      input, select { padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; }
+      .table-wrap { border: 1px solid #e5e7eb; border-radius: 12px; overflow-x: auto; }
+      table { width: 100%; min-width: 980px; border-collapse: collapse; }
+      th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: top; }
+      th { background: #f8fafc; white-space: nowrap; }
+      .student-col { min-width: 170px; }
+      .consultant-col { min-width: 170px; }
+      .teacher-col { min-width: 130px; }
+      .phone-col { min-width: 150px; max-width: 150px; }
+      .phone-cell { max-width: 150px; white-space: normal; overflow-wrap: anywhere; word-break: break-word; }
+      @media (max-width: 900px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    </style>
+  </head>
+  <body>
+    {% include "_navbar.html" %}
+    <div class="container">
+      <h1>Sales Admin Monitor</h1>
+      <div class="stats">
+        <div class="card pending_operation">Pending Operation: <span id="pendingCount">0</span></div>
+        <div class="card approved">Approved: <span id="approvedCount">0</span></div>
+        <div class="card delivered">Delivered: <span id="deliveredCount">0</span></div>
+        <div class="card rejected">Not Accepted: <span id="rejectedCount">0</span></div>
+      </div>
+
+      <div class="filters">
+        <select id="salesFilter" onchange="load()">
+          <option value="">All sales staff</option>
+        </select>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th class="student-col">Student</th>
+              <th class="consultant-col">Educational Consultant</th>
+              <th class="teacher-col">Teacher</th>
+              <th>Level</th>
+              <th>Type</th>
+              <th class="phone-col">Phone</th>
+              <th>View</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      let allRows = [];
+
+      function displayPhone(row) {
+        const value = String(row.student_id || "").trim();
+        if (!value || value.startsWith("legacy-")) return "-";
+        return value;
+      }
+
+      async function load() {
+        const sales = document.getElementById("salesFilter").value;
+        const query = new URLSearchParams();
+        if (sales) query.set("sales_id", sales);
+        const response = await fetch(`/admin/reports?${query.toString()}`);
+        allRows = await response.json();
+        render();
+      }
+
+      function render() {
+        const counts = { pending_operation: 0, approved: 0, delivered: 0, rejected: 0 };
+        const tbody = document.getElementById("tableBody");
+        tbody.innerHTML = "";
+        allRows.forEach((row) => {
+          counts[row.status] = (counts[row.status] || 0) + 1;
+          tbody.innerHTML += `
+            <tr>
+              <td>${row.id}</td>
+              <td>${row.student_name || "-"}</td>
+              <td>${row.sales_name || "-"}</td>
+              <td>${row.teacher_name || "-"}</td>
+              <td>${row.level || "-"}</td>
+              <td>${row.report_type || "-"}</td>
+              <td class="phone-cell">${displayPhone(row)}</td>
+              <td><a href="/view/${row.id}" target="_blank">Preview</a></td>
+            </tr>
+          `;
+        });
+        document.getElementById("pendingCount").innerText = counts.pending_operation;
+        document.getElementById("approvedCount").innerText = counts.approved;
+        document.getElementById("deliveredCount").innerText = counts.delivered;
+        document.getElementById("rejectedCount").innerText = counts.rejected;
+      }
+
+      async function loadSalesStaff() {
+        const query = new URLSearchParams({ role: "sales" });
+        const response = await fetch(`/api/users?${query.toString()}`);
+        const users = await response.json();
+        const select = document.getElementById("salesFilter");
+        select.innerHTML = '<option value="">All sales staff</option>';
+        users.forEach((user) => {
+          select.innerHTML += `<option value="${user.id}">${user.name}</option>`;
+        });
+      }
+
+      loadSalesStaff().then(load);
+    </script>
+  </body>
+</html>

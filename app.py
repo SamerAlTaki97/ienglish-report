@@ -195,7 +195,7 @@ def admin():
 @login_required
 @role_required("sales_admin")
 def sales_admin():
-    return render_with_user("Admin.html")
+    return render_with_user("SalesAdmin.html")
 
 
 @app.route("/sales")
