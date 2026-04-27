@@ -66,6 +66,7 @@
 
     <script>
       let allRows = [];
+      const visibleStatuses = new Set(["approved", "delivered"]);
 
       function displayPhone(row) {
         const value = String(row.student_id || "").trim();
@@ -75,10 +76,11 @@
 
       async function load() {
         const sales = document.getElementById("salesFilter").value;
-        const query = new URLSearchParams({ status: "approved" });
+        const query = new URLSearchParams();
         if (sales) query.set("sales_id", sales);
         const response = await fetch(`/admin/reports?${query.toString()}`);
-        allRows = await response.json();
+        const rows = await response.json();
+        allRows = rows.filter((row) => visibleStatuses.has(row.status));
         render();
       }
 
