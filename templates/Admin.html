@@ -17,16 +17,17 @@
       .search-wrap input { min-width: 230px; }
       input, select, button { padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; }
       .table-wrap { border: 1px solid #e5e7eb; border-radius: 12px; overflow-x: auto; }
-      table { width: 100%; min-width: 1200px; border-collapse: collapse; }
-      th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: top; }
+      table { width: 100%; min-width: 1180px; border-collapse: collapse; }
+      th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center; vertical-align: middle; }
       th { background: #f8fafc; white-space: nowrap; }
       .student-col { min-width: 170px; }
       .teacher-col { min-width: 120px; }
       .consultant-col { min-width: 170px; }
-      .phone-col { min-width: 150px; max-width: 150px; }
-      .email-col { min-width: 180px; max-width: 180px; }
+      .phone-col { min-width: 120px; max-width: 120px; }
+      .email-col { min-width: 145px; max-width: 145px; }
       .status-col { min-width: 120px; }
-      .email-cell, .phone-cell, .status-cell { white-space: normal; overflow-wrap: anywhere; word-break: break-word; }
+      .view-col { min-width: 90px; }
+      .email-cell, .phone-cell, .status-cell { white-space: normal; overflow-wrap: anywhere; word-break: break-word; text-align: center; }
       @media (max-width: 900px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     </style>
   </head>
@@ -79,7 +80,7 @@
             <th class="status-col">Status</th>
             <th>Email Sent</th>
             <th>Received</th>
-            <th>View</th>
+            <th class="view-col">View</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>

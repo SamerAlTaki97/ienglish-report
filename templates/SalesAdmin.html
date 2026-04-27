@@ -17,13 +17,14 @@
       input, select { padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; }
       .table-wrap { border: 1px solid #e5e7eb; border-radius: 12px; overflow-x: auto; }
       table { width: 100%; min-width: 980px; border-collapse: collapse; }
-      th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: top; }
+      th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center; vertical-align: middle; }
       th { background: #f8fafc; white-space: nowrap; }
       .student-col { min-width: 170px; }
       .consultant-col { min-width: 170px; }
       .teacher-col { min-width: 130px; }
-      .phone-col { min-width: 150px; max-width: 150px; }
-      .phone-cell { max-width: 150px; white-space: normal; overflow-wrap: anywhere; word-break: break-word; }
+      .phone-col { min-width: 120px; max-width: 120px; }
+      .view-col { min-width: 90px; }
+      .phone-cell { max-width: 120px; white-space: normal; overflow-wrap: anywhere; word-break: break-word; text-align: center; }
       @media (max-width: 900px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     </style>
   </head>
@@ -55,7 +56,7 @@
               <th>Level</th>
               <th>Type</th>
               <th class="phone-col">Phone</th>
-              <th>View</th>
+              <th class="view-col">View</th>
             </tr>
           </thead>
           <tbody id="tableBody"></tbody>
@@ -74,7 +75,7 @@
 
       async function load() {
         const sales = document.getElementById("salesFilter").value;
-        const query = new URLSearchParams();
+        const query = new URLSearchParams({ status: "approved" });
         if (sales) query.set("sales_id", sales);
         const response = await fetch(`/admin/reports?${query.toString()}`);
         allRows = await response.json();

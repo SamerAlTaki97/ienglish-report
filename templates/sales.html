@@ -10,8 +10,9 @@
       .filters { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
       input, select, button { padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; }
       button { cursor: pointer; }
-      table { width: 100%; border-collapse: collapse; }
-      th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: left; }
+      .table-wrap { border: 1px solid #e5e7eb; border-radius: 12px; overflow-x: auto; }
+      table { width: 100%; min-width: 860px; border-collapse: collapse; }
+      th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center; vertical-align: middle; }
       th { background: #f8fafc; }
     </style>
   </head>
@@ -32,6 +33,7 @@
         </select>
       </div>
 
+      <div class="table-wrap">
       <table>
         <thead>
           <tr>
@@ -48,6 +50,7 @@
         </thead>
         <tbody id="tableBody"></tbody>
       </table>
+      </div>
     </div>
 
     <script>
