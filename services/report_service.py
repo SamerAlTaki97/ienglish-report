@@ -33,6 +33,8 @@ COURSE_TYPES = {
 }
 CLASS_TYPES = {"Group Adult", "VIP Adult", "Group Kids", "VIP Kid"}
 MR_NAMES = {"hussam", "fouad", "mazen", "zain", "amin", "karam", "omar"}
+DIRECT_SALES_VALUE = "direct"
+DIRECT_SALES_LABEL = "Direct"
 
 
 def generate_report(data, actor):
@@ -202,7 +204,7 @@ def list_reports_for_user(actor, phone=None, status=None, teacher_id=None, branc
             teacher_id=normalized_teacher_id,
             branch=branch,
         )
-    elif user_has_role(actor, "admin", "operation"):
+    elif user_has_role(actor, "admin", "operation", "sales_admin"):
         reports = models.list_reports(
             phone=phone,
             status=status,
@@ -226,7 +228,7 @@ def list_reports_for_user(actor, phone=None, status=None, teacher_id=None, branc
 
 
 def search_students(phone_query, actor):
-    if not user_has_role(actor, "teacher", "operation", "admin", "sales", "manager"):
+    if not user_has_role(actor, "teacher", "operation", "admin", "sales", "sales_admin", "manager"):
         raise ServiceError("Forbidden", 403)
     return models.search_students_by_phone(phone_query)
 
@@ -244,6 +246,20 @@ def render_report_html(data, preview_mode=False, report_meta=None, template_cont
     if template_context:
         context.update(template_context)
     return render_template("report_document.html", **context)
+
+
+def build_report_download_name(report):
+    report_payload = report.get("report_json") or {}
+    if isinstance(report_payload, str):
+        try:
+            report_payload = json.loads(report_payload)
+        except json.JSONDecodeError:
+            report_payload = {}
+    student_payload = dict(report_payload.get("student") or {})
+    base_name = student_payload.get("name") or report.get("student_name") or "student"
+    normalized = re.sub(r"[^0-9A-Za-z]+", " ", str(base_name).strip().lower())
+    normalized = re.sub(r"\s+", " ", normalized).strip() or "student"
+    return f"{normalized} report.pdf"
 
 
 def build_report_document_context(data, report_meta=None, preview_mode=False):
@@ -299,13 +315,10 @@ def update_student_contact(report_id, actor, phone=None, email=None, sales_id=No
     raw_phone = str(phone).strip() if isinstance(phone, str) else None
     normalized_phone = raw_phone or report["student_id"] or None
     normalized_email = email.strip() if isinstance(email, str) else email
-    normalized_sales_id = sales_id
-    if normalized_sales_id in ("", None):
-        normalized_sales_id = None
-    elif isinstance(normalized_sales_id, str) and normalized_sales_id.isdigit():
-        normalized_sales_id = int(normalized_sales_id)
+    sales_id_provided = sales_id is not None
+    normalized_sales_id, sales_mode, sales_name = _normalize_sales_selection(sales_id)
 
-    if not normalized_phone and normalized_email in ("", None) and normalized_sales_id is None:
+    if not normalized_phone and normalized_email in ("", None) and normalized_sales_id is None and not sales_id_provided:
         raise ServiceError("Student phone, email, or educational consultant is required", 400)
 
     try:
@@ -314,6 +327,7 @@ def update_student_contact(report_id, actor, phone=None, email=None, sales_id=No
             phone=raw_phone,
             email=normalized_email,
             sales_id=normalized_sales_id,
+            sales_id_provided=sales_id_provided,
         )
     except ValueError as exc:
         raise ServiceError(str(exc), 409) from exc
@@ -323,7 +337,16 @@ def update_student_contact(report_id, actor, phone=None, email=None, sales_id=No
     student_payload = dict(report_payload.get("student") or {})
     student_payload["phone"] = normalized_phone or updated_report["student_id"]
     student_payload["email"] = normalized_email if normalized_email not in ("", None) else updated_report.get("student_email")
-    student_payload["sales_id"] = normalized_sales_id if sales_id is not None else updated_report.get("sales_id")
+    if sales_id_provided:
+        student_payload["sales_id"] = normalized_sales_id
+        student_payload["sales_mode"] = sales_mode
+        if sales_name:
+            student_payload["sales_name"] = sales_name
+        else:
+            student_payload.pop("sales_name", None)
+    else:
+        student_payload["sales_id"] = updated_report.get("sales_id")
+        student_payload["sales_mode"] = updated_report.get("sales_mode") or student_payload.get("sales_mode")
     report_payload["student"] = student_payload
     models.update_report_content(report_id=report_id, report_json=report_payload)
     if refresh_pdf:
@@ -411,11 +434,7 @@ def _normalize_submission(data, actor, existing_report=None):
     if not phone and existing_report and existing_report.get("student_id"):
         phone = existing_report["student_id"]
 
-    sales_id = student.get("sales_id")
-    if sales_id in ("", None):
-        sales_id = None
-    elif isinstance(sales_id, str) and sales_id.isdigit():
-        sales_id = int(sales_id)
+    sales_id, sales_mode, sales_name = _normalize_sales_selection(student.get("sales_id"))
 
     course_type = str(student.get("course_type") or "").strip()
     course = str(student.get("course") or "").strip()
@@ -445,6 +464,11 @@ def _normalize_submission(data, actor, existing_report=None):
     student["level"] = level
     student["email"] = str(student.get("email") or "").strip() or None
     student["sales_id"] = sales_id
+    student["sales_mode"] = sales_mode
+    if sales_name:
+        student["sales_name"] = sales_name
+    else:
+        student.pop("sales_name", None)
     student["teacher"] = _display_person_name(actor["name"])
 
     performance = dict(data.get("performance") or {})
@@ -976,9 +1000,13 @@ def _append_dataset_entry(input_data, output_data):
 def _serialize_listing(row):
     report = dict(row)
     report["sent_student_email"] = bool(report.get("sent_student_email"))
-    for key in ("student_name", "teacher_name", "sales_name", "created_by_name"):
+    if report.get("sales_name") == DIRECT_SALES_LABEL:
+        report["sales_name"] = DIRECT_SALES_LABEL
+    for key in ("student_name", "teacher_name", "created_by_name"):
         if report.get(key):
             report[key] = _format_name_words(report[key])
+    if report.get("sales_name") and report["sales_name"] != DIRECT_SALES_LABEL:
+        report["sales_name"] = _format_name_words(report["sales_name"])
     return report
 
 
@@ -987,7 +1015,7 @@ def _can_view_report(actor, report):
         return True
     if user_has_role(actor, "manager"):
         return True
-    if user_has_role(actor, "admin", "operation"):
+    if user_has_role(actor, "admin", "operation", "sales_admin"):
         if report.get("status") == "draft":
             return False
         return report.get("student_branch") == actor.get("branch") or report.get("teacher_branch") == actor.get("branch")
@@ -1012,6 +1040,17 @@ def _normalize_id(value):
         return int(str(value).strip())
     except Exception:
         return None
+
+
+def _normalize_sales_selection(value):
+    raw_value = str(value).strip() if value is not None else ""
+    if not raw_value:
+        return None, None, None
+    if raw_value.lower() == DIRECT_SALES_VALUE:
+        return None, DIRECT_SALES_VALUE, DIRECT_SALES_LABEL
+    if raw_value.isdigit():
+        return int(raw_value), None, None
+    return None, None, None
 
 
 def _build_storage_key(report_id, student, report_type):

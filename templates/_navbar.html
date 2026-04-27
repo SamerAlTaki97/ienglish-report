@@ -49,6 +49,8 @@
     <a href="/admin_teachers" style="color: #ffffff; text-decoration: none"
       >Owner Users</a
     >
+    {% endif %} {% if role == 'sales_admin' %}
+    <a href="/sales-admin" style="color: #ffffff; text-decoration: none">Sales Admin</a>
     {% endif %} {% if role == 'sales' %}
     <a href="/sales" style="color: #ffffff; text-decoration: none">Educational Consultant</a>
     {% endif %}
@@ -117,10 +119,31 @@
     }).observe(document.documentElement, { childList: true, subtree: true });
   })();
 
-  (function logoutWhenWindowCloses() {
-    if (!navigator.sendBeacon) return;
+  (function protectSessionExperience() {
+    const NAV_FLAG_KEY = "ienglish_internal_navigation";
 
-    window.__internalNavigation = false;
+    function markInternalNavigation() {
+      window.__internalNavigation = true;
+      try {
+        sessionStorage.setItem(NAV_FLAG_KEY, "1");
+      } catch (error) {}
+    }
+
+    function clearInternalNavigation() {
+      window.__internalNavigation = false;
+      try {
+        sessionStorage.removeItem(NAV_FLAG_KEY);
+      } catch (error) {}
+    }
+
+    function isInternalNavigation() {
+      if (window.__internalNavigation) return true;
+      try {
+        return sessionStorage.getItem(NAV_FLAG_KEY) === "1";
+      } catch (error) {
+        return false;
+      }
+    }
 
     document.addEventListener("click", (event) => {
       const link = event.target.closest && event.target.closest("a[href]");
@@ -128,22 +151,73 @@
       try {
         const nextUrl = new URL(link.href, window.location.href);
         if (nextUrl.origin === window.location.origin) {
-          window.__internalNavigation = true;
+          markInternalNavigation();
         }
       } catch (error) {}
-    });
+    }, true);
 
     document.addEventListener("submit", () => {
-      window.__internalNavigation = true;
-    });
+      markInternalNavigation();
+    }, true);
 
     window.addEventListener("pageshow", () => {
-      window.__internalNavigation = false;
+      window.setTimeout(clearInternalNavigation, 0);
     });
 
-    window.addEventListener("pagehide", () => {
-      if (window.__internalNavigation) return;
-      navigator.sendBeacon("/logout-beacon", new Blob(["1"], { type: "text/plain" }));
-    });
+    if (navigator.sendBeacon) {
+      window.addEventListener("pagehide", () => {
+        if (isInternalNavigation()) return;
+        navigator.sendBeacon("/logout-beacon", new Blob(["1"], { type: "text/plain" }));
+      });
+    }
+
+    if (!window.fetch) return;
+
+    const nativeFetch = window.fetch.bind(window);
+    window.fetch = async function(input, init = {}) {
+      const requestUrl = typeof input === "string" ? input : (input && input.url) || window.location.href;
+      const targetUrl = new URL(requestUrl, window.location.href);
+      const headers = new Headers(init.headers || (input && input.headers) || {});
+      headers.set("X-Requested-With", "XMLHttpRequest");
+      if (!headers.has("Accept")) {
+        headers.set("Accept", "application/json");
+      }
+
+      try {
+        const response = await nativeFetch(input, { ...init, headers });
+        if (targetUrl.origin !== window.location.origin) {
+          return response;
+        }
+
+        if (response.status === 401) {
+          window.location.replace("/logout");
+          throw new Error("Session expired");
+        }
+
+        if (response.status === 403) {
+          const clone = response.clone();
+          let payload = {};
+          try {
+            payload = await clone.json();
+          } catch (error) {}
+          const message = String(payload.error || "").toLowerCase();
+          if (message.includes("password change")) {
+            window.location.replace("/change-password");
+            throw new Error("Password change required");
+          }
+          if (message.includes("session expired")) {
+            window.location.replace("/logout");
+            throw new Error("Session expired");
+          }
+        }
+
+        return response;
+      } catch (error) {
+        if (targetUrl.origin === window.location.origin) {
+          window.location.replace("/logout");
+        }
+        throw error;
+      }
+    };
   })();
 </script>

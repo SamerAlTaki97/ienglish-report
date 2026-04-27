@@ -42,6 +42,8 @@
       .modal-body { padding: 24px; display: grid; gap: 16px; }
       .panel { border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; background: #fbfdff; }
       .panel h3 { margin: 0 0 12px; }
+      .panel-note { margin: 0; color: #64748b; line-height: 1.5; }
+      .panel-note.warning { color: #991b1b; font-weight: 700; }
       .field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
       .field { display: flex; flex-direction: column; gap: 6px; }
       .field label { font-size: 12px; color: #475569; font-weight: 700; }
@@ -156,6 +158,7 @@
 
           <div class="panel" id="decisionPanel">
             <h3>Decision</h3>
+            <p id="decisionHint" class="panel-note">Choose whether the report is accepted for delivery or marked as not accepted.</p>
             <div class="button-row">
               <button id="approveBtn" class="btn-primary" type="button" onclick="approveCurrentReport()">Accept Report</button>
               <button id="rejectBtn" class="btn-red" type="button" onclick="rejectCurrentReport()">Not Accepted</button>
@@ -172,7 +175,7 @@
 
           <div class="panel" id="deletePanel">
             <h3>Delete From Data</h3>
-            <div class="delivery-pending">This removes the report and its PDF, tracking, and delivery records from the database.</div>
+            <div id="deleteHint" class="delivery-pending">This removes the report and its PDF, tracking, and delivery records from the database.</div>
             <div class="button-row">
               <button id="deleteReportBtn" class="btn-danger" type="button" onclick="deleteCurrentReport()">Delete Report</button>
             </div>
@@ -263,8 +266,8 @@
         document.getElementById("modalSubtitle").innerText = `${row.student_name || "Student"} | ${row.teacher_name || "-"} | ${row.report_type}`;
         document.getElementById("modalStudentPhone").value = row.student_id || "";
         document.getElementById("modalStudentEmail").value = row.student_email || "";
-        document.getElementById("modalSalesId").value = row.sales_id || "";
-        contactEditState = { phone: !row.student_id, email: !row.student_email, sales: !row.sales_id };
+        document.getElementById("modalSalesId").value = currentSalesSelection(row);
+        contactEditState = { phone: !row.student_id, email: !row.student_email, sales: !currentSalesSelection(row) };
         setFeedback(feedbackMessage, isError);
         renderModalState();
         document.getElementById("actionModal").classList.add("open");
@@ -294,10 +297,19 @@
         const canSend = (row.status === "approved" || row.status === "delivered") && Boolean(row.student_email);
         const contactVisible = row.status === "approved" || row.status === "delivered";
         const rejected = row.status === "rejected";
+        const decisionHint = document.getElementById("decisionHint");
+        const deleteHint = document.getElementById("deleteHint");
         document.getElementById("contactPanel").style.display = contactVisible ? "block" : "none";
         document.getElementById("decisionPanel").style.display = canApprove || canReject ? "block" : "none";
         document.getElementById("emailPanel").style.display = contactVisible ? "block" : "none";
         document.getElementById("deletePanel").style.display = rejected ? "block" : "none";
+        decisionHint.innerText = rejected
+          ? "This report is marked as not accepted."
+          : "Choose whether the report is accepted for delivery or marked as not accepted.";
+        decisionHint.className = rejected ? "panel-note warning" : "panel-note";
+        deleteHint.innerText = rejected
+          ? "This report is already marked as not accepted. You can now delete this record permanently."
+          : "This removes the report and its PDF, tracking, and delivery records from the database.";
         document.getElementById("approveBtn").style.display = canApprove ? "inline-flex" : "none";
         document.getElementById("rejectBtn").style.display = canReject ? "inline-flex" : "none";
         document.getElementById("sendEmailBtn").disabled = !canSend;
@@ -310,6 +322,12 @@
         renderContactFieldState("phone");
         renderContactFieldState("email");
         renderContactFieldState("sales");
+      }
+
+      function currentSalesSelection(row) {
+        if (!row) return "";
+        if (row.sales_mode === "direct" || row.sales_name === "Direct") return "direct";
+        return row.sales_id ? String(row.sales_id) : "";
       }
 
       function editContactField(field) {
@@ -420,7 +438,7 @@
         }
         const reportId = currentReportId;
         await load();
-        openActionModal(reportId, "Report marked as not accepted.");
+        openActionModal(reportId, "Report marked as not accepted. You can delete this record now if you do not want to keep it.");
       }
 
       async function deleteCurrentReport() {
@@ -471,7 +489,7 @@
         const response = await fetch(`/api/users?${query.toString()}`);
         const users = await response.json();
         const select = document.getElementById("modalSalesId");
-        select.innerHTML = '<option value="">Select consultant</option>';
+        select.innerHTML = '<option value="">Select consultant</option><option value="direct">Direct</option>';
         users.forEach((user) => {
           select.innerHTML += `<option value="${user.id}">${user.name}</option>`;
         });

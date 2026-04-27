@@ -336,10 +336,17 @@ def get_report_detail(report_id, include_json=True):
             COALESCE(s.name, json_extract(r.report_json, '$.student.name')) AS student_name,
             COALESCE(s.branch, json_extract(r.report_json, '$.student.branch')) AS student_branch,
             COALESCE(s.email, json_extract(r.report_json, '$.student.email')) AS student_email,
-            COALESCE(s.sales_id, CAST(json_extract(r.report_json, '$.student.sales_id') AS INTEGER)) AS sales_id,
+            CASE
+                WHEN COALESCE(json_extract(r.report_json, '$.student.sales_mode'), '') = 'direct' THEN NULL
+                ELSE COALESCE(s.sales_id, CAST(json_extract(r.report_json, '$.student.sales_id') AS INTEGER))
+            END AS sales_id,
+            COALESCE(json_extract(r.report_json, '$.student.sales_mode'), '') AS sales_mode,
             teacher.name AS teacher_name,
             teacher.branch AS teacher_branch,
-            sales.name AS sales_name,
+            CASE
+                WHEN COALESCE(json_extract(r.report_json, '$.student.sales_mode'), '') = 'direct' THEN 'Direct'
+                ELSE COALESCE(sales.name, json_extract(r.report_json, '$.student.sales_name'))
+            END AS sales_name,
             creator.name AS created_by_name,
             (
                 SELECT dl.sent_at
@@ -387,10 +394,17 @@ def list_reports(phone=None, status=None, teacher_id=None, sales_id=None, create
             COALESCE(s.name, json_extract(r.report_json, '$.student.name')) AS student_name,
             COALESCE(s.branch, json_extract(r.report_json, '$.student.branch')) AS student_branch,
             COALESCE(s.email, json_extract(r.report_json, '$.student.email')) AS student_email,
-            COALESCE(s.sales_id, CAST(json_extract(r.report_json, '$.student.sales_id') AS INTEGER)) AS sales_id,
+            CASE
+                WHEN COALESCE(json_extract(r.report_json, '$.student.sales_mode'), '') = 'direct' THEN NULL
+                ELSE COALESCE(s.sales_id, CAST(json_extract(r.report_json, '$.student.sales_id') AS INTEGER))
+            END AS sales_id,
+            COALESCE(json_extract(r.report_json, '$.student.sales_mode'), '') AS sales_mode,
             teacher.name AS teacher_name,
             teacher.branch AS teacher_branch,
-            sales.name AS sales_name,
+            CASE
+                WHEN COALESCE(json_extract(r.report_json, '$.student.sales_mode'), '') = 'direct' THEN 'Direct'
+                ELSE COALESCE(sales.name, json_extract(r.report_json, '$.student.sales_name'))
+            END AS sales_name,
             creator.name AS created_by_name,
             (
                 SELECT dl.sent_at
@@ -429,7 +443,12 @@ def list_reports(phone=None, status=None, teacher_id=None, sales_id=None, create
         query += " AND r.teacher_id=?"
         params.append(teacher_id)
     if sales_id:
-        query += " AND COALESCE(s.sales_id, CAST(json_extract(r.report_json, '$.student.sales_id') AS INTEGER))=?"
+        query += """
+            AND CASE
+                WHEN COALESCE(json_extract(r.report_json, '$.student.sales_mode'), '') = 'direct' THEN NULL
+                ELSE COALESCE(s.sales_id, CAST(json_extract(r.report_json, '$.student.sales_id') AS INTEGER))
+            END=?
+        """
         params.append(sales_id)
     if created_by:
         query += " AND r.created_by=?"
@@ -580,7 +599,7 @@ def update_delivery_log(log_id, status, error_message=None, sent_at=None):
     conn.close()
 
 
-def update_student_contact_for_report(report_id, phone=None, email=None, sales_id=None):
+def update_student_contact_for_report(report_id, phone=None, email=None, sales_id=None, sales_id_provided=False):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -611,10 +630,11 @@ def update_student_contact_for_report(report_id, phone=None, email=None, sales_i
     student_name = report_row["name"] or student_payload.get("name") or "Student"
     student_branch = report_row["branch"] or student_payload.get("branch")
     next_sales_id = (
-        report_row["sales_id"]
-        or student_payload.get("sales_id")
-        if sales_id is None
-        else sales_id
+        sales_id
+        if sales_id_provided
+        else report_row["sales_id"]
+        if report_row["sales_id"] is not None
+        else student_payload.get("sales_id")
     )
     if next_sales_id in ("", None):
         next_sales_id = None
@@ -630,8 +650,8 @@ def update_student_contact_for_report(report_id, phone=None, email=None, sales_i
             cursor.execute(
                 """
                 UPDATE students
-                SET email=COALESCE(?, email),
-                    sales_id=COALESCE(?, sales_id)
+                SET email=?,
+                    sales_id=?
                 WHERE phone=?
                 """,
                 (cleaned_email, next_sales_id, next_phone),
@@ -670,8 +690,8 @@ def update_student_contact_for_report(report_id, phone=None, email=None, sales_i
                 UPDATE students
                 SET name=COALESCE(name, ?),
                     branch=COALESCE(branch, ?),
-                    email=COALESCE(?, email),
-                    sales_id=COALESCE(?, sales_id)
+                    email=?,
+                    sales_id=?
                 WHERE phone=?
                 """,
                 (student_name, student_branch, cleaned_email, next_sales_id, next_phone),

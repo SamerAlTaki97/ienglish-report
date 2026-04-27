@@ -51,6 +51,7 @@
           <option value="">All roles</option>
           <option value="manager">Manager</option>
           <option value="admin">Admin</option>
+          <option value="sales_admin">Sales Admin</option>
           <option value="operation">Operation</option>
           <option value="teacher">Teacher</option>
           <option value="sales">Educational Consultant</option>
@@ -93,6 +94,7 @@
             <option value="manager">Manager</option>
             <option value="teacher">Teacher</option>
             <option value="sales">Educational Consultant</option>
+            <option value="sales_admin">Sales Admin</option>
             <option value="operation">Operation</option>
             <option value="admin">Admin</option>
           </select>
@@ -165,6 +167,7 @@
 
       function displayRole(value) {
         if (value === "sales") return "Educational Consultant";
+        if (value === "sales_admin") return "Sales Admin";
         if (value === "manager") return "Manager";
         if (value === "superadmin") return "Owner";
         return value;

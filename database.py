@@ -9,7 +9,7 @@ PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "http://localhost:5000").rst
     "/"
 )
 
-USER_ROLES = ("teacher", "operation", "admin", "sales", "manager", "superadmin")
+USER_ROLES = ("teacher", "operation", "admin", "sales", "sales_admin", "manager", "superadmin")
 REPORT_TYPES = ("midterm", "final")
 REPORT_STATUSES = ("draft", "pending_operation", "approved", "delivered", "rejected")
 DELIVERY_CHANNELS = ("email",)
@@ -532,6 +532,7 @@ def _seed_default_users(cursor):
         ("Haider", "haider", None, "123", "manager", "AlAin"),
         ("Admin", "admin", "admin@test.com", "123", "admin", "AlAin"),
         ("Operation", "operation", "op@test.com", "123", "operation", "AlAin"),
+        ("Sarah Admin", "SarahAdmin", None, "123", "sales_admin", "AlAin"),
         ("Hussam", "hussam", None, "123", "teacher", "AlAin"),
         ("Fouad", "fouad", None, "123", "teacher", "AlAin"),
         ("Sara", "sara", None, "123", "teacher", "AlAin"),
@@ -627,6 +628,7 @@ def _users_table_is_current(cursor):
         {"id", "name", "username", "email", "password_hash", "password_plain", "role", "branch", "must_change_password", "is_active", "created_at"}
         .issubset(columns)
         and "sales" in sql
+        and "sales_admin" in sql
         and "manager" in sql
         and "superadmin" in sql
     )

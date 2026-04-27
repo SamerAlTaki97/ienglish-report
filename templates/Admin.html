@@ -3,7 +3,7 @@
   <head>
     <link rel="stylesheet" href="/static/css/style.css" />
     <meta charset="UTF-8" />
-    <title>Admin Dashboard</title>
+    <title>{% if role == 'sales_admin' %}Sales Admin Dashboard{% else %}Admin Dashboard{% endif %}</title>
     <style>
       body { font-family: Arial, sans-serif; background: #eef2f7; margin: 0; }
       .container { max-width: 1220px; margin: 32px auto; background: white; padding: 24px; border-radius: 12px; }
@@ -25,8 +25,11 @@
   <body>
     {% include "_navbar.html" %}
     <div class="container">
+      {% if role == 'sales_admin' %}
+      <h1>Sales Admin Monitor</h1>
+      {% else %}
       <h1>Admin Operation Monitor</h1>
-
+      {% endif %}
       <div class="stats">
         <div class="card pending_operation">Pending Operation: <span id="pendingCount">0</span></div>
         <div class="card approved">Approved: <span id="approvedCount">0</span></div>
@@ -68,10 +71,14 @@
             <th>Branch</th>
             <th>Level</th>
             <th>Type</th>
+            {% if role == 'sales_admin' %}
+            <th>Educational Consultant</th>
+            {% else %}
             <th>Status</th>
             <th>Received</th>
             <th>Email Sent</th>
             <th>Sent At</th>
+            {% endif %}
             <th>View</th>
           </tr>
         </thead>
@@ -81,6 +88,7 @@
 
     <script>
       let allRows = [];
+      const isSalesAdmin = {{ "true" if role == "sales_admin" else "false" }};
 
       async function load() {
         const phone = document.getElementById("phoneFilter").value.trim();
@@ -114,10 +122,12 @@
               <td>${row.student_branch || row.teacher_branch || "-"}</td>
               <td>${row.level || "-"}</td>
               <td>${row.report_type}</td>
-              <td>${row.status}</td>
-              <td>${row.created_at}</td>
-              <td>${row.sent_student_email ? "Yes" : "No"}</td>
-              <td>${row.sent_at || "-"}</td>
+              ${isSalesAdmin
+                ? `<td>${row.sales_name || "-"}</td>`
+                : `<td>${row.status}</td>
+                   <td>${row.created_at}</td>
+                   <td>${row.sent_student_email ? "Yes" : "No"}</td>
+                   <td>${row.sent_at || "-"}</td>`}
               <td><a href="/view/${row.id}" target="_blank">Preview</a></td>
             </tr>
           `;

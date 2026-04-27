@@ -6,8 +6,8 @@ import models
 
 from . import ServiceError
 
-VALID_ROLES = {"teacher", "operation", "admin", "sales", "manager", "superadmin"}
-OWNER_MANAGED_ROLES = {"teacher", "operation", "admin", "sales", "manager"}
+VALID_ROLES = {"teacher", "operation", "admin", "sales", "sales_admin", "manager", "superadmin"}
+OWNER_MANAGED_ROLES = {"teacher", "operation", "admin", "sales", "sales_admin", "manager"}
 USERNAME_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+$")
 
 
@@ -47,7 +47,7 @@ def list_visible_users(actor, role=None, branch=None):
             )
     elif user_has_role(actor, "manager"):
         selected_role = role or None
-        if selected_role in {"teacher", "operation", "admin", "sales"}:
+        if selected_role in {"teacher", "operation", "admin", "sales", "sales_admin"}:
             users = models.list_users(role=selected_role, branch=branch or None)
         else:
             users = []

@@ -1,3 +1,4 @@
+import io
 from functools import wraps
 
 from flask import Flask, Response, jsonify, redirect, render_template, request, send_file, session, url_for
@@ -25,10 +26,32 @@ DISPLAY_MR_NAMES = {
     "omar",
 }
 
+JSON_PATH_PREFIXES = (
+    "/api/",
+    "/reports/",
+    "/generate",
+    "/admin/",
+    "/operation/",
+    "/sales-admin/",
+    "/sales/",
+    "/students/",
+)
+
 
 @app.errorhandler(ServiceError)
 def handle_service_error(error):
     return jsonify({"error": error.message}), error.status_code
+
+
+def wants_json_response():
+    accept_header = (request.headers.get("Accept") or "").lower()
+    requested_with = (request.headers.get("X-Requested-With") or "").lower()
+    return (
+        request.is_json
+        or requested_with == "xmlhttprequest"
+        or "application/json" in accept_header
+        or request.path.startswith(JSON_PATH_PREFIXES)
+    )
 
 
 def login_required(view):
@@ -36,11 +59,11 @@ def login_required(view):
     def wrapper(*args, **kwargs):
         user = current_user()
         if not user:
-            if request.accept_mimetypes.accept_json or request.path.startswith(("/api/", "/reports/", "/generate")):
+            if wants_json_response():
                 return jsonify({"error": "Your session expired. Please log in again."}), 401
             return redirect(url_for("login"))
         if user.get("must_change_password") and request.endpoint not in {"change_password", "logout"}:
-            if request.accept_mimetypes.accept_json or request.path.startswith(("/api/", "/reports/", "/generate")):
+            if wants_json_response():
                 return jsonify({"error": "Password change is required before continuing."}), 403
             return redirect(url_for("change_password"))
         return view(*args, **kwargs)
@@ -54,15 +77,15 @@ def role_required(*roles):
         def wrapper(*args, **kwargs):
             user = current_user()
             if not user:
-                if request.accept_mimetypes.accept_json or request.path.startswith(("/api/", "/reports/", "/generate")):
+                if wants_json_response():
                     return jsonify({"error": "Your session expired. Please log in again."}), 401
                 return redirect(url_for("login"))
             if user.get("must_change_password") and request.endpoint not in {"change_password", "logout"}:
-                if request.accept_mimetypes.accept_json or request.path.startswith(("/api/", "/reports/", "/generate")):
+                if wants_json_response():
                     return jsonify({"error": "Password change is required before continuing."}), 403
                 return redirect(url_for("change_password"))
             if user["role"] != "superadmin" and user["role"] not in roles:
-                if request.accept_mimetypes.accept_json or request.path.startswith(("/api/", "/reports/", "/generate")):
+                if wants_json_response():
                     return jsonify({"error": "Forbidden"}), 403
                 return "Forbidden", 403
             return view(*args, **kwargs)
@@ -125,6 +148,8 @@ def redirect_for_role(user):
         return redirect(url_for("admin"))
     if user["role"] == "admin":
         return redirect(url_for("admin"))
+    if user["role"] == "sales_admin":
+        return redirect(url_for("sales_admin"))
     if user["role"] == "operation":
         return redirect(url_for("operation"))
     if user["role"] == "sales":
@@ -163,6 +188,13 @@ def operation():
 @login_required
 @role_required("admin", "manager")
 def admin():
+    return render_with_user("Admin.html")
+
+
+@app.route("/sales-admin")
+@login_required
+@role_required("sales_admin")
+def sales_admin():
     return render_with_user("Admin.html")
 
 
@@ -246,7 +278,7 @@ def students_search():
 
 @app.route("/admin/reports")
 @login_required
-@role_required("admin", "manager")
+@role_required("admin", "manager", "sales_admin")
 def admin_reports():
     reports = report_service.list_reports_for_user(
         current_user(),
@@ -377,6 +409,7 @@ def update_report_contact(report_id):
             "student_id": report["student_id"],
             "student_email": report.get("student_email"),
             "sales_id": report.get("sales_id"),
+            "sales_mode": report.get("sales_mode"),
             "sales_name": report.get("sales_name"),
         }
     )
@@ -487,11 +520,13 @@ def public_report_pdf(report_id):
     if document["storage_provider"] == "s3" and report.get("pdf_path"):
         return redirect(report["pdf_path"])
 
+    filename = report_service.build_report_download_name(report)
+
     return Response(
         document["content"],
         mimetype=document.get("content_type", "application/pdf"),
         headers={
-            "Content-Disposition": f'{"attachment" if as_download else "inline"}; filename="report_{report_id}.pdf"',
+            "Content-Disposition": f'{"attachment" if as_download else "inline"}; filename="{filename}"',
             "X-Content-Type-Options": "nosniff",
         },
     )

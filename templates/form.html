@@ -339,7 +339,7 @@
         const response = await fetch("/api/users?role=sales");
         const users = await response.json();
         const select = document.getElementById("sales_id");
-        select.innerHTML = `<option value="">Unassigned</option>`;
+        select.innerHTML = `<option value="">Unassigned</option><option value="direct">Direct</option>`;
         users.forEach((user) => { select.innerHTML += `<option value="${user.id}">${user.name}</option>`; });
       }
 
@@ -446,7 +446,7 @@
 
         document.getElementById("name").value = student.name || "";
         document.getElementById("teacher").value = student.teacher || document.getElementById("teacher").value;
-        setSelectValue("sales_id", student.sales_id || report.sales_id || "");
+        setSelectValue("sales_id", student.sales_mode === "direct" ? "direct" : (student.sales_id || report.sales_id || ""));
         setSelectValue("report_type", reportJson.report_type || report.report_type || "");
         document.getElementById("exam_score").value = performance.exam_score || "";
 
