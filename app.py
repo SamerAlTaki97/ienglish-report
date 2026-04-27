@@ -267,6 +267,12 @@ def users_lookup():
     return jsonify(user_service.list_visible_users(current_user(), role=role, branch=branch))
 
 
+@app.route("/api/session-status")
+@login_required
+def session_status():
+    return ("", 204)
+
+
 @app.route("/students/search")
 @login_required
 def students_search():

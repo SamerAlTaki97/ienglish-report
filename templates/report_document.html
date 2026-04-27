@@ -510,7 +510,7 @@
           <button class="preview-action submit" id="submitDraftBtn" type="button" onclick="submitDraftReport()">Send To Operation</button>
           {% endif %}
           {% if report_meta.pdf_download_url %}
-          <a class="preview-action download" href="{{ report_meta.pdf_download_url }}?download=1" target="_blank">Download PDF</a>
+          <a class="preview-action download" href="{{ report_meta.pdf_download_url }}?download=1" download="{{ (student.name or 'student')|lower }} report.pdf">Download PDF</a>
           {% endif %}
         </div>
       </div>

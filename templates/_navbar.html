@@ -49,7 +49,7 @@
     <a href="/admin_teachers" style="color: #ffffff; text-decoration: none"
       >Owner Users</a
     >
-    {% endif %} {% if role == 'sales_admin' %}
+    {% endif %} {% if role in ['sales_admin', 'superadmin'] %}
     <a href="/sales-admin" style="color: #ffffff; text-decoration: none">Sales Admin</a>
     {% endif %} {% if role == 'sales' %}
     <a href="/sales" style="color: #ffffff; text-decoration: none">Educational Consultant</a>
@@ -219,5 +219,20 @@
         throw error;
       }
     };
+
+    window.setInterval(async () => {
+      try {
+        const response = await nativeFetch("/api/session-status", {
+          headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            "Accept": "application/json",
+          },
+          cache: "no-store",
+        });
+        if (response.status === 401) {
+          window.location.replace("/logout");
+        }
+      } catch (error) {}
+    }, 60000);
   })();
 </script>
