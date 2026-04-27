@@ -88,7 +88,7 @@
         {% endif %}
         <select id="statusFilter" onchange="load()">
           <option value="">All statuses</option>
-          <option value="pending_operation">Pending operation</option>
+          <option value="pending_operation">Pending</option>
           <option value="approved">Approved</option>
           <option value="delivered">Delivered</option>
           <option value="rejected">Not accepted</option>
@@ -100,11 +100,11 @@
           <thead>
             <tr>
               <th>ID</th>
-              <th class="phone-col">Phone</th>
-              <th class="email-col">Email</th>
               <th>Student</th>
               <th>Teacher</th>
               <th>Educational Consultant</th>
+              <th class="phone-col">Phone</th>
+              <th class="email-col">Email</th>
               <th>Status</th>
               <th>Email Delivery</th>
               <th>Sent</th>
@@ -194,6 +194,11 @@
       let currentReportId = null;
       let contactEditState = { phone: true, email: true, sales: true };
 
+      function formatStatusLabel(status) {
+        if (status === "pending_operation") return "pending";
+        return String(status || "-").replaceAll("_", " ");
+      }
+
       function parseJson(response) {
         return response.text().then((raw) => {
           try { return raw ? JSON.parse(raw) : {}; }
@@ -225,12 +230,12 @@
           tbody.innerHTML += `
             <tr>
               <td data-label="ID">${row.id}</td>
-              <td data-label="Phone" class="phone-cell">${row.student_id || "-"}</td>
-              <td data-label="Email" class="email-cell">${row.student_email || "-"}</td>
               <td data-label="Student">${row.student_name || "-"}</td>
               <td data-label="Teacher">${row.teacher_name || "-"}</td>
               <td data-label="Educational Consultant">${row.sales_name || "-"}</td>
-              <td data-label="Status"><span class="status ${row.status}">${row.status.replaceAll("_", " ")}</span></td>
+              <td data-label="Phone" class="phone-cell">${row.student_id || "-"}</td>
+              <td data-label="Email" class="email-cell">${row.student_email || "-"}</td>
+              <td data-label="Status"><span class="status ${row.status}">${formatStatusLabel(row.status)}</span></td>
               <td data-label="Email Delivery">${row.sent_student_email ? '<span class="delivery-done">Sent</span>' : '<span class="delivery-pending">Not sent</span>'}</td>
               <td data-label="Sent">${row.sent_at || "-"}</td>
               <td data-label="Received">${row.created_at || "-"}</td>

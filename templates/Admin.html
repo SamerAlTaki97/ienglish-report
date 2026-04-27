@@ -6,7 +6,7 @@
     <title>Admin Dashboard</title>
     <style>
       body { font-family: Arial, sans-serif; background: #eef2f7; margin: 0; }
-      .container { max-width: 1220px; margin: 32px auto; background: white; padding: 24px; border-radius: 12px; }
+      .container { max-width: 1460px; margin: 32px auto; background: white; padding: 24px; border-radius: 12px; }
       .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
       .card { padding: 16px; border-radius: 10px; color: white; font-weight: bold; }
       .pending_operation { background: #d97706; }
@@ -16,17 +16,17 @@
       .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
       .search-wrap input { min-width: 230px; }
       input, select, button { padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; }
-      .table-wrap { border: 1px solid #e5e7eb; border-radius: 12px; overflow-x: auto; }
-      table { width: 100%; min-width: 1180px; border-collapse: collapse; }
+      .table-wrap { border: 1px solid #e5e7eb; border-radius: 12px; overflow: visible; }
+      table { width: 100%; border-collapse: collapse; table-layout: fixed; }
       th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center; vertical-align: middle; }
-      th { background: #f8fafc; white-space: nowrap; }
-      .student-col { min-width: 170px; }
-      .teacher-col { min-width: 120px; }
-      .consultant-col { min-width: 170px; }
-      .phone-col { min-width: 120px; max-width: 120px; }
-      .email-col { min-width: 145px; max-width: 145px; }
-      .status-col { min-width: 120px; }
-      .view-col { min-width: 90px; }
+      th { background: #f8fafc; white-space: normal; line-height: 1.2; }
+      .student-col { width: 12%; }
+      .teacher-col { width: 9%; }
+      .consultant-col { width: 12%; }
+      .phone-col { width: 8%; }
+      .email-col { width: 10%; }
+      .status-col { width: 8%; }
+      .view-col { width: 7%; }
       .email-cell, .phone-cell, .status-cell { white-space: normal; overflow-wrap: anywhere; word-break: break-word; text-align: center; }
       @media (max-width: 900px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     </style>
@@ -36,7 +36,7 @@
     <div class="container">
       <h1>Admin Operation Monitor</h1>
       <div class="stats">
-        <div class="card pending_operation">Pending Operation: <span id="pendingCount">0</span></div>
+        <div class="card pending_operation">Pending: <span id="pendingCount">0</span></div>
         <div class="card approved">Approved: <span id="approvedCount">0</span></div>
         <div class="card delivered">Delivered: <span id="deliveredCount">0</span></div>
         <div class="card rejected">Not Accepted: <span id="rejectedCount">0</span></div>
@@ -58,7 +58,7 @@
         {% endif %}
         <select id="statusFilter" onchange="load()">
           <option value="">All statuses</option>
-          <option value="pending_operation">Pending operation</option>
+          <option value="pending_operation">Pending</option>
           <option value="approved">Approved</option>
           <option value="delivered">Delivered</option>
           <option value="rejected">Not accepted</option>
@@ -90,6 +90,11 @@
 
     <script>
       let allRows = [];
+
+      function formatStatusLabel(status) {
+        if (status === "pending_operation") return "pending";
+        return String(status || "-").replaceAll("_", " ");
+      }
 
       function displayPhone(row) {
         const value = String(row.student_id || "").trim();
@@ -129,7 +134,7 @@
               <td>${row.sales_name || "-"}</td>
               <td class="phone-cell">${displayPhone(row)}</td>
               <td class="email-cell">${row.student_email || "-"}</td>
-              <td class="status-cell">${row.status || "-"}</td>
+              <td class="status-cell">${formatStatusLabel(row.status)}</td>
               <td>${row.sent_student_email ? "Yes" : "No"}</td>
               <td>${row.created_at || "-"}</td>
               <td><a href="/view/${row.id}" target="_blank">Preview</a></td>

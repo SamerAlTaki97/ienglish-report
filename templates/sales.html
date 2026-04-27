@@ -26,7 +26,7 @@
         <select id="statusFilter" onchange="load()">
           <option value="">All statuses</option>
           <option value="draft">Draft</option>
-          <option value="pending_operation">Pending operation</option>
+          <option value="pending_operation">Pending</option>
           <option value="approved">Approved</option>
           <option value="delivered">Delivered</option>
           <option value="rejected">Not accepted</option>
@@ -54,6 +54,11 @@
     </div>
 
     <script>
+      function formatStatusLabel(status) {
+        if (status === "pending_operation") return "pending";
+        return String(status || "-").replaceAll("_", " ");
+      }
+
       async function load() {
         const phone = document.getElementById("phoneFilter").value.trim();
         const status = document.getElementById("statusFilter").value;
@@ -73,7 +78,7 @@
               <td>${row.teacher_name}</td>
               <td>${row.level || "-"}</td>
               <td>${row.report_type}</td>
-              <td>${row.status}</td>
+              <td>${formatStatusLabel(row.status)}</td>
               <td>${row.sent_at || "-"}</td>
               <td><a href="/view/${row.id}" target="_blank">Preview</a></td>
             </tr>
