@@ -6,6 +6,8 @@ import base64
 import shutil
 import tempfile
 import time
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from urllib.parse import urljoin
 
 from flask import current_app, has_request_context, render_template, request
@@ -35,6 +37,7 @@ CLASS_TYPES = {"Group Adult", "VIP Adult", "Group Kids", "VIP Kid"}
 MR_NAMES = {"hussam", "fouad", "mazen", "zain", "amin", "karam", "omar"}
 DIRECT_SALES_VALUE = "direct"
 DIRECT_SALES_LABEL = "Direct"
+DISPLAY_TIMEZONE = ZoneInfo("Asia/Dubai")
 
 
 def generate_report(data, actor):
@@ -280,7 +283,7 @@ def build_report_document_context(data, report_meta=None, preview_mode=False):
     return {
         "preview_mode": preview_mode,
         "report_type_label": _format_report_type(data.get("report_type")),
-        "issue_date": time.strftime("%d %B %Y"),
+        "issue_date": datetime.now(DISPLAY_TIMEZONE).strftime("%d %B %Y"),
         "student": student,
         "exam_score": performance.get("exam_score"),
         "report_meta": report_meta or {},
@@ -1003,6 +1006,8 @@ def _append_dataset_entry(input_data, output_data):
 def _serialize_listing(row):
     report = dict(row)
     report["sent_student_email"] = bool(report.get("sent_student_email"))
+    report["created_at"] = _format_display_timestamp(report.get("created_at"))
+    report["sent_at"] = _format_display_timestamp(report.get("sent_at"))
     raw_student_id = str(report.get("student_id") or "").strip()
     display_phone = str(report.get("display_student_phone") or "").strip()
     if display_phone:
@@ -1080,6 +1085,21 @@ def _effective_student_phone(report):
         except json.JSONDecodeError:
             report_payload = {}
     return str((report_payload.get("student") or {}).get("phone") or "").strip() or None
+
+
+def _format_display_timestamp(value):
+    raw = str(value or "").strip()
+    if not raw:
+        return "-"
+
+    normalized = raw.replace("T", " ")
+    for fmt in ("%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d %H:%M:%S"):
+        try:
+            parsed = datetime.strptime(normalized, fmt).replace(tzinfo=timezone.utc)
+            return parsed.astimezone(DISPLAY_TIMEZONE).strftime("%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            continue
+    return raw
 
 
 def _build_storage_key(report_id, student, report_type):
