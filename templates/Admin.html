@@ -3,23 +3,288 @@
   <head>
     <link rel="stylesheet" href="/static/css/style.css" />
     <meta charset="UTF-8" />
-    <title>Admin Dashboard</title>
+    <title>{% if manager_view or role == 'manager' %}Manager Dashboard{% else %}Admin Dashboard{% endif %}</title>
     <style>
-      body { font-family: Arial, sans-serif; background: #eef2f7; margin: 0; }
-      .container { max-width: 1460px; margin: 32px auto; background: white; padding: 24px; border-radius: 12px; }
-      .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
-      .card { padding: 16px; border-radius: 10px; color: white; font-weight: bold; }
-      .pending_operation { background: #d97706; }
-      .approved { background: #2563eb; }
-      .delivered { background: #16a34a; }
-      .rejected { background: #991b1b; }
-      .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+      :root {
+        --bg: #eef2f7;
+        --surface: #ffffff;
+        --line: #dbe4ee;
+        --ink: #0f172a;
+        --muted: #64748b;
+        --pending: #d97706;
+        --approved: #2563eb;
+        --delivered: #16a34a;
+        --rejected: #991b1b;
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--ink); }
+      .page {
+        max-width: 1460px;
+        margin: 28px auto 40px;
+        padding: 0 18px;
+      }
+      .hero {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 18px;
+        margin-bottom: 22px;
+      }
+      .hero h1 {
+        margin: 0;
+        font-size: 34px;
+      }
+      .hero-note {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .toolbar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      input, select, button {
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        font: inherit;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .stat-card {
+        border-radius: 14px;
+        color: #fff;
+        padding: 18px 18px 16px;
+        min-height: 108px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .stat-card small {
+        opacity: 0.92;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .stat-card strong {
+        font-size: 36px;
+        line-height: 1;
+      }
+      .stat-card span {
+        font-size: 14px;
+        opacity: 0.92;
+      }
+      .pending-card { background: var(--pending); }
+      .approved-card { background: var(--approved); }
+      .delivered-card { background: var(--delivered); }
+      .rejected-card { background: var(--rejected); }
+
+      .tabs {
+        display: inline-flex;
+        gap: 8px;
+        padding: 6px;
+        border-radius: 14px;
+        background: #dfe8f2;
+        margin-bottom: 18px;
+      }
+      .tab {
+        border: none;
+        background: transparent;
+        color: #1e293b;
+        font-weight: 700;
+        padding: 10px 16px;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+      .tab.active {
+        background: #ffffff;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+      }
+
+      .panel {
+        display: none;
+      }
+      .panel.active {
+        display: block;
+      }
+
+      .overview-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 0.9fr;
+        gap: 18px;
+        margin-bottom: 18px;
+      }
+      .overview-box,
+      .reports-box,
+      .teachers-box {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 18px;
+      }
+      .box-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      .box-head h2,
+      .box-head h3 {
+        margin: 0;
+      }
+      .box-head span {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .distribution {
+        display: grid;
+        gap: 12px;
+      }
+      .distribution-track {
+        display: flex;
+        width: 100%;
+        height: 14px;
+        border-radius: 999px;
+        overflow: hidden;
+        background: #e2e8f0;
+      }
+      .distribution-segment { height: 100%; }
+      .distribution-legend {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+      }
+      .legend-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 700;
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        flex: 0 0 auto;
+      }
+
+      .activity-list,
+      .teacher-list {
+        display: grid;
+        gap: 12px;
+      }
+      .activity-item,
+      .teacher-item {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 14px;
+      }
+      .activity-top,
+      .teacher-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: start;
+      }
+      .activity-title,
+      .teacher-name {
+        font-weight: 700;
+      }
+      .activity-meta,
+      .teacher-meta {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 88px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: capitalize;
+      }
+      .pill.pending_operation { background: var(--pending); }
+      .pill.approved { background: var(--approved); }
+      .pill.delivered { background: var(--delivered); }
+      .pill.rejected { background: var(--rejected); }
+      .teacher-bar {
+        width: 100%;
+        height: 10px;
+        background: #e2e8f0;
+        border-radius: 999px;
+        overflow: hidden;
+        margin-top: 12px;
+      }
+      .teacher-bar > div {
+        height: 100%;
+        background: linear-gradient(90deg, #2563eb, #16a34a);
+      }
+      .teacher-stats {
+        margin-top: 10px;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 8px;
+        color: var(--muted);
+        font-size: 12px;
+        text-align: center;
+      }
+
+      .report-filters {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+      }
       .search-wrap input { min-width: 230px; }
-      input, select, button { padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; }
-      .table-wrap { border: 1px solid #e5e7eb; border-radius: 12px; overflow: visible; }
-      table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-      th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center; vertical-align: middle; }
-      th { background: #f8fafc; white-space: normal; line-height: 1.2; }
+      .table-wrap {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        min-width: 1220px;
+        border-collapse: collapse;
+      }
+      th, td {
+        padding: 11px 10px;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: center;
+        vertical-align: middle;
+      }
+      th {
+        background: #f8fafc;
+        white-space: normal;
+        line-height: 1.2;
+        color: #334155;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
       .student-col { width: 12%; }
       .teacher-col { width: 9%; }
       .consultant-col { width: 12%; }
@@ -27,69 +292,216 @@
       .email-col { width: 10%; }
       .status-col { width: 8%; }
       .view-col { width: 7%; }
-      .email-cell, .phone-cell, .status-cell { white-space: normal; overflow-wrap: anywhere; word-break: break-word; text-align: center; }
-      @media (max-width: 900px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      .email-cell, .phone-cell, .status-cell {
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        text-align: center;
+      }
+      .empty-state {
+        padding: 28px 18px;
+        text-align: center;
+        color: var(--muted);
+      }
+      .view-link {
+        color: #2563eb;
+        font-weight: 700;
+        text-decoration: none;
+      }
+      .view-link:hover { text-decoration: underline; }
+
+      @media (max-width: 1100px) {
+        .overview-grid {
+          grid-template-columns: 1fr;
+        }
+        .teacher-stats {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 900px) {
+        .stats {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .hero {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
     </style>
   </head>
   <body>
     {% include "_navbar.html" %}
-    <div class="container">
-      <h1>Admin Operation Monitor</h1>
-      <div class="stats">
-        <div class="card pending_operation">Pending: <span id="pendingCount">0</span></div>
-        <div class="card approved">Approved: <span id="approvedCount">0</span></div>
-        <div class="card delivered">Delivered: <span id="deliveredCount">0</span></div>
-        <div class="card rejected">Not Accepted: <span id="rejectedCount">0</span></div>
-      </div>
-
-      <div class="filters">
-        <div class="search-wrap">
-          <input id="phoneFilter" placeholder="Search by student phone" />
+    <div class="page">
+      <div class="hero">
+        <div>
+          <h1>{% if manager_view or role == 'manager' %}Manager Dashboard{% else %}Admin Dashboard{% endif %}</h1>
+          <div class="hero-note">Overview, branch monitoring, and teacher activity in one place.</div>
         </div>
-        <select id="teacherFilter" onchange="load()">
-          <option value="">All teachers</option>
-        </select>
-        {% if manager_view or role == 'manager' %}
-        <select id="branchFilter" onchange="handleBranchChange()">
-          <option value="">All branches</option>
-          <option value="AlAin">AlAin</option>
-          <option value="Abu Dhabi">Abu Dhabi</option>
-        </select>
-        {% endif %}
-        <select id="statusFilter" onchange="load()">
-          <option value="">All statuses</option>
-          <option value="pending_operation">Pending</option>
-          <option value="approved">Approved</option>
-          <option value="delivered">Delivered</option>
-          <option value="rejected">Not accepted</option>
-        </select>
+        <div class="toolbar">
+          {% if manager_view or role == 'manager' %}
+          <select id="branchFilter" onchange="handleBranchChange()">
+            <option value="">All branches</option>
+            <option value="AlAin">AlAin</option>
+            <option value="Abu Dhabi">Abu Dhabi</option>
+          </select>
+          {% endif %}
+        </div>
       </div>
 
-      <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th class="student-col">Student</th>
-            <th class="teacher-col">Teacher</th>
-            <th>Level</th>
-            <th>Type</th>
-            <th class="consultant-col">Educational Consultant</th>
-            <th class="phone-col">Phone</th>
-            <th class="email-col">Email</th>
-            <th class="status-col">Status</th>
-            <th>Email Sent</th>
-            <th>Received</th>
-            <th class="view-col">View</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
+      <div class="stats">
+        <div class="stat-card pending-card">
+          <small>Pending</small>
+          <strong id="pendingCount">0</strong>
+          <span id="pendingShare">0% of current workflow</span>
+        </div>
+        <div class="stat-card approved-card">
+          <small>Approved</small>
+          <strong id="approvedCount">0</strong>
+          <span id="approvedShare">0 ready for delivery</span>
+        </div>
+        <div class="stat-card delivered-card">
+          <small>Delivered</small>
+          <strong id="deliveredCount">0</strong>
+          <span id="deliveredShare">0 completed reports</span>
+        </div>
+        <div class="stat-card rejected-card">
+          <small>Not Accepted</small>
+          <strong id="rejectedCount">0</strong>
+          <span id="rejectedShare">0 rejected items</span>
+        </div>
       </div>
+
+      <div class="tabs">
+        <button class="tab active" type="button" data-tab="overview">Overview</button>
+        <button class="tab" type="button" data-tab="reports">Reports</button>
+        <button class="tab" type="button" data-tab="teachers">Teachers</button>
+      </div>
+
+      <section id="overviewPanel" class="panel active">
+        <div class="overview-grid">
+          <div class="overview-box">
+            <div class="box-head">
+              <h2>Workflow Distribution</h2>
+              <span id="distributionCaption">0 reports in workflow</span>
+            </div>
+            <div class="distribution">
+              <div id="distributionTrack" class="distribution-track"></div>
+              <div id="distributionLegend" class="distribution-legend"></div>
+            </div>
+          </div>
+
+          <div class="overview-box">
+            <div class="box-head">
+              <h2>Needs Attention</h2>
+              <span>Pending items and approved reports still waiting to be sent</span>
+            </div>
+            <div id="attentionList" class="activity-list"></div>
+          </div>
+        </div>
+
+        <div class="overview-box">
+          <div class="box-head">
+            <h2>Teacher Snapshot</h2>
+            <span>Workload and completion trend by teacher</span>
+          </div>
+          <div id="teacherSnapshot" class="teacher-list"></div>
+        </div>
+      </section>
+
+      <section id="reportsPanel" class="panel">
+        <div class="reports-box">
+          <div class="box-head">
+            <h2>Reports Monitor</h2>
+            <span>Detailed view with live filters</span>
+          </div>
+
+          <div class="report-filters">
+            <div class="search-wrap">
+              <input id="phoneFilter" placeholder="Search by student phone" />
+            </div>
+            <select id="teacherFilter" onchange="loadReports()">
+              <option value="">All teachers</option>
+            </select>
+            <select id="statusFilter" onchange="loadReports()">
+              <option value="">All statuses</option>
+              <option value="pending_operation">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="delivered">Delivered</option>
+              <option value="rejected">Not accepted</option>
+            </select>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th class="student-col">Student</th>
+                  <th class="teacher-col">Teacher</th>
+                  <th>Level</th>
+                  <th>Type</th>
+                  <th class="consultant-col">Educational Consultant</th>
+                  <th class="phone-col">Phone</th>
+                  <th class="email-col">Email</th>
+                  <th class="status-col">Status</th>
+                  <th>Email Sent</th>
+                  <th>Received</th>
+                  <th class="view-col">View</th>
+                </tr>
+              </thead>
+              <tbody id="reportsTableBody"></tbody>
+            </table>
+            <div id="reportsEmptyState" class="empty-state" style="display:none;">No reports match the current filters.</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="teachersPanel" class="panel">
+        <div class="teachers-box">
+          <div class="box-head">
+            <h2>Teacher Performance</h2>
+            <span>Summary for the current branch view</span>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Teacher</th>
+                  <th>Total</th>
+                  <th>Pending</th>
+                  <th>Approved</th>
+                  <th>Delivered</th>
+                  <th>Not Accepted</th>
+                  <th>Email Sent</th>
+                </tr>
+              </thead>
+              <tbody id="teachersTableBody"></tbody>
+            </table>
+            <div id="teachersEmptyState" class="empty-state" style="display:none;">No teacher activity is available for this view.</div>
+          </div>
+        </div>
+      </section>
     </div>
 
     <script>
-      let allRows = [];
+      const dashboardRows = [];
+      let filteredRows = [];
+
+      const STATUS_ORDER = ["pending_operation", "approved", "delivered", "rejected"];
+      const STATUS_LABELS = {
+        pending_operation: "Pending",
+        approved: "Approved",
+        delivered: "Delivered",
+        rejected: "Not accepted",
+      };
+      const STATUS_COLORS = {
+        pending_operation: "#d97706",
+        approved: "#2563eb",
+        delivered: "#16a34a",
+        rejected: "#991b1b",
+      };
 
       function formatStatusLabel(status) {
         if (status === "pending_operation") return "pending";
@@ -102,55 +514,248 @@
         return value;
       }
 
-      async function load() {
-        const phone = document.getElementById("phoneFilter").value.trim();
-        const teacher = document.getElementById("teacherFilter").value;
-        const status = document.getElementById("statusFilter").value;
+      function currentBranch() {
         const branchFilter = document.getElementById("branchFilter");
-        const branch = branchFilter ? branchFilter.value : "";
-        const query = new URLSearchParams();
-        if (phone) query.set("phone", phone);
-        if (teacher) query.set("teacher_id", teacher);
-        if (status) query.set("status", status);
-        if (branch) query.set("branch", branch);
-        const response = await fetch(`/admin/reports?${query.toString()}`);
-        allRows = await response.json();
-        render();
+        return branchFilter ? branchFilter.value : "";
       }
 
-      function render() {
+      async function fetchRows(params = {}) {
+        const query = new URLSearchParams();
+        const branch = currentBranch();
+        if (branch) query.set("branch", branch);
+        Object.entries(params).forEach(([key, value]) => {
+          if (value) query.set(key, value);
+        });
+        const response = await fetch(`/admin/reports?${query.toString()}`);
+        return response.json();
+      }
+
+      function statusCounts(rows) {
         const counts = { pending_operation: 0, approved: 0, delivered: 0, rejected: 0 };
-        const tbody = document.getElementById("tableBody");
-        tbody.innerHTML = "";
-        allRows.forEach((row) => {
+        rows.forEach((row) => {
           counts[row.status] = (counts[row.status] || 0) + 1;
+        });
+        return counts;
+      }
+
+      function percentage(part, total) {
+        if (!total) return 0;
+        return Math.round((part / total) * 100);
+      }
+
+      function renderStats(rows) {
+        const counts = statusCounts(rows);
+        const total = rows.length;
+
+        document.getElementById("pendingCount").innerText = counts.pending_operation;
+        document.getElementById("approvedCount").innerText = counts.approved;
+        document.getElementById("deliveredCount").innerText = counts.delivered;
+        document.getElementById("rejectedCount").innerText = counts.rejected;
+
+        document.getElementById("pendingShare").innerText = `${percentage(counts.pending_operation, total)}% of current workflow`;
+        document.getElementById("approvedShare").innerText = `${counts.approved} ready for delivery`;
+        document.getElementById("deliveredShare").innerText = `${counts.delivered} completed reports`;
+        document.getElementById("rejectedShare").innerText = `${counts.rejected} rejected items`;
+      }
+
+      function renderDistribution(rows) {
+        const counts = statusCounts(rows);
+        const total = rows.length;
+        const track = document.getElementById("distributionTrack");
+        const legend = document.getElementById("distributionLegend");
+        document.getElementById("distributionCaption").innerText = `${total} reports in workflow`;
+
+        track.innerHTML = "";
+        legend.innerHTML = "";
+
+        STATUS_ORDER.forEach((status) => {
+          const count = counts[status] || 0;
+          const width = total ? Math.max((count / total) * 100, count ? 6 : 0) : 0;
+          const segment = document.createElement("div");
+          segment.className = "distribution-segment";
+          segment.style.width = `${width}%`;
+          segment.style.background = STATUS_COLORS[status];
+          track.appendChild(segment);
+
+          const item = document.createElement("div");
+          item.className = "legend-item";
+          item.innerHTML = `
+            <div class="legend-label">
+              <span class="dot" style="background:${STATUS_COLORS[status]}"></span>
+              <span>${STATUS_LABELS[status]}</span>
+            </div>
+            <strong>${count}</strong>
+          `;
+          legend.appendChild(item);
+        });
+      }
+
+      function renderAttention(rows) {
+        const attentionList = document.getElementById("attentionList");
+        const priorityRows = [...rows]
+          .filter((row) => row.status === "pending_operation" || (row.status === "approved" && !row.sent_student_email))
+          .sort((a, b) => {
+            const rank = { pending_operation: 0, approved: 1 };
+            const statusGap = (rank[a.status] ?? 9) - (rank[b.status] ?? 9);
+            if (statusGap) return statusGap;
+            return String(b.created_at || "").localeCompare(String(a.created_at || ""));
+          })
+          .slice(0, 6);
+
+        if (!priorityRows.length) {
+          attentionList.innerHTML = '<div class="empty-state">Everything is moving smoothly right now.</div>';
+          return;
+        }
+
+        attentionList.innerHTML = priorityRows.map((row) => `
+          <div class="activity-item">
+            <div class="activity-top">
+              <div>
+                <div class="activity-title">${row.student_name || "-"}</div>
+                <div class="activity-meta">
+                  Teacher: ${row.teacher_name || "-"}<br />
+                  Consultant: ${row.sales_name || "-"}<br />
+                  Received: ${row.created_at || "-"}
+                </div>
+              </div>
+              <span class="pill ${row.status}">${formatStatusLabel(row.status)}</span>
+            </div>
+          </div>
+        `).join("");
+      }
+
+      function teacherSummary(rows) {
+        const summary = new Map();
+        rows.forEach((row) => {
+          const key = row.teacher_name || "Unknown";
+          if (!summary.has(key)) {
+            summary.set(key, {
+              teacher_name: key,
+              total: 0,
+              pending_operation: 0,
+              approved: 0,
+              delivered: 0,
+              rejected: 0,
+              sent_student_email: 0,
+            });
+          }
+          const item = summary.get(key);
+          item.total += 1;
+          item[row.status] = (item[row.status] || 0) + 1;
+          if (row.sent_student_email) item.sent_student_email += 1;
+        });
+
+        return [...summary.values()].sort((a, b) => b.total - a.total || a.teacher_name.localeCompare(b.teacher_name));
+      }
+
+      function renderTeacherSnapshot(rows) {
+        const host = document.getElementById("teacherSnapshot");
+        const teachers = teacherSummary(rows);
+        const maxTotal = Math.max(...teachers.map((item) => item.total), 1);
+
+        if (!teachers.length) {
+          host.innerHTML = '<div class="empty-state">No teacher activity is available for this branch.</div>';
+          return;
+        }
+
+        host.innerHTML = teachers.map((item) => `
+          <div class="teacher-item">
+            <div class="teacher-top">
+              <div>
+                <div class="teacher-name">${item.teacher_name}</div>
+                <div class="teacher-meta">${item.total} reports in workflow</div>
+              </div>
+              <strong>${percentage(item.sent_student_email, item.total)}% emailed</strong>
+            </div>
+            <div class="teacher-bar"><div style="width:${(item.total / maxTotal) * 100}%"></div></div>
+            <div class="teacher-stats">
+              <div>Total<br /><strong>${item.total}</strong></div>
+              <div>Pending<br /><strong>${item.pending_operation}</strong></div>
+              <div>Approved<br /><strong>${item.approved}</strong></div>
+              <div>Delivered<br /><strong>${item.delivered}</strong></div>
+              <div>Rejected<br /><strong>${item.rejected}</strong></div>
+            </div>
+          </div>
+        `).join("");
+      }
+
+      function renderReports(rows) {
+        const tbody = document.getElementById("reportsTableBody");
+        const empty = document.getElementById("reportsEmptyState");
+        tbody.innerHTML = "";
+
+        rows.forEach((row) => {
           tbody.innerHTML += `
             <tr>
               <td>${row.id}</td>
-              <td>${row.student_name}</td>
-              <td>${row.teacher_name}</td>
+              <td>${row.student_name || "-"}</td>
+              <td>${row.teacher_name || "-"}</td>
               <td>${row.level || "-"}</td>
-              <td>${row.report_type}</td>
+              <td>${row.report_type || "-"}</td>
               <td>${row.sales_name || "-"}</td>
               <td class="phone-cell">${displayPhone(row)}</td>
               <td class="email-cell">${row.student_email || "-"}</td>
               <td class="status-cell">${formatStatusLabel(row.status)}</td>
               <td>${row.sent_student_email ? "Yes" : "No"}</td>
               <td>${row.created_at || "-"}</td>
-              <td><a href="/view/${row.id}" target="_blank">Preview</a></td>
+              <td><a class="view-link" href="/view/${row.id}" target="_blank">Preview</a></td>
             </tr>
           `;
         });
-        document.getElementById("pendingCount").innerText = counts.pending_operation;
-        document.getElementById("approvedCount").innerText = counts.approved;
-        document.getElementById("deliveredCount").innerText = counts.delivered;
-        document.getElementById("rejectedCount").innerText = counts.rejected;
+
+        empty.style.display = rows.length ? "none" : "block";
+      }
+
+      function renderTeachersTable(rows) {
+        const tbody = document.getElementById("teachersTableBody");
+        const empty = document.getElementById("teachersEmptyState");
+        const teachers = teacherSummary(rows);
+        tbody.innerHTML = "";
+
+        teachers.forEach((item) => {
+          tbody.innerHTML += `
+            <tr>
+              <td>${item.teacher_name}</td>
+              <td>${item.total}</td>
+              <td>${item.pending_operation}</td>
+              <td>${item.approved}</td>
+              <td>${item.delivered}</td>
+              <td>${item.rejected}</td>
+              <td>${item.sent_student_email}</td>
+            </tr>
+          `;
+        });
+
+        empty.style.display = teachers.length ? "none" : "block";
+      }
+
+      async function loadDashboard() {
+        const rows = await fetchRows();
+        dashboardRows.length = 0;
+        dashboardRows.push(...rows);
+        renderStats(dashboardRows);
+        renderDistribution(dashboardRows);
+        renderAttention(dashboardRows);
+        renderTeacherSnapshot(dashboardRows);
+        renderTeachersTable(dashboardRows);
+      }
+
+      async function loadReports() {
+        const phone = document.getElementById("phoneFilter").value.trim();
+        const teacher = document.getElementById("teacherFilter").value;
+        const status = document.getElementById("statusFilter").value;
+        filteredRows = await fetchRows({ phone, teacher_id: teacher, status });
+        renderReports(filteredRows);
+      }
+
+      async function loadAll() {
+        await Promise.all([loadDashboard(), loadReports()]);
       }
 
       async function loadTeachers() {
-        const branchFilter = document.getElementById("branchFilter");
         const query = new URLSearchParams({ role: "teacher" });
-        if (branchFilter && branchFilter.value) query.set("branch", branchFilter.value);
+        const branch = currentBranch();
+        if (branch) query.set("branch", branch);
         const response = await fetch(`/api/users?${query.toString()}`);
         const teachers = await response.json();
         const select = document.getElementById("teacherFilter");
@@ -160,17 +765,31 @@
         });
       }
 
-      function handleBranchChange() {
-        loadTeachers().then(load);
+      async function handleBranchChange() {
+        await loadTeachers();
+        await loadAll();
       }
+
+      function setActiveTab(tabName) {
+        document.querySelectorAll(".tab").forEach((tab) => {
+          tab.classList.toggle("active", tab.dataset.tab === tabName);
+        });
+        document.querySelectorAll(".panel").forEach((panel) => {
+          panel.classList.toggle("active", panel.id === `${tabName}Panel`);
+        });
+      }
+
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.addEventListener("click", () => setActiveTab(tab.dataset.tab));
+      });
 
       let searchTimer = null;
       document.getElementById("phoneFilter").addEventListener("input", () => {
         clearTimeout(searchTimer);
-        searchTimer = setTimeout(load, 250);
+        searchTimer = setTimeout(loadReports, 250);
       });
 
-      loadTeachers().then(load);
+      loadTeachers().then(loadAll);
     </script>
   </body>
 </html>
