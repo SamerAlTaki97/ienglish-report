@@ -35,11 +35,6 @@
         margin: 0;
         font-size: 34px;
       }
-      .hero-note {
-        margin-top: 6px;
-        color: var(--muted);
-        font-size: 14px;
-      }
       .toolbar {
         display: flex;
         gap: 10px;
@@ -140,10 +135,6 @@
       .box-head h2,
       .box-head h3 {
         margin: 0;
-      }
-      .box-head span {
-        color: var(--muted);
-        font-size: 13px;
       }
 
       .distribution {
@@ -336,7 +327,6 @@
       <div class="hero">
         <div>
           <h1>{% if manager_view or role == 'manager' %}Manager Dashboard{% else %}Admin Dashboard{% endif %}</h1>
-          <div class="hero-note">Overview, branch monitoring, and teacher activity in one place.</div>
         </div>
         <div class="toolbar">
           {% if manager_view or role == 'manager' %}
@@ -358,17 +348,17 @@
         <div class="stat-card approved-card">
           <small>Approved</small>
           <strong id="approvedCount">0</strong>
-          <span id="approvedShare">0 ready for delivery</span>
+          <span id="approvedShare">0 approved</span>
         </div>
         <div class="stat-card delivered-card">
           <small>Delivered</small>
           <strong id="deliveredCount">0</strong>
-          <span id="deliveredShare">0 completed reports</span>
+          <span id="deliveredShare">0 delivered</span>
         </div>
         <div class="stat-card rejected-card">
           <small>Not Accepted</small>
           <strong id="rejectedCount">0</strong>
-          <span id="rejectedShare">0 rejected items</span>
+          <span id="rejectedShare">0 rejected</span>
         </div>
       </div>
 
@@ -381,10 +371,9 @@
       <section id="overviewPanel" class="panel active">
         <div class="overview-grid">
           <div class="overview-box">
-            <div class="box-head">
-              <h2>Workflow Distribution</h2>
-              <span id="distributionCaption">0 reports in workflow</span>
-            </div>
+          <div class="box-head">
+            <h2>Workflow Distribution</h2>
+          </div>
             <div class="distribution">
               <div id="distributionTrack" class="distribution-track"></div>
               <div id="distributionLegend" class="distribution-legend"></div>
@@ -392,10 +381,9 @@
           </div>
 
           <div class="overview-box">
-            <div class="box-head">
-              <h2>Needs Attention</h2>
-              <span>Pending items and approved reports still waiting to be sent</span>
-            </div>
+          <div class="box-head">
+            <h2>Needs Attention</h2>
+          </div>
             <div id="attentionList" class="activity-list"></div>
           </div>
         </div>
@@ -403,7 +391,6 @@
         <div class="overview-box">
           <div class="box-head">
             <h2>Teacher Snapshot</h2>
-            <span>Workload and completion trend by teacher</span>
           </div>
           <div id="teacherSnapshot" class="teacher-list"></div>
         </div>
@@ -413,7 +400,6 @@
         <div class="reports-box">
           <div class="box-head">
             <h2>Reports Monitor</h2>
-            <span>Detailed view with live filters</span>
           </div>
 
           <div class="report-filters">
@@ -452,7 +438,7 @@
               </thead>
               <tbody id="reportsTableBody"></tbody>
             </table>
-            <div id="reportsEmptyState" class="empty-state" style="display:none;">No reports match the current filters.</div>
+            <div id="reportsEmptyState" class="empty-state" style="display:none;">No records.</div>
           </div>
         </div>
       </section>
@@ -461,7 +447,6 @@
         <div class="teachers-box">
           <div class="box-head">
             <h2>Teacher Performance</h2>
-            <span>Summary for the current branch view</span>
           </div>
 
           <div class="table-wrap">
@@ -479,7 +464,7 @@
               </thead>
               <tbody id="teachersTableBody"></tbody>
             </table>
-            <div id="teachersEmptyState" class="empty-state" style="display:none;">No teacher activity is available for this view.</div>
+            <div id="teachersEmptyState" class="empty-state" style="display:none;">No records.</div>
           </div>
         </div>
       </section>
@@ -553,9 +538,9 @@
         document.getElementById("rejectedCount").innerText = counts.rejected;
 
         document.getElementById("pendingShare").innerText = `${percentage(counts.pending_operation, total)}% of current workflow`;
-        document.getElementById("approvedShare").innerText = `${counts.approved} ready for delivery`;
-        document.getElementById("deliveredShare").innerText = `${counts.delivered} completed reports`;
-        document.getElementById("rejectedShare").innerText = `${counts.rejected} rejected items`;
+        document.getElementById("approvedShare").innerText = `${counts.approved} approved`;
+        document.getElementById("deliveredShare").innerText = `${counts.delivered} delivered`;
+        document.getElementById("rejectedShare").innerText = `${counts.rejected} rejected`;
       }
 
       function renderDistribution(rows) {
@@ -563,7 +548,6 @@
         const total = rows.length;
         const track = document.getElementById("distributionTrack");
         const legend = document.getElementById("distributionLegend");
-        document.getElementById("distributionCaption").innerText = `${total} reports in workflow`;
 
         track.innerHTML = "";
         legend.innerHTML = "";
@@ -603,7 +587,7 @@
           .slice(0, 6);
 
         if (!priorityRows.length) {
-          attentionList.innerHTML = '<div class="empty-state">Everything is moving smoothly right now.</div>';
+          attentionList.innerHTML = '<div class="empty-state">No records.</div>';
           return;
         }
 
@@ -654,7 +638,7 @@
         const maxTotal = Math.max(...teachers.map((item) => item.total), 1);
 
         if (!teachers.length) {
-          host.innerHTML = '<div class="empty-state">No teacher activity is available for this branch.</div>';
+          host.innerHTML = '<div class="empty-state">No records.</div>';
           return;
         }
 
