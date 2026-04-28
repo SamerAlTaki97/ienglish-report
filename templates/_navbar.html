@@ -122,57 +122,6 @@
   })();
 
   (function protectSessionExperience() {
-    const NAV_FLAG_KEY = "ienglish_internal_navigation";
-
-    function markInternalNavigation() {
-      window.__internalNavigation = true;
-      try {
-        sessionStorage.setItem(NAV_FLAG_KEY, "1");
-      } catch (error) {}
-    }
-
-    function clearInternalNavigation() {
-      window.__internalNavigation = false;
-      try {
-        sessionStorage.removeItem(NAV_FLAG_KEY);
-      } catch (error) {}
-    }
-
-    function isInternalNavigation() {
-      if (window.__internalNavigation) return true;
-      try {
-        return sessionStorage.getItem(NAV_FLAG_KEY) === "1";
-      } catch (error) {
-        return false;
-      }
-    }
-
-    document.addEventListener("click", (event) => {
-      const link = event.target.closest && event.target.closest("a[href]");
-      if (!link) return;
-      try {
-        const nextUrl = new URL(link.href, window.location.href);
-        if (nextUrl.origin === window.location.origin) {
-          markInternalNavigation();
-        }
-      } catch (error) {}
-    }, true);
-
-    document.addEventListener("submit", () => {
-      markInternalNavigation();
-    }, true);
-
-    window.addEventListener("pageshow", () => {
-      window.setTimeout(clearInternalNavigation, 0);
-    });
-
-    if (navigator.sendBeacon) {
-      window.addEventListener("pagehide", () => {
-        if (isInternalNavigation()) return;
-        navigator.sendBeacon("/logout-beacon", new Blob(["1"], { type: "text/plain" }));
-      });
-    }
-
     if (!window.fetch) return;
 
     const nativeFetch = window.fetch.bind(window);
@@ -215,9 +164,6 @@
 
         return response;
       } catch (error) {
-        if (targetUrl.origin === window.location.origin) {
-          window.location.replace("/logout");
-        }
         throw error;
       }
     };
