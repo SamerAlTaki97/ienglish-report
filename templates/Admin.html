@@ -15,15 +15,12 @@
         --approved: #2563eb;
         --delivered: #16a34a;
         --rejected: #991b1b;
+        --direct: #475569;
       }
 
       * { box-sizing: border-box; }
       body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--ink); }
-      .page {
-        max-width: 1460px;
-        margin: 28px auto 40px;
-        padding: 0 18px;
-      }
+      .page { max-width: 1480px; margin: 28px auto 40px; padding: 0 18px; }
       .hero {
         display: flex;
         justify-content: space-between;
@@ -31,11 +28,9 @@
         gap: 18px;
         margin-bottom: 22px;
       }
-      .hero h1 {
-        margin: 0;
-        font-size: 34px;
-      }
-      .toolbar {
+      .hero h1 { margin: 0; font-size: 34px; }
+      .toolbar,
+      .filters {
         display: flex;
         gap: 10px;
         flex-wrap: wrap;
@@ -58,7 +53,7 @@
         border-radius: 14px;
         color: #fff;
         padding: 18px 18px 16px;
-        min-height: 108px;
+        min-height: 110px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -89,6 +84,7 @@
         border-radius: 14px;
         background: #dfe8f2;
         margin-bottom: 18px;
+        flex-wrap: wrap;
       }
       .tab {
         border: none;
@@ -103,23 +99,22 @@
         background: #ffffff;
         box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
       }
+      .panel { display: none; }
+      .panel.active { display: block; }
 
-      .panel {
-        display: none;
-      }
-      .panel.active {
-        display: block;
-      }
-
-      .overview-grid {
+      .grid-2,
+      .grid-3,
+      .grid-4 {
         display: grid;
-        grid-template-columns: 1.2fr 0.9fr;
         gap: 18px;
         margin-bottom: 18px;
       }
-      .overview-box,
-      .reports-box,
-      .teachers-box {
+      .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+      .box,
+      .metric-card {
         background: var(--surface);
         border: 1px solid var(--line);
         border-radius: 16px;
@@ -129,13 +124,13 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
         margin-bottom: 14px;
       }
       .box-head h2,
-      .box-head h3 {
-        margin: 0;
-      }
+      .box-head h3 { margin: 0; }
+      .box-head strong { font-size: 14px; color: var(--muted); }
+      .muted { color: var(--muted); }
 
       .distribution {
         display: grid;
@@ -155,14 +150,21 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 10px;
       }
+      .legend-item,
+      .summary-chip,
+      .leader-card,
+      .snapshot-card,
+      .alert-card {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+      }
       .legend-item {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 10px;
         padding: 12px 14px;
-        border: 1px solid var(--line);
-        border-radius: 12px;
       }
       .legend-label {
         display: flex;
@@ -177,36 +179,63 @@
         flex: 0 0 auto;
       }
 
-      .activity-list,
-      .teacher-list {
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+      }
+      .metric-card { min-height: 120px; }
+      .metric-card small {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 10px;
+      }
+      .metric-card strong {
+        display: block;
+        font-size: 34px;
+        margin-bottom: 10px;
+      }
+
+      .list,
+      .stack {
         display: grid;
         gap: 12px;
       }
-      .activity-item,
-      .teacher-item {
-        border: 1px solid var(--line);
-        border-radius: 14px;
+      .list-item,
+      .leader-card,
+      .snapshot-card,
+      .alert-card {
         padding: 14px;
       }
-      .activity-top,
-      .teacher-top {
+      .item-top,
+      .leader-top,
+      .snapshot-top,
+      .alert-top {
         display: flex;
         justify-content: space-between;
-        gap: 12px;
         align-items: start;
+        gap: 12px;
       }
-      .activity-title,
-      .teacher-name {
+      .item-title,
+      .leader-title,
+      .snapshot-title,
+      .alert-title {
         font-weight: 700;
       }
-      .activity-meta,
-      .teacher-meta {
+      .item-meta,
+      .leader-meta,
+      .snapshot-meta,
+      .alert-meta {
         margin-top: 6px;
         color: var(--muted);
         font-size: 13px;
         line-height: 1.45;
       }
-      .pill {
+      .pill,
+      .badge {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -222,7 +251,13 @@
       .pill.approved { background: var(--approved); }
       .pill.delivered { background: var(--delivered); }
       .pill.rejected { background: var(--rejected); }
-      .teacher-bar {
+      .badge.direct { background: var(--direct); }
+      .badge.assigned { background: var(--approved); }
+      .badge.good { background: var(--delivered); }
+      .badge.watch { background: var(--pending); }
+      .badge.risk { background: var(--rejected); }
+
+      .bar-track {
         width: 100%;
         height: 10px;
         background: #e2e8f0;
@@ -230,27 +265,44 @@
         overflow: hidden;
         margin-top: 12px;
       }
-      .teacher-bar > div {
-        height: 100%;
-        background: linear-gradient(90deg, #2563eb, #16a34a);
-      }
-      .teacher-stats {
+      .bar-fill { height: 100%; background: linear-gradient(90deg, #2563eb, #16a34a); }
+
+      .snapshot-stats,
+      .branch-mini-stats {
         margin-top: 10px;
         display: grid;
-        grid-template-columns: repeat(5, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 8px;
         color: var(--muted);
         font-size: 12px;
         text-align: center;
       }
-
-      .report-filters {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        margin-bottom: 14px;
+      .branch-mini-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
       }
-      .search-wrap input { min-width: 230px; }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .summary-chip {
+        padding: 14px;
+        text-align: center;
+      }
+      .summary-chip small {
+        display: block;
+        color: var(--muted);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 0.04em;
+      }
+      .summary-chip strong {
+        display: block;
+        font-size: 28px;
+      }
+
       .table-wrap {
         border: 1px solid var(--line);
         border-radius: 14px;
@@ -258,7 +310,7 @@
       }
       table {
         width: 100%;
-        min-width: 1220px;
+        min-width: 1160px;
         border-collapse: collapse;
       }
       th, td {
@@ -278,12 +330,15 @@
       }
       .student-col { width: 12%; }
       .teacher-col { width: 9%; }
-      .consultant-col { width: 12%; }
+      .consultant-col { width: 11%; }
       .phone-col { width: 8%; }
       .email-col { width: 10%; }
+      .branch-col { width: 8%; }
       .status-col { width: 8%; }
       .view-col { width: 7%; }
-      .email-cell, .phone-cell, .status-cell {
+      .email-cell,
+      .phone-cell,
+      .status-cell {
         white-space: normal;
         overflow-wrap: anywhere;
         word-break: break-word;
@@ -301,23 +356,22 @@
       }
       .view-link:hover { text-decoration: underline; }
 
+      @media (max-width: 1250px) {
+        .grid-4,
+        .summary-grid,
+        .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .grid-3 { grid-template-columns: 1fr; }
+      }
+
       @media (max-width: 1100px) {
-        .overview-grid {
-          grid-template-columns: 1fr;
-        }
-        .teacher-stats {
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-        }
+        .grid-2 { grid-template-columns: 1fr; }
+        .snapshot-stats,
+        .branch-mini-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       }
 
       @media (max-width: 900px) {
-        .stats {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-        .hero {
-          flex-direction: column;
-          align-items: flex-start;
-        }
+        .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .hero { flex-direction: column; align-items: flex-start; }
       }
     </style>
   </head>
@@ -364,51 +418,218 @@
 
       <div class="tabs">
         <button class="tab active" type="button" data-tab="overview">Overview</button>
-        <button class="tab" type="button" data-tab="reports">Reports</button>
+        {% if manager_view or role == 'manager' %}
+        <button class="tab" type="button" data-tab="quality">Quality</button>
+        <button class="tab" type="button" data-tab="branches">Branches</button>
+        <button class="tab" type="button" data-tab="sales">Sales</button>
+        {% endif %}
         <button class="tab" type="button" data-tab="teachers">Teachers</button>
+        <button class="tab" type="button" data-tab="reports">Reports</button>
       </div>
 
       <section id="overviewPanel" class="panel active">
-        <div class="overview-grid">
-          <div class="overview-box">
-          <div class="box-head">
-            <h2>Workflow Distribution</h2>
-          </div>
+        <div class="grid-2">
+          <div class="box">
+            <div class="box-head">
+              <h2>Workflow</h2>
+              <strong id="workflowTotal">0 reports</strong>
+            </div>
             <div class="distribution">
               <div id="distributionTrack" class="distribution-track"></div>
               <div id="distributionLegend" class="distribution-legend"></div>
             </div>
           </div>
 
-          <div class="overview-box">
-          <div class="box-head">
-            <h2>Needs Attention</h2>
-          </div>
-            <div id="attentionList" class="activity-list"></div>
+          <div class="box">
+            <div class="box-head">
+              <h2>Needs Attention</h2>
+            </div>
+            <div id="attentionList" class="list"></div>
           </div>
         </div>
 
-        <div class="overview-box">
-          <div class="box-head">
-            <h2>Teacher Snapshot</h2>
+        <div class="grid-2">
+          <div class="box">
+            <div class="box-head">
+              <h2>Teacher Snapshot</h2>
+            </div>
+            <div id="teacherSnapshot" class="stack"></div>
           </div>
-          <div id="teacherSnapshot" class="teacher-list"></div>
+
+          <div class="box">
+            <div class="box-head">
+              <h2>{% if manager_view or role == 'manager' %}Branch Pulse{% else %}Delivery Pulse{% endif %}</h2>
+            </div>
+            <div id="overviewSidePanel" class="stack"></div>
+          </div>
+        </div>
+      </section>
+
+      {% if manager_view or role == 'manager' %}
+      <section id="qualityPanel" class="panel">
+        <div class="metric-grid">
+          <div class="metric-card">
+            <small>Rejected Rate</small>
+            <strong id="qcRejectedRate">0%</strong>
+            <span class="muted" id="qcRejectedCount">0 rejected</span>
+          </div>
+          <div class="metric-card">
+            <small>Pending Over 24h</small>
+            <strong id="qcPendingAged">0</strong>
+            <span class="muted" id="qcPendingShare">0 pending aged</span>
+          </div>
+          <div class="metric-card">
+            <small>Approved Awaiting Email</small>
+            <strong id="qcApprovedWaiting">0</strong>
+            <span class="muted" id="qcApprovedShare">0 approved pending delivery</span>
+          </div>
+          <div class="metric-card">
+            <small>Same-Day Delivery</small>
+            <strong id="qcSameDayRate">0%</strong>
+            <span class="muted" id="qcSameDayCount">0 same-day deliveries</span>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="box">
+            <div class="box-head">
+              <h2>Teacher Quality Watch</h2>
+            </div>
+            <div id="teacherQualityList" class="stack"></div>
+          </div>
+          <div class="box">
+            <div class="box-head">
+              <h2>Action Queue</h2>
+            </div>
+            <div id="qualityAlerts" class="stack"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="branchesPanel" class="panel">
+        <div class="box" style="margin-bottom:18px;">
+          <div class="box-head">
+            <h2>Branch Summary</h2>
+          </div>
+          <div id="branchSummary" class="summary-grid"></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="box">
+            <div class="box-head">
+              <h2>Branch Ranking</h2>
+            </div>
+            <div id="branchRanking" class="stack"></div>
+          </div>
+          <div class="box">
+            <div class="box-head">
+              <h2>Branch Table</h2>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Branch</th>
+                    <th>Total</th>
+                    <th>Pending</th>
+                    <th>Approved</th>
+                    <th>Delivered</th>
+                    <th>Not Accepted</th>
+                    <th>Email Rate</th>
+                    <th>Delivery Rate</th>
+                  </tr>
+                </thead>
+                <tbody id="branchesTableBody"></tbody>
+              </table>
+              <div id="branchesEmptyState" class="empty-state" style="display:none;">No records.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="salesPanel" class="panel">
+        <div class="box" style="margin-bottom:18px;">
+          <div class="box-head">
+            <h2>Sales Summary</h2>
+          </div>
+          <div id="salesSummary" class="summary-grid"></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="box">
+            <div class="box-head">
+              <h2>Consultant Leaderboard</h2>
+            </div>
+            <div id="salesLeaderboard" class="stack"></div>
+          </div>
+          <div class="box">
+            <div class="box-head">
+              <h2>Consultant Table</h2>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Educational Consultant</th>
+                    <th>Total</th>
+                    <th>Approved</th>
+                    <th>Delivered</th>
+                    <th>Direct</th>
+                    <th>Email Rate</th>
+                    <th>Delivery Rate</th>
+                  </tr>
+                </thead>
+                <tbody id="salesTableBody"></tbody>
+              </table>
+              <div id="salesEmptyState" class="empty-state" style="display:none;">No records.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      {% endif %}
+
+      <section id="teachersPanel" class="panel">
+        <div class="box">
+          <div class="box-head">
+            <h2>Teachers</h2>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Teacher</th>
+                  <th>Total</th>
+                  <th>Pending</th>
+                  <th>Approved</th>
+                  <th>Delivered</th>
+                  <th>Not Accepted</th>
+                  <th>Email Sent</th>
+                  <th>Reject Rate</th>
+                </tr>
+              </thead>
+              <tbody id="teachersTableBody"></tbody>
+            </table>
+            <div id="teachersEmptyState" class="empty-state" style="display:none;">No records.</div>
+          </div>
         </div>
       </section>
 
       <section id="reportsPanel" class="panel">
-        <div class="reports-box">
+        <div class="box">
           <div class="box-head">
-            <h2>Reports Monitor</h2>
+            <h2>Reports</h2>
           </div>
 
-          <div class="report-filters">
-            <div class="search-wrap">
-              <input id="phoneFilter" placeholder="Search by student phone" />
-            </div>
+          <div class="filters" style="margin-bottom:14px;">
+            <input id="phoneFilter" placeholder="Search by student phone" />
             <select id="teacherFilter" onchange="loadReports()">
               <option value="">All teachers</option>
             </select>
+            {% if manager_view or role == 'manager' %}
+            <select id="salesFilter" onchange="loadReports()">
+              <option value="">All sales staff</option>
+            </select>
+            {% endif %}
             <select id="statusFilter" onchange="loadReports()">
               <option value="">All statuses</option>
               <option value="pending_operation">Pending</option>
@@ -424,6 +645,9 @@
                 <tr>
                   <th>ID</th>
                   <th class="student-col">Student</th>
+                  {% if manager_view or role == 'manager' %}
+                  <th class="branch-col">Branch</th>
+                  {% endif %}
                   <th class="teacher-col">Teacher</th>
                   <th>Level</th>
                   <th>Type</th>
@@ -442,35 +666,10 @@
           </div>
         </div>
       </section>
-
-      <section id="teachersPanel" class="panel">
-        <div class="teachers-box">
-          <div class="box-head">
-            <h2>Teacher Performance</h2>
-          </div>
-
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Teacher</th>
-                  <th>Total</th>
-                  <th>Pending</th>
-                  <th>Approved</th>
-                  <th>Delivered</th>
-                  <th>Not Accepted</th>
-                  <th>Email Sent</th>
-                </tr>
-              </thead>
-              <tbody id="teachersTableBody"></tbody>
-            </table>
-            <div id="teachersEmptyState" class="empty-state" style="display:none;">No records.</div>
-          </div>
-        </div>
-      </section>
     </div>
 
     <script>
+      const isManagerView = {% if manager_view or role == 'manager' %}true{% else %}false{% endif %};
       const dashboardRows = [];
       let filteredRows = [];
 
@@ -499,6 +698,33 @@
         return value;
       }
 
+      function consultantLabel(row) {
+        return row.sales_name || "-";
+      }
+
+      function branchLabel(row) {
+        return row.student_branch || row.teacher_branch || "-";
+      }
+
+      function parseTimestamp(value) {
+        if (!value || value === "-") return null;
+        const normalized = String(value).replace(" ", "T");
+        const parsed = new Date(normalized);
+        return Number.isNaN(parsed.getTime()) ? null : parsed;
+      }
+
+      function hoursBetween(startValue, endValue = new Date()) {
+        const start = startValue instanceof Date ? startValue : parseTimestamp(startValue);
+        const end = endValue instanceof Date ? endValue : parseTimestamp(endValue);
+        if (!start || !end) return null;
+        return (end.getTime() - start.getTime()) / 36e5;
+      }
+
+      function percentage(part, total) {
+        if (!total) return 0;
+        return Math.round((part / total) * 100);
+      }
+
       function currentBranch() {
         const branchFilter = document.getElementById("branchFilter");
         return branchFilter ? branchFilter.value : "";
@@ -523,24 +749,88 @@
         return counts;
       }
 
-      function percentage(part, total) {
-        if (!total) return 0;
-        return Math.round((part / total) * 100);
+      function teacherSummary(rows) {
+        const summary = new Map();
+        rows.forEach((row) => {
+          const key = row.teacher_name || "Unknown";
+          if (!summary.has(key)) {
+            summary.set(key, {
+              label: key,
+              total: 0,
+              pending_operation: 0,
+              approved: 0,
+              delivered: 0,
+              rejected: 0,
+              sent_student_email: 0,
+            });
+          }
+          const item = summary.get(key);
+          item.total += 1;
+          item[row.status] = (item[row.status] || 0) + 1;
+          if (row.sent_student_email) item.sent_student_email += 1;
+        });
+        return [...summary.values()].sort((a, b) => b.total - a.total || a.label.localeCompare(b.label));
+      }
+
+      function salesSummary(rows) {
+        const summary = new Map();
+        rows.forEach((row) => {
+          const key = consultantLabel(row);
+          if (!summary.has(key)) {
+            summary.set(key, {
+              label: key,
+              total: 0,
+              approved: 0,
+              delivered: 0,
+              direct: 0,
+              sent_student_email: 0,
+            });
+          }
+          const item = summary.get(key);
+          item.total += 1;
+          if (row.status === "approved") item.approved += 1;
+          if (row.status === "delivered") item.delivered += 1;
+          if (key === "Direct") item.direct += 1;
+          if (row.sent_student_email) item.sent_student_email += 1;
+        });
+        return [...summary.values()].sort((a, b) => b.total - a.total || a.label.localeCompare(b.label));
+      }
+
+      function branchSummary(rows) {
+        const summary = new Map();
+        rows.forEach((row) => {
+          const key = branchLabel(row);
+          if (!summary.has(key)) {
+            summary.set(key, {
+              label: key,
+              total: 0,
+              pending_operation: 0,
+              approved: 0,
+              delivered: 0,
+              rejected: 0,
+              sent_student_email: 0,
+            });
+          }
+          const item = summary.get(key);
+          item.total += 1;
+          item[row.status] = (item[row.status] || 0) + 1;
+          if (row.sent_student_email) item.sent_student_email += 1;
+        });
+        return [...summary.values()].sort((a, b) => b.total - a.total || a.label.localeCompare(b.label));
       }
 
       function renderStats(rows) {
         const counts = statusCounts(rows);
         const total = rows.length;
-
         document.getElementById("pendingCount").innerText = counts.pending_operation;
         document.getElementById("approvedCount").innerText = counts.approved;
         document.getElementById("deliveredCount").innerText = counts.delivered;
         document.getElementById("rejectedCount").innerText = counts.rejected;
-
         document.getElementById("pendingShare").innerText = `${percentage(counts.pending_operation, total)}% of current workflow`;
         document.getElementById("approvedShare").innerText = `${counts.approved} approved`;
         document.getElementById("deliveredShare").innerText = `${counts.delivered} delivered`;
         document.getElementById("rejectedShare").innerText = `${counts.rejected} rejected`;
+        document.getElementById("workflowTotal").innerText = `${total} reports`;
       }
 
       function renderDistribution(rows) {
@@ -548,7 +838,6 @@
         const total = rows.length;
         const track = document.getElementById("distributionTrack");
         const legend = document.getElementById("distributionLegend");
-
         track.innerHTML = "";
         legend.innerHTML = "";
 
@@ -575,7 +864,7 @@
       }
 
       function renderAttention(rows) {
-        const attentionList = document.getElementById("attentionList");
+        const host = document.getElementById("attentionList");
         const priorityRows = [...rows]
           .filter((row) => row.status === "pending_operation" || (row.status === "approved" && !row.sent_student_email))
           .sort((a, b) => {
@@ -587,54 +876,37 @@
           .slice(0, 6);
 
         if (!priorityRows.length) {
-          attentionList.innerHTML = '<div class="empty-state">No records.</div>';
+          host.innerHTML = '<div class="empty-state">No records.</div>';
           return;
         }
 
-        attentionList.innerHTML = priorityRows.map((row) => `
-          <div class="activity-item">
-            <div class="activity-top">
-              <div>
-                <div class="activity-title">${row.student_name || "-"}</div>
-                <div class="activity-meta">
-                  Teacher: ${row.teacher_name || "-"}<br />
-                  Consultant: ${row.sales_name || "-"}<br />
-                  Received: ${row.created_at || "-"}
+        host.innerHTML = priorityRows.map((row) => {
+          const ageHours = hoursBetween(row.created_at);
+          const ageLabel = ageHours === null ? "-" : `${Math.round(ageHours)}h open`;
+          return `
+            <div class="list-item">
+              <div class="item-top">
+                <div>
+                  <div class="item-title">${row.student_name || "-"}</div>
+                  <div class="item-meta">
+                    Teacher: ${row.teacher_name || "-"}<br />
+                    Consultant: ${consultantLabel(row)}<br />
+                    Received: ${row.created_at || "-"}
+                  </div>
+                </div>
+                <div style="display:grid;gap:8px;justify-items:end;">
+                  <span class="pill ${row.status}">${formatStatusLabel(row.status)}</span>
+                  <span class="muted">${ageLabel}</span>
                 </div>
               </div>
-              <span class="pill ${row.status}">${formatStatusLabel(row.status)}</span>
             </div>
-          </div>
-        `).join("");
-      }
-
-      function teacherSummary(rows) {
-        const summary = new Map();
-        rows.forEach((row) => {
-          const key = row.teacher_name || "Unknown";
-          if (!summary.has(key)) {
-            summary.set(key, {
-              teacher_name: key,
-              total: 0,
-              pending_operation: 0,
-              approved: 0,
-              delivered: 0,
-              rejected: 0,
-              sent_student_email: 0,
-            });
-          }
-          const item = summary.get(key);
-          item.total += 1;
-          item[row.status] = (item[row.status] || 0) + 1;
-          if (row.sent_student_email) item.sent_student_email += 1;
-        });
-
-        return [...summary.values()].sort((a, b) => b.total - a.total || a.teacher_name.localeCompare(b.teacher_name));
+          `;
+        }).join("");
       }
 
       function renderTeacherSnapshot(rows) {
         const host = document.getElementById("teacherSnapshot");
-        const teachers = teacherSummary(rows);
+        const teachers = teacherSummary(rows).slice(0, 6);
         const maxTotal = Math.max(...teachers.map((item) => item.total), 1);
 
         if (!teachers.length) {
@@ -643,21 +915,71 @@
         }
 
         host.innerHTML = teachers.map((item) => `
-          <div class="teacher-item">
-            <div class="teacher-top">
+          <div class="snapshot-card">
+            <div class="snapshot-top">
               <div>
-                <div class="teacher-name">${item.teacher_name}</div>
-                <div class="teacher-meta">${item.total} reports in workflow</div>
+                <div class="snapshot-title">${item.label}</div>
+                <div class="snapshot-meta">${item.total} reports in workflow</div>
               </div>
               <strong>${percentage(item.sent_student_email, item.total)}% emailed</strong>
             </div>
-            <div class="teacher-bar"><div style="width:${(item.total / maxTotal) * 100}%"></div></div>
-            <div class="teacher-stats">
+            <div class="bar-track"><div class="bar-fill" style="width:${(item.total / maxTotal) * 100}%"></div></div>
+            <div class="snapshot-stats">
               <div>Total<br /><strong>${item.total}</strong></div>
               <div>Pending<br /><strong>${item.pending_operation}</strong></div>
               <div>Approved<br /><strong>${item.approved}</strong></div>
               <div>Delivered<br /><strong>${item.delivered}</strong></div>
-              <div>Rejected<br /><strong>${item.rejected}</strong></div>
+            </div>
+          </div>
+        `).join("");
+      }
+
+      function renderOverviewSide(rows) {
+        const host = document.getElementById("overviewSidePanel");
+        if (isManagerView) {
+          const branches = branchSummary(rows).slice(0, 4);
+          if (!branches.length) {
+            host.innerHTML = '<div class="empty-state">No records.</div>';
+            return;
+          }
+          host.innerHTML = branches.map((item) => `
+            <div class="leader-card">
+              <div class="leader-top">
+                <div>
+                  <div class="leader-title">${item.label}</div>
+                  <div class="leader-meta">${item.total} reports</div>
+                </div>
+                <span class="badge ${item.rejected ? "watch" : "good"}">${percentage(item.delivered, item.total)}% delivered</span>
+              </div>
+              <div class="branch-mini-stats">
+                <div>Pending<br /><strong>${item.pending_operation}</strong></div>
+                <div>Approved<br /><strong>${item.approved}</strong></div>
+                <div>Delivered<br /><strong>${item.delivered}</strong></div>
+              </div>
+            </div>
+          `).join("");
+          return;
+        }
+
+        const readyRows = rows
+          .filter((row) => row.status === "approved" || row.status === "delivered")
+          .sort((a, b) => String(b.sent_at || b.created_at || "").localeCompare(String(a.sent_at || a.created_at || "")))
+          .slice(0, 6);
+        if (!readyRows.length) {
+          host.innerHTML = '<div class="empty-state">No records.</div>';
+          return;
+        }
+        host.innerHTML = readyRows.map((row) => `
+          <div class="leader-card">
+            <div class="leader-top">
+              <div>
+                <div class="leader-title">${row.student_name || "-"}</div>
+                <div class="leader-meta">
+                  ${consultantLabel(row)}<br />
+                  ${row.sent_student_email ? (row.sent_at || "-") : (row.created_at || "-")}
+                </div>
+              </div>
+              <span class="pill ${row.status}">${formatStatusLabel(row.status)}</span>
             </div>
           </div>
         `).join("");
@@ -673,10 +995,11 @@
             <tr>
               <td>${row.id}</td>
               <td>${row.student_name || "-"}</td>
+              ${isManagerView ? `<td>${branchLabel(row)}</td>` : ""}
               <td>${row.teacher_name || "-"}</td>
               <td>${row.level || "-"}</td>
               <td>${row.report_type || "-"}</td>
-              <td>${row.sales_name || "-"}</td>
+              <td>${consultantLabel(row)}</td>
               <td class="phone-cell">${displayPhone(row)}</td>
               <td class="email-cell">${row.student_email || "-"}</td>
               <td class="status-cell">${formatStatusLabel(row.status)}</td>
@@ -699,18 +1022,203 @@
         teachers.forEach((item) => {
           tbody.innerHTML += `
             <tr>
-              <td>${item.teacher_name}</td>
+              <td>${item.label}</td>
               <td>${item.total}</td>
               <td>${item.pending_operation}</td>
               <td>${item.approved}</td>
               <td>${item.delivered}</td>
               <td>${item.rejected}</td>
               <td>${item.sent_student_email}</td>
+              <td>${percentage(item.rejected, item.total)}%</td>
             </tr>
           `;
         });
 
         empty.style.display = teachers.length ? "none" : "block";
+      }
+
+      function renderQuality(rows) {
+        if (!isManagerView) return;
+        const total = rows.length;
+        const rejected = rows.filter((row) => row.status === "rejected");
+        const pendingAged = rows.filter((row) => row.status === "pending_operation" && (hoursBetween(row.created_at) ?? 0) >= 24);
+        const approvedWaiting = rows.filter((row) => row.status === "approved" && !row.sent_student_email);
+        const deliveredRows = rows.filter((row) => row.status === "delivered" && row.sent_at);
+        const sameDay = deliveredRows.filter((row) => {
+          const hours = hoursBetween(row.created_at, row.sent_at);
+          return hours !== null && hours <= 24;
+        });
+
+        document.getElementById("qcRejectedRate").innerText = `${percentage(rejected.length, total)}%`;
+        document.getElementById("qcRejectedCount").innerText = `${rejected.length} rejected`;
+        document.getElementById("qcPendingAged").innerText = pendingAged.length;
+        document.getElementById("qcPendingShare").innerText = `${percentage(pendingAged.length, total)}% of workflow`;
+        document.getElementById("qcApprovedWaiting").innerText = approvedWaiting.length;
+        document.getElementById("qcApprovedShare").innerText = `${approvedWaiting.length} approved pending delivery`;
+        document.getElementById("qcSameDayRate").innerText = `${percentage(sameDay.length, deliveredRows.length)}%`;
+        document.getElementById("qcSameDayCount").innerText = `${sameDay.length} same-day deliveries`;
+
+        const teacherWatch = teacherSummary(rows)
+          .map((item) => ({
+            ...item,
+            rejectRate: percentage(item.rejected, item.total),
+          }))
+          .sort((a, b) => b.rejectRate - a.rejectRate || b.pending_operation - a.pending_operation || b.total - a.total)
+          .slice(0, 6);
+        const teacherHost = document.getElementById("teacherQualityList");
+        teacherHost.innerHTML = teacherWatch.length
+          ? teacherWatch.map((item) => `
+              <div class="alert-card">
+                <div class="alert-top">
+                  <div>
+                    <div class="alert-title">${item.label}</div>
+                    <div class="alert-meta">
+                      Pending: ${item.pending_operation}<br />
+                      Rejected: ${item.rejected}<br />
+                      Delivered: ${item.delivered}
+                    </div>
+                  </div>
+                  <span class="badge ${item.rejectRate >= 25 ? "risk" : item.pending_operation >= 2 ? "watch" : "good"}">${item.rejectRate}% reject</span>
+                </div>
+              </div>
+            `).join("")
+          : '<div class="empty-state">No records.</div>';
+
+        const qualityHost = document.getElementById("qualityAlerts");
+        const alerts = [
+          ...pendingAged.map((row) => ({
+            title: row.student_name || "-",
+            meta: `Pending ${Math.round(hoursBetween(row.created_at) || 0)}h<br />Teacher: ${row.teacher_name || "-"}`,
+            tone: "watch",
+          })),
+          ...approvedWaiting.map((row) => ({
+            title: row.student_name || "-",
+            meta: `Approved without email<br />Consultant: ${consultantLabel(row)}`,
+            tone: "risk",
+          })),
+        ].slice(0, 8);
+        qualityHost.innerHTML = alerts.length
+          ? alerts.map((item) => `
+              <div class="alert-card">
+                <div class="alert-top">
+                  <div>
+                    <div class="alert-title">${item.title}</div>
+                    <div class="alert-meta">${item.meta}</div>
+                  </div>
+                  <span class="badge ${item.tone}">${item.tone === "watch" ? "Queue" : "Hold"}</span>
+                </div>
+              </div>
+            `).join("")
+          : '<div class="empty-state">No records.</div>';
+      }
+
+      function renderBranches(rows) {
+        if (!isManagerView) return;
+        const summary = branchSummary(rows);
+        const summaryHost = document.getElementById("branchSummary");
+        const rankingHost = document.getElementById("branchRanking");
+        const tableBody = document.getElementById("branchesTableBody");
+        const empty = document.getElementById("branchesEmptyState");
+
+        const totalBranches = summary.length;
+        const leader = summary[0];
+        const strongestDelivery = [...summary].sort((a, b) => percentage(b.delivered, b.total) - percentage(a.delivered, a.total))[0];
+        const highestReject = [...summary].sort((a, b) => percentage(b.rejected, b.total) - percentage(a.rejected, a.total))[0];
+        summaryHost.innerHTML = totalBranches ? `
+          <div class="summary-chip"><small>Branches</small><strong>${totalBranches}</strong></div>
+          <div class="summary-chip"><small>Top Volume</small><strong>${leader ? leader.label : "-"}</strong></div>
+          <div class="summary-chip"><small>Best Delivery</small><strong>${strongestDelivery ? strongestDelivery.label : "-"}</strong></div>
+          <div class="summary-chip"><small>Needs Focus</small><strong>${highestReject ? highestReject.label : "-"}</strong></div>
+        ` : '<div class="empty-state" style="grid-column:1/-1;">No records.</div>';
+
+        rankingHost.innerHTML = summary.length
+          ? summary.map((item) => `
+              <div class="leader-card">
+                <div class="leader-top">
+                  <div>
+                    <div class="leader-title">${item.label}</div>
+                    <div class="leader-meta">${item.total} reports</div>
+                  </div>
+                  <span class="badge ${percentage(item.rejected, item.total) >= 20 ? "risk" : "good"}">${percentage(item.delivered, item.total)}% delivered</span>
+                </div>
+                <div class="branch-mini-stats">
+                  <div>Pending<br /><strong>${item.pending_operation}</strong></div>
+                  <div>Email<br /><strong>${percentage(item.sent_student_email, item.total)}%</strong></div>
+                  <div>Rejected<br /><strong>${percentage(item.rejected, item.total)}%</strong></div>
+                </div>
+              </div>
+            `).join("")
+          : '<div class="empty-state">No records.</div>';
+
+        tableBody.innerHTML = "";
+        summary.forEach((item) => {
+          tableBody.innerHTML += `
+            <tr>
+              <td>${item.label}</td>
+              <td>${item.total}</td>
+              <td>${item.pending_operation}</td>
+              <td>${item.approved}</td>
+              <td>${item.delivered}</td>
+              <td>${item.rejected}</td>
+              <td>${percentage(item.sent_student_email, item.total)}%</td>
+              <td>${percentage(item.delivered, item.total)}%</td>
+            </tr>
+          `;
+        });
+        empty.style.display = summary.length ? "none" : "block";
+      }
+
+      function renderSales(rows) {
+        if (!isManagerView) return;
+        const summary = salesSummary(rows);
+        const readyRows = rows.filter((row) => row.status === "approved" || row.status === "delivered");
+        const directRows = rows.filter((row) => consultantLabel(row) === "Direct");
+        const summaryHost = document.getElementById("salesSummary");
+        const leaderboardHost = document.getElementById("salesLeaderboard");
+        const tableBody = document.getElementById("salesTableBody");
+        const empty = document.getElementById("salesEmptyState");
+
+        summaryHost.innerHTML = summary.length ? `
+          <div class="summary-chip"><small>Consultants</small><strong>${summary.length}</strong></div>
+          <div class="summary-chip"><small>Ready Reports</small><strong>${readyRows.length}</strong></div>
+          <div class="summary-chip"><small>Direct</small><strong>${directRows.length}</strong></div>
+          <div class="summary-chip"><small>Assigned</small><strong>${rows.length - directRows.length}</strong></div>
+        ` : '<div class="empty-state" style="grid-column:1/-1;">No records.</div>';
+
+        leaderboardHost.innerHTML = summary.length
+          ? summary.map((item) => `
+              <div class="leader-card">
+                <div class="leader-top">
+                  <div>
+                    <div class="leader-title">${item.label}</div>
+                    <div class="leader-meta">${item.total} reports</div>
+                  </div>
+                  <span class="badge ${item.label === "Direct" ? "direct" : "assigned"}">${item.label === "Direct" ? "Direct" : "Assigned"}</span>
+                </div>
+                <div class="branch-mini-stats">
+                  <div>Approved<br /><strong>${item.approved}</strong></div>
+                  <div>Delivered<br /><strong>${item.delivered}</strong></div>
+                  <div>Email<br /><strong>${percentage(item.sent_student_email, item.total)}%</strong></div>
+                </div>
+              </div>
+            `).join("")
+          : '<div class="empty-state">No records.</div>';
+
+        tableBody.innerHTML = "";
+        summary.forEach((item) => {
+          tableBody.innerHTML += `
+            <tr>
+              <td>${item.label}</td>
+              <td>${item.total}</td>
+              <td>${item.approved}</td>
+              <td>${item.delivered}</td>
+              <td>${item.direct}</td>
+              <td>${percentage(item.sent_student_email, item.total)}%</td>
+              <td>${percentage(item.delivered, item.total)}%</td>
+            </tr>
+          `;
+        });
+        empty.style.display = summary.length ? "none" : "block";
       }
 
       async function loadDashboard() {
@@ -721,19 +1229,21 @@
         renderDistribution(dashboardRows);
         renderAttention(dashboardRows);
         renderTeacherSnapshot(dashboardRows);
+        renderOverviewSide(dashboardRows);
         renderTeachersTable(dashboardRows);
+        renderQuality(dashboardRows);
+        renderBranches(dashboardRows);
+        renderSales(dashboardRows);
       }
 
       async function loadReports() {
         const phone = document.getElementById("phoneFilter").value.trim();
         const teacher = document.getElementById("teacherFilter").value;
+        const salesSelect = document.getElementById("salesFilter");
+        const sales = salesSelect ? salesSelect.value : "";
         const status = document.getElementById("statusFilter").value;
-        filteredRows = await fetchRows({ phone, teacher_id: teacher, status });
+        filteredRows = await fetchRows({ phone, teacher_id: teacher, sales_id: sales, status });
         renderReports(filteredRows);
-      }
-
-      async function loadAll() {
-        await Promise.all([loadDashboard(), loadReports()]);
       }
 
       async function loadTeachers() {
@@ -749,9 +1259,23 @@
         });
       }
 
+      async function loadSalesStaff() {
+        const select = document.getElementById("salesFilter");
+        if (!select) return;
+        const query = new URLSearchParams({ role: "sales" });
+        const branch = currentBranch();
+        if (branch) query.set("branch", branch);
+        const response = await fetch(`/api/users?${query.toString()}`);
+        const users = await response.json();
+        select.innerHTML = '<option value="">All sales staff</option>';
+        users.forEach((user) => {
+          select.innerHTML += `<option value="${user.id}">${user.name}</option>`;
+        });
+      }
+
       async function handleBranchChange() {
-        await loadTeachers();
-        await loadAll();
+        await Promise.all([loadTeachers(), loadSalesStaff()]);
+        await Promise.all([loadDashboard(), loadReports()]);
       }
 
       function setActiveTab(tabName) {
@@ -767,13 +1291,13 @@
         tab.addEventListener("click", () => setActiveTab(tab.dataset.tab));
       });
 
-      let searchTimer = null;
+      let phoneTimer = null;
       document.getElementById("phoneFilter").addEventListener("input", () => {
-        clearTimeout(searchTimer);
-        searchTimer = setTimeout(loadReports, 250);
+        clearTimeout(phoneTimer);
+        phoneTimer = setTimeout(loadReports, 250);
       });
 
-      loadTeachers().then(loadAll);
+      Promise.all([loadTeachers(), loadSalesStaff()]).then(() => Promise.all([loadDashboard(), loadReports()]));
     </script>
   </body>
 </html>

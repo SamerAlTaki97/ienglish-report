@@ -5,55 +5,299 @@
     <meta charset="UTF-8" />
     <title>Sales Admin Dashboard</title>
     <style>
-      body { font-family: Arial, sans-serif; background: #eef2f7; margin: 0; }
-      .container { max-width: 1220px; margin: 32px auto; background: white; padding: 24px; border-radius: 12px; }
-      .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
-      input, select { padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; }
-      .table-wrap { border: 1px solid #e5e7eb; border-radius: 12px; overflow-x: auto; }
+      :root {
+        --bg: #eef2f7;
+        --surface: #ffffff;
+        --line: #dbe4ee;
+        --ink: #0f172a;
+        --muted: #64748b;
+        --approved: #2563eb;
+        --delivered: #16a34a;
+        --direct: #475569;
+        --assigned: #b91c1c;
+      }
+
+      * { box-sizing: border-box; }
+      body { font-family: Arial, sans-serif; background: var(--bg); margin: 0; color: var(--ink); }
+      .page { max-width: 1380px; margin: 28px auto 40px; padding: 0 18px; }
+      .hero {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 18px;
+        margin-bottom: 20px;
+      }
+      .hero h1 { margin: 0; font-size: 34px; }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+      .stat-card {
+        border-radius: 14px;
+        color: #fff;
+        padding: 18px;
+        min-height: 108px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .stat-card small {
+        opacity: 0.92;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .stat-card strong {
+        font-size: 34px;
+        line-height: 1;
+      }
+      .approved-card { background: var(--approved); }
+      .delivered-card { background: var(--delivered); }
+      .direct-card { background: var(--direct); }
+      .assigned-card { background: var(--assigned); }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+        margin-bottom: 18px;
+      }
+      .box {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 18px;
+      }
+      .box-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .box-head h2 { margin: 0; }
+      .filters {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+      }
+      input, select {
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        font: inherit;
+      }
+
+      .stack {
+        display: grid;
+        gap: 12px;
+      }
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+        padding: 14px;
+      }
+      .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        gap: 12px;
+      }
+      .card-title { font-weight: 700; }
+      .card-meta {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 88px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .badge.direct { background: var(--direct); }
+      .badge.assigned { background: var(--approved); }
+      .badge.approved { background: var(--approved); }
+      .badge.delivered { background: var(--delivered); }
+
+      .bar-track {
+        width: 100%;
+        height: 10px;
+        background: #e2e8f0;
+        border-radius: 999px;
+        overflow: hidden;
+        margin-top: 12px;
+      }
+      .bar-fill { height: 100%; background: linear-gradient(90deg, #2563eb, #16a34a); }
+
+      .mini-stats {
+        margin-top: 10px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        color: var(--muted);
+        font-size: 12px;
+        text-align: center;
+      }
+
+      .table-wrap { border: 1px solid var(--line); border-radius: 14px; overflow-x: auto; }
       table { width: 100%; min-width: 980px; border-collapse: collapse; }
-      th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center; vertical-align: middle; }
-      th { background: #f8fafc; white-space: nowrap; }
-      .student-col { min-width: 170px; }
-      .consultant-col { min-width: 170px; }
+      th, td {
+        padding: 11px 10px;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: center;
+        vertical-align: middle;
+      }
+      th {
+        background: #f8fafc;
+        white-space: normal;
+        line-height: 1.2;
+        color: #334155;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+      .student-col { min-width: 180px; }
+      .consultant-col { min-width: 180px; }
       .teacher-col { min-width: 130px; }
-      .phone-col { min-width: 120px; max-width: 120px; }
+      .phone-col { min-width: 110px; max-width: 110px; }
       .view-col { min-width: 90px; }
-      .phone-cell { max-width: 120px; white-space: normal; overflow-wrap: anywhere; word-break: break-word; text-align: center; }
+      .phone-cell {
+        max-width: 110px;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        text-align: center;
+      }
+      .empty-state {
+        padding: 28px 18px;
+        text-align: center;
+        color: var(--muted);
+      }
+      .view-link {
+        color: #2563eb;
+        font-weight: 700;
+        text-decoration: none;
+      }
+      .view-link:hover { text-decoration: underline; }
+
+      @media (max-width: 1100px) {
+        .grid-2 { grid-template-columns: 1fr; }
+      }
+
+      @media (max-width: 900px) {
+        .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .hero { flex-direction: column; align-items: flex-start; }
+      }
     </style>
   </head>
   <body>
     {% include "_navbar.html" %}
-    <div class="container">
-      <h1>Sales Admin Monitor</h1>
-
-      <div class="filters">
-        <select id="salesFilter" onchange="load()">
-          <option value="">All sales staff</option>
-        </select>
+    <div class="page">
+      <div class="hero">
+        <div>
+          <h1>Sales Admin Dashboard</h1>
+        </div>
       </div>
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th class="student-col">Student</th>
-              <th class="consultant-col">Educational Consultant</th>
-              <th class="teacher-col">Teacher</th>
-              <th>Level</th>
-              <th>Type</th>
-              <th class="phone-col">Phone</th>
-              <th class="view-col">View</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody"></tbody>
-        </table>
+      <div class="stats">
+        <div class="stat-card approved-card">
+          <small>Approved</small>
+          <strong id="approvedCount">0</strong>
+          <span id="approvedShare">0 ready reports</span>
+        </div>
+        <div class="stat-card delivered-card">
+          <small>Delivered</small>
+          <strong id="deliveredCount">0</strong>
+          <span id="deliveredShare">0 delivered</span>
+        </div>
+        <div class="stat-card direct-card">
+          <small>Direct</small>
+          <strong id="directCount">0</strong>
+          <span id="directShare">0 direct reports</span>
+        </div>
+        <div class="stat-card assigned-card">
+          <small>Assigned</small>
+          <strong id="assignedCount">0</strong>
+          <span id="assignedShare">0 assigned reports</span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="box">
+          <div class="box-head">
+            <h2>Recent Ready Reports</h2>
+          </div>
+          <div id="recentList" class="stack"></div>
+        </div>
+
+        <div class="box">
+          <div class="box-head">
+            <h2>Consultant Activity</h2>
+          </div>
+          <div id="consultantList" class="stack"></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <div class="box-head">
+          <h2>Reports</h2>
+        </div>
+
+        <div class="filters">
+          <select id="salesFilter" onchange="load()">
+            <option value="">All sales staff</option>
+          </select>
+          <select id="teacherFilter" onchange="load()">
+            <option value="">All teachers</option>
+          </select>
+          <select id="typeFilter" onchange="load()">
+            <option value="">All types</option>
+            <option value="midterm">Midterm</option>
+            <option value="final">Final</option>
+          </select>
+          <select id="statusFilter" onchange="load()">
+            <option value="">Approved + Delivered</option>
+            <option value="approved">Approved</option>
+            <option value="delivered">Delivered</option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th class="student-col">Student</th>
+                <th class="consultant-col">Educational Consultant</th>
+                <th class="teacher-col">Teacher</th>
+                <th>Level</th>
+                <th>Type</th>
+                <th class="phone-col">Phone</th>
+                <th class="view-col">View</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+          <div id="tableEmptyState" class="empty-state" style="display:none;">No records.</div>
+        </div>
       </div>
     </div>
 
     <script>
       let allRows = [];
-      const visibleStatuses = new Set(["approved", "delivered"]);
+      const READY_STATUSES = new Set(["approved", "delivered"]);
 
       function displayPhone(row) {
         const value = String(row.student_id || "").trim();
@@ -61,33 +305,156 @@
         return value;
       }
 
-      async function load() {
-        const sales = document.getElementById("salesFilter").value;
-        const query = new URLSearchParams();
-        if (sales) query.set("sales_id", sales);
-        const response = await fetch(`/admin/reports?${query.toString()}`);
-        const rows = await response.json();
-        allRows = rows.filter((row) => visibleStatuses.has(row.status));
-        render();
+      function consultantLabel(row) {
+        return row.sales_name || "-";
       }
 
-      function render() {
+      function consultantBadge(row) {
+        return consultantLabel(row) === "Direct"
+          ? '<span class="badge direct">Direct</span>'
+          : '<span class="badge assigned">Assigned</span>';
+      }
+
+      function consultantSummary(rows) {
+        const summary = new Map();
+        rows.forEach((row) => {
+          const key = consultantLabel(row);
+          if (!summary.has(key)) {
+            summary.set(key, {
+              label: key,
+              total: 0,
+              approved: 0,
+              delivered: 0,
+            });
+          }
+          const item = summary.get(key);
+          item.total += 1;
+          if (row.status === "approved") item.approved += 1;
+          if (row.status === "delivered") item.delivered += 1;
+        });
+        return [...summary.values()].sort((a, b) => b.total - a.total || a.label.localeCompare(b.label));
+      }
+
+      function renderStats(rows) {
+        const approved = rows.filter((row) => row.status === "approved").length;
+        const delivered = rows.filter((row) => row.status === "delivered").length;
+        const direct = rows.filter((row) => consultantLabel(row) === "Direct").length;
+        const assigned = rows.length - direct;
+
+        document.getElementById("approvedCount").innerText = approved;
+        document.getElementById("deliveredCount").innerText = delivered;
+        document.getElementById("directCount").innerText = direct;
+        document.getElementById("assignedCount").innerText = assigned;
+
+        document.getElementById("approvedShare").innerText = `${approved} ready reports`;
+        document.getElementById("deliveredShare").innerText = `${delivered} delivered`;
+        document.getElementById("directShare").innerText = `${direct} direct reports`;
+        document.getElementById("assignedShare").innerText = `${assigned} assigned reports`;
+      }
+
+      function renderRecent(rows) {
+        const host = document.getElementById("recentList");
+        const recentRows = [...rows]
+          .sort((a, b) => String(b.sent_at || b.created_at || "").localeCompare(String(a.sent_at || a.created_at || "")))
+          .slice(0, 6);
+
+        if (!recentRows.length) {
+          host.innerHTML = '<div class="empty-state">No records.</div>';
+          return;
+        }
+
+        host.innerHTML = recentRows.map((row) => `
+          <div class="card">
+            <div class="card-top">
+              <div>
+                <div class="card-title">${row.student_name || "-"}</div>
+                <div class="card-meta">
+                  ${consultantLabel(row)}<br />
+                  Teacher: ${row.teacher_name || "-"}<br />
+                  ${row.sent_at || row.created_at || "-"}
+                </div>
+              </div>
+              <span class="badge ${row.status}">${row.status === "approved" ? "Approved" : "Delivered"}</span>
+            </div>
+          </div>
+        `).join("");
+      }
+
+      function renderConsultants(rows) {
+        const host = document.getElementById("consultantList");
+        const consultants = consultantSummary(rows);
+        const maxTotal = Math.max(...consultants.map((item) => item.total), 1);
+
+        if (!consultants.length) {
+          host.innerHTML = '<div class="empty-state">No records.</div>';
+          return;
+        }
+
+        host.innerHTML = consultants.map((item) => `
+          <div class="card">
+            <div class="card-top">
+              <div>
+                <div class="card-title">${item.label}</div>
+                <div class="card-meta">${item.total} reports</div>
+              </div>
+              <span class="badge ${item.label === "Direct" ? "direct" : "assigned"}">${item.label === "Direct" ? "Direct" : "Assigned"}</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:${(item.total / maxTotal) * 100}%"></div></div>
+            <div class="mini-stats">
+              <div>Total<br /><strong>${item.total}</strong></div>
+              <div>Approved<br /><strong>${item.approved}</strong></div>
+              <div>Delivered<br /><strong>${item.delivered}</strong></div>
+            </div>
+          </div>
+        `).join("");
+      }
+
+      function renderTable(rows) {
         const tbody = document.getElementById("tableBody");
+        const empty = document.getElementById("tableEmptyState");
         tbody.innerHTML = "";
-        allRows.forEach((row) => {
+
+        rows.forEach((row) => {
           tbody.innerHTML += `
             <tr>
               <td>${row.id}</td>
               <td>${row.student_name || "-"}</td>
-              <td>${row.sales_name || "-"}</td>
+              <td>${consultantLabel(row)}</td>
               <td>${row.teacher_name || "-"}</td>
               <td>${row.level || "-"}</td>
               <td>${row.report_type || "-"}</td>
               <td class="phone-cell">${displayPhone(row)}</td>
-              <td><a href="/view/${row.id}" target="_blank">Preview</a></td>
+              <td><a class="view-link" href="/view/${row.id}" target="_blank">Preview</a></td>
             </tr>
           `;
         });
+
+        empty.style.display = rows.length ? "none" : "block";
+      }
+
+      function applyFilters(rows) {
+        const sales = document.getElementById("salesFilter").value;
+        const teacher = document.getElementById("teacherFilter").value;
+        const type = document.getElementById("typeFilter").value;
+        const status = document.getElementById("statusFilter").value;
+
+        return rows.filter((row) => {
+          if (sales && String(row.sales_id || "") !== sales) return false;
+          if (teacher && String(row.teacher_id || "") !== teacher) return false;
+          if (type && row.report_type !== type) return false;
+          if (status && row.status !== status) return false;
+          return true;
+        });
+      }
+
+      async function load() {
+        const response = await fetch("/admin/reports");
+        const rows = await response.json();
+        allRows = rows.filter((row) => READY_STATUSES.has(row.status));
+        renderStats(allRows);
+        renderRecent(allRows);
+        renderConsultants(allRows);
+        renderTable(applyFilters(allRows));
       }
 
       async function loadSalesStaff() {
@@ -101,7 +468,18 @@
         });
       }
 
-      loadSalesStaff().then(load);
+      async function loadTeachers() {
+        const query = new URLSearchParams({ role: "teacher" });
+        const response = await fetch(`/api/users?${query.toString()}`);
+        const users = await response.json();
+        const select = document.getElementById("teacherFilter");
+        select.innerHTML = '<option value="">All teachers</option>';
+        users.forEach((user) => {
+          select.innerHTML += `<option value="${user.id}">${user.name}</option>`;
+        });
+      }
+
+      Promise.all([loadSalesStaff(), loadTeachers()]).then(load);
     </script>
   </body>
 </html>

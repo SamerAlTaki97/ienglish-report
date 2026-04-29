@@ -145,7 +145,7 @@ def redirect_for_role(user):
     if user["role"] == "superadmin":
         return redirect(url_for("admin_teachers_page"))
     if user["role"] == "manager":
-        return redirect(url_for("admin"))
+        return redirect(url_for("manager"))
     if user["role"] == "admin":
         return redirect(url_for("admin"))
     if user["role"] == "sales_admin":
