@@ -36,8 +36,10 @@ def init_db():
     _migrate_report_tracking_table(cursor)
     _create_evaluations_table(cursor)
     _create_delivery_logs_table(cursor)
+    _create_branches_table(cursor)
     _create_indexes(cursor)
     _seed_default_users(cursor)
+    _sync_branches(cursor)
     _cleanup_legacy_tables(cursor)
 
     cursor.execute("PRAGMA foreign_key_check")
@@ -465,6 +467,40 @@ def _create_delivery_logs_table(cursor):
         cursor.execute("DROP TABLE delivery_logs_old_fk")
 
     _ensure_column(cursor, "delivery_logs", "delivery_target", "TEXT")
+
+
+def _create_branches_table(cursor):
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS branches (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+
+
+def _sync_branches(cursor):
+    branch_names = {"AlAin", "Abu Dhabi"}
+
+    if _table_exists(cursor, "users"):
+        rows = cursor.execute(
+            "SELECT DISTINCT TRIM(branch) AS branch FROM users WHERE branch IS NOT NULL AND TRIM(branch) <> ''"
+        ).fetchall()
+        branch_names.update(row["branch"] for row in rows if row["branch"])
+
+    if _table_exists(cursor, "students"):
+        rows = cursor.execute(
+            "SELECT DISTINCT TRIM(branch) AS branch FROM students WHERE branch IS NOT NULL AND TRIM(branch) <> ''"
+        ).fetchall()
+        branch_names.update(row["branch"] for row in rows if row["branch"])
+
+    for branch_name in sorted(branch_names):
+        cursor.execute(
+            "INSERT OR IGNORE INTO branches (name) VALUES (?)",
+            (branch_name,),
+        )
 
 
 def _create_indexes(cursor):

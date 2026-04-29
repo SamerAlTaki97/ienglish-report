@@ -522,6 +522,7 @@ def _compose_report_payload(submission, ai_payload):
 def _generate_ai_report(data):
     student = data.get("student", {})
     name = student["name"]
+    score_guide = _build_generation_score_guide(data)
 
     prompt = f"""
 You are a senior academic English instructor writing a professional student progress report.
@@ -540,6 +541,14 @@ STRICT RULES:
 - Use this exact name: {name}
 - Every sentence must end with a single period.
 - Do not use ellipses or three-dot endings.
+- Use clear academic English with common classroom words.
+- Avoid rare, highly advanced, or complicated vocabulary.
+- The wording must change based on the score level.
+- Higher scores must sound stronger, more confident, and more independent.
+- Mid scores must sound developing, balanced, and realistic.
+- Lower scores must sound supportive, cautious, and improvement-focused.
+- Attendance, assignment, exam score, and each skill score must affect the wording.
+- Do not describe a low score with very positive language.
 - No hallucination
 - Return valid JSON only
 
@@ -562,6 +571,9 @@ Return JSON:
 
 DATA:
 {json.dumps(data, ensure_ascii=False)}
+
+SCORE GUIDE:
+{score_guide}
 """
 
     try:
@@ -599,6 +611,14 @@ def _generate_local_report(data):
     attendance = _score_phrase(performance.get("attendance"))
     assignment = _score_phrase(performance.get("assignment"))
     exam_score = str(performance.get("exam_score") or "").strip()
+    exam_summary = _exam_phrase(exam_score)
+    overall_summary = _overall_progress_phrase(overall_score)
+    reading_summary = _skill_progress_phrase(skills.get("reading"))
+    writing_summary = _skill_progress_phrase(skills.get("writing"))
+    listening_summary = _skill_progress_phrase(skills.get("listening"))
+    speaking_summary = _skill_progress_phrase(skills.get("speaking"))
+    vocab_summary = _skill_progress_phrase(skills.get("vocab"))
+    grammar_summary = _skill_progress_phrase(skills.get("grammar"))
     communication_notes = _join_notes(input_sections.get("communication"))
     vocabulary_notes = _join_notes(input_sections.get("vocabulary"))
     grammar_notes = _join_notes(input_sections.get("grammar"))
@@ -611,62 +631,58 @@ def _generate_local_report(data):
             "title": "INTRODUCTION",
             "content": (
                 f"{name} has completed the current {_format_report_type(report_type).lower()} cycle "
-                f"for {course} in a {class_type} class with an overall performance average of {overall_score}/10. "
-                "The report reflects classroom performance, submitted work, and the core language skill scores provided by the teacher."
+                f"for {course} in a {class_type} class. {name} is currently performing at {overall_summary}, "
+                f"with an overall average of {overall_score}/10. The report reflects classroom work, submitted tasks, and the recorded language scores."
             ),
         },
         {
             "title": "ATTENDANCE & PERFORMANCE",
             "content": (
                 f"{name}'s attendance is currently {attendance}, assignment completion is {assignment}, "
-                f"and the exam score is {exam_score}/100. "
-                "These indicators should be monitored together because consistent attendance and regular "
-                "assignment practice strongly support measurable language progress."
+                f"and the exam score is {exam_score}/100, which indicates {exam_summary}. "
+                "These results should be read together because regular attendance and steady assignment work usually support stronger academic progress."
             ),
         },
         {
             "title": "COMMUNICATION SKILLS",
             "content": (
                 communication_notes
-                or f"{name}'s strongest measured area is {strongest_skill['label']}, while {weakest_skill['label']} "
-                "requires the most focused support during speaking and classroom communication tasks."
+                or f"In speaking, {name} is {speaking_summary}, and in listening, {name} is {listening_summary}. "
+                "This shows how effectively ideas are understood, expressed, and sustained during class interaction."
             ),
         },
         {
             "title": "VOCABULARY DEVELOPMENT",
             "content": (
                 vocabulary_notes
-                or f"{name} should continue expanding vocabulary range and accuracy through topic-based practice, "
-                "guided review, and frequent use of new words in complete spoken and written responses."
+                or f"In vocabulary, {name} is {vocab_summary}. Continued progress in this area depends on accurate word choice, regular review, and active use of new language in context."
             ),
         },
         {
             "title": "GRAMMAR ANALYSIS",
             "content": (
                 grammar_notes
-                or f"{name}'s grammar development should focus on accuracy, sentence control, and consistent use "
-                "of target structures across classroom activities and written assignments."
+                or f"In grammar, {name} is {grammar_summary}. Sentence control, accuracy, and consistent use of target structures should continue to improve through guided correction and repeated practice."
             ),
         },
         {
             "title": "READING & WRITING",
             "content": (
-                f"In reading, {name} scored {_score_value(skills.get('reading'))}/10, and in writing, "
-                f"{name} scored {_score_value(skills.get('writing'))}/10. Continued practice should connect "
-                "reading comprehension with clear written production so progress remains balanced."
+                f"In reading, {name} is {reading_summary}. In writing, {name} is {writing_summary}. "
+                "These two areas should continue to develop together so comprehension and written expression remain balanced."
             ),
         },
         {
             "title": "STRENGTHS",
-            "content": strengths or f"{name}'s strongest current area is {strongest_skill['label']}, which should be maintained through regular practice.",
+            "content": strengths or f"{name}'s strongest current area is {strongest_skill['label']}, and this strength should be maintained through regular, well-focused practice.",
         },
         {
             "title": "AREAS FOR IMPROVEMENT",
-            "content": weaknesses or f"{name} should prioritize {weakest_skill['label']} with targeted support and short, consistent practice tasks.",
+            "content": weaknesses or f"{name} should now prioritize {weakest_skill['label']} through targeted support, clear correction, and short, consistent practice tasks.",
         },
         {
             "title": "FINAL RECOMMENDATION",
-            "content": final_note or f"{name} should continue with a structured study plan that reinforces weaker skills while preserving current strengths.",
+            "content": final_note or f"{name} should continue with a structured study plan that builds weaker areas while maintaining current strengths in a steady and measurable way.",
         },
     ]
 
@@ -686,13 +702,97 @@ def _score_value(value):
 
 def _score_phrase(value):
     score = _score_value(value)
+    if score >= 9:
+        return f"excellent at {score}/10"
     if score >= 8:
         return f"strong at {score}/10"
+    if score >= 7:
+        return f"good at {score}/10"
     if score >= 6:
         return f"developing at {score}/10"
+    if score >= 5:
+        return f"fair at {score}/10"
+    if score >= 3:
+        return f"basic at {score}/10"
     if score > 0:
         return f"in need of support at {score}/10"
     return "not yet scored"
+
+
+def _skill_progress_phrase(value):
+    score = _score_value(value)
+    if score >= 9:
+        return f"working at an excellent level ({score}/10)"
+    if score >= 7:
+        return f"working at a strong level ({score}/10)"
+    if score >= 5:
+        return f"working at a developing level ({score}/10)"
+    if score >= 3:
+        return f"working at a basic level ({score}/10)"
+    if score > 0:
+        return f"working at a limited level ({score}/10)"
+    return "not yet scored"
+
+
+def _overall_progress_phrase(score):
+    if score >= 9:
+        return "a very strong and consistent level"
+    if score >= 7:
+        return "a good and steady level"
+    if score >= 5:
+        return "a developing level with a fair base"
+    if score >= 3:
+        return "a basic level that still needs more consistency"
+    if score > 0:
+        return "a limited level that needs clear support"
+    return "an unscored level"
+
+
+def _exam_phrase(value):
+    try:
+        score = float(str(value or "").strip())
+    except ValueError:
+        return "an unscored exam result"
+
+    if score >= 90:
+        return "very strong understanding and control"
+    if score >= 75:
+        return "good understanding with clear progress"
+    if score >= 60:
+        return "a developing result with a fair base"
+    if score >= 40:
+        return "a basic result that needs more consistency"
+    if score > 0:
+        return "a limited result that needs close support"
+    return "an unscored exam result"
+
+
+def _build_generation_score_guide(data):
+    performance = data.get("performance") or {}
+    skills = data.get("skills") or {}
+    guide_items = [
+        ("Attendance", performance.get("attendance"), _score_phrase(performance.get("attendance"))),
+        ("Assignment", performance.get("assignment"), _score_phrase(performance.get("assignment"))),
+        ("Reading", skills.get("reading"), _skill_progress_phrase(skills.get("reading"))),
+        ("Writing", skills.get("writing"), _skill_progress_phrase(skills.get("writing"))),
+        ("Listening", skills.get("listening"), _skill_progress_phrase(skills.get("listening"))),
+        ("Speaking", skills.get("speaking"), _skill_progress_phrase(skills.get("speaking"))),
+        ("Vocabulary", skills.get("vocab"), _skill_progress_phrase(skills.get("vocab"))),
+        ("Grammar", skills.get("grammar"), _skill_progress_phrase(skills.get("grammar"))),
+    ]
+
+    exam_score_text = str(performance.get("exam_score") or "").strip() or "not scored"
+    if exam_score_text == "not scored":
+        lines = [f"- Exam score: {exam_score_text} -> {_exam_phrase(performance.get('exam_score'))}."]
+    else:
+        lines = [f"- Exam score: {exam_score_text}/100 -> {_exam_phrase(performance.get('exam_score'))}."]
+    for label, raw_value, description in guide_items:
+        score_text = str(raw_value or "").strip() or "not scored"
+        if score_text == "not scored":
+            lines.append(f"- {label}: {score_text} -> {description}.")
+        else:
+            lines.append(f"- {label}: {score_text}/10 -> {description}.")
+    return "\n".join(lines)
 
 
 def _join_notes(items):

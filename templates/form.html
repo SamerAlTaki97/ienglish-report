@@ -49,7 +49,24 @@
               </select>
               <input id="course_other" placeholder="Enter course type" style="display:none; margin-top: 8px;" autocomplete="off" />
             </div>
-            <div class="field"><label>Level</label><input id="level" placeholder="Select General English first" disabled autocomplete="off" /></div>
+            <div class="field">
+              <label>Level</label>
+              <select id="level" disabled>
+                <option value="">Select General English first</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+              </select>
+            </div>
             <div class="field">
               <label>Class Type</label>
               <select id="class_type">
@@ -263,6 +280,7 @@
         const labels = {
           name: "Student Name",
           course_type: "Course",
+          level: "Level",
           class_type: "Class Type",
           report_type: "Report Type",
           exam_score: "Exam Score",
@@ -282,6 +300,7 @@
         });
         const courseType = document.getElementById("course_type").value;
         if (courseType === "other" && !document.getElementById("course_other").value.trim()) missing.push("course_other");
+        if (courseType === "general_english" && !document.getElementById("level").value) missing.push("level");
         if (!hasSectionEntry("commBox")) missing.push("Communication Topics");
         if (!hasSectionEntry("vocabBox")) missing.push("Vocabulary Topics");
         if (!hasSectionEntry("grammarBox")) missing.push("Grammar Topics");
@@ -316,12 +335,15 @@
         const courseType = document.getElementById("course_type").value;
         const courseOther = document.getElementById("course_other");
         const level = document.getElementById("level");
+        const levelPlaceholder = level.querySelector('option[value=""]');
 
         courseOther.style.display = courseType === "other" ? "block" : "none";
         if (courseType !== "other") courseOther.value = "";
 
         level.disabled = courseType !== "general_english";
-        level.placeholder = courseType === "general_english" ? "Enter level" : "Available for General English only";
+        if (levelPlaceholder) {
+          levelPlaceholder.textContent = courseType === "general_english" ? "Select level" : "Select General English first";
+        }
         if (courseType !== "general_english") level.value = "";
         updateButton();
       }

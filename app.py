@@ -274,6 +274,13 @@ def users_lookup():
     return jsonify(user_service.list_visible_users(current_user(), role=role, branch=branch))
 
 
+@app.route("/api/branches")
+@login_required
+@role_required("superadmin")
+def branches_lookup():
+    return jsonify(user_service.list_branches(current_user()))
+
+
 @app.route("/api/session-status")
 @login_required
 def session_status():
@@ -580,6 +587,14 @@ def admin_add_teacher():
         branch=data.get("branch"),
     )
     return jsonify(user)
+
+
+@app.route("/admin/branches", methods=["POST"])
+@login_required
+@role_required("superadmin")
+def admin_add_branch():
+    data = request.get_json() or {}
+    return jsonify(user_service.create_branch(current_user(), data.get("name")))
 
 
 @app.route("/admin/users/<int:user_id>/reset-password", methods=["POST"])

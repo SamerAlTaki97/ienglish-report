@@ -94,6 +94,36 @@ def list_users(role=None, branch=None, active_only=True, exclude_roles=None):
     return [dict(row) for row in rows]
 
 
+def list_branches():
+    conn = get_connection()
+    rows = conn.execute("SELECT * FROM branches ORDER BY name").fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+
+def branch_exists(name):
+    conn = get_connection()
+    row = conn.execute(
+        "SELECT 1 FROM branches WHERE lower(name)=lower(?)",
+        (name,),
+    ).fetchone()
+    conn.close()
+    return bool(row)
+
+
+def create_branch(name):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO branches (name) VALUES (?)",
+        (name,),
+    )
+    conn.commit()
+    branch_id = cursor.lastrowid
+    conn.close()
+    return branch_id
+
+
 def deactivate_user(user_id):
     conn = get_connection()
     cursor = conn.cursor()

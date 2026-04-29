@@ -73,6 +73,24 @@ def list_visible_users(actor, role=None, branch=None):
     return users
 
 
+def list_branches(actor):
+    if not user_has_role(actor, "superadmin"):
+        raise ServiceError("Forbidden", 403)
+    return models.list_branches()
+
+
+def create_branch(actor, name):
+    if not user_has_role(actor, "superadmin"):
+        raise ServiceError("Forbidden", 403)
+    branch_name = str(name or "").strip()
+    if not branch_name:
+        raise ServiceError("Branch name is required", 400)
+    if models.branch_exists(branch_name):
+        raise ServiceError("Branch already exists", 409)
+    branch_id = models.create_branch(branch_name)
+    return {"id": branch_id, "name": branch_name}
+
+
 def create_user_account(actor, name, username, password, role, branch=None):
     if role not in VALID_ROLES:
         raise ServiceError("Invalid role", 400)
@@ -92,6 +110,8 @@ def create_user_account(actor, name, username, password, role, branch=None):
     allowed_branch = branch or None
     if not allowed_branch:
         raise ServiceError("Branch is required", 400)
+    if not models.branch_exists(allowed_branch):
+        raise ServiceError("Selected branch does not exist", 400)
 
     existing_username = models.get_user_by_username_ci(username)
     if existing_username:
@@ -186,6 +206,8 @@ def update_user_branch(actor, user_id, branch):
         raise ServiceError("Only owner can update branches", 403)
     if not branch:
         raise ServiceError("Branch is required", 400)
+    if not models.branch_exists(branch):
+        raise ServiceError("Selected branch does not exist", 400)
 
     user = models.get_user_by_id(user_id)
     if not user or not user.get("is_active"):

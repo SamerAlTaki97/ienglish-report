@@ -6,11 +6,32 @@
     <link rel="stylesheet" href="/static/css/style.css" />
     <style>
       body { font-family: Arial, sans-serif; background: #eef2f7; margin: 0; color: #0f172a; }
-      .container { max-width: 1180px; margin: 32px auto; background: white; padding: 24px; border-radius: 16px; box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08); }
+      .container { max-width: 1240px; margin: 32px auto; background: white; padding: 24px; border-radius: 16px; box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08); }
       .head { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 18px; }
       h1 { margin: 0; }
-      .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
-      input, select, button { padding: 10px 12px; border-radius: 10px; border: 1px solid #cbd5e1; box-sizing: border-box; font: inherit; }
+      .tabs {
+        display: inline-flex;
+        gap: 8px;
+        padding: 6px;
+        border-radius: 14px;
+        background: #dfe8f2;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+      }
+      .tab {
+        border: none;
+        background: transparent;
+        color: #1e293b;
+        font-weight: 700;
+        padding: 10px 16px;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+      .tab.active { background: white; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08); }
+      .panel { display: none; }
+      .panel.active { display: block; }
+      .filters, .branch-tools { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+      input, select, button, textarea { padding: 10px 12px; border-radius: 10px; border: 1px solid #cbd5e1; box-sizing: border-box; font: inherit; }
       button { background: #2563eb; color: white; border: none; cursor: pointer; font-weight: 700; }
       .danger { background: #b91c1c; }
       .dark { background: #111827; }
@@ -18,6 +39,11 @@
       .success { background: #16a34a; }
       .actions { display: flex; gap: 8px; flex-wrap: wrap; }
       .feedback { margin-top: 12px; color: #166534; font-size: 14px; font-weight: 700; min-height: 18px; }
+      .section-card { border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px; background: #fff; }
+      .branch-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+      .branch-card { border: 1px solid #dbe4ee; border-radius: 14px; padding: 16px; background: #f8fafc; }
+      .branch-card strong { display: block; font-size: 20px; margin-bottom: 6px; }
+      .branch-card span { color: #64748b; font-size: 13px; }
       table { width: 100%; border-collapse: collapse; }
       td, th { padding: 12px 10px; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: middle; }
       th { background: #f8fafc; color: #475569; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; }
@@ -28,6 +54,9 @@
       .modal-head h2 { margin: 0; }
       .modal-body { padding: 22px; display: grid; gap: 12px; }
       .modal-actions { display: flex; gap: 10px; justify-content: flex-end; padding: 0 22px 22px; }
+      @media (max-width: 980px) {
+        .branch-grid { grid-template-columns: 1fr; }
+      }
       @media (max-width: 850px) {
         .head { align-items: flex-start; flex-direction: column; }
         table, thead, tbody, th, td, tr { display: block; }
@@ -42,42 +71,61 @@
     {% include "_navbar.html" %}
     <div class="container">
       <div class="head">
-        <h1>Owner User Management</h1>
+        <h1>Owner Management</h1>
         <button onclick="openAddModal()">Add User</button>
       </div>
 
-      <div class="filters">
-        <select id="roleFilter" onchange="load()">
-          <option value="">All roles</option>
-          <option value="manager">Manager</option>
-          <option value="admin">Admin</option>
-          <option value="sales_admin">Sales Admin</option>
-          <option value="operation">Operation</option>
-          <option value="teacher">Teacher</option>
-          <option value="sales">Educational Consultant</option>
-        </select>
-        <select id="branchFilter" onchange="load()">
-          <option value="">All branches</option>
-          <option value="AlAin">AlAin</option>
-          <option value="Abu Dhabi">Abu Dhabi</option>
-        </select>
+      <div class="tabs">
+        <button class="tab active" type="button" data-tab="users">Users</button>
+        <button class="tab" type="button" data-tab="branches">Branches</button>
       </div>
 
       <div id="feedback" class="feedback"></div>
 
-      <table style="margin-top: 18px">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Username</th>
-            <th>Role</th>
-            <th>Branch</th>
-            <th>Save Branch</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="table"></tbody>
-      </table>
+      <section id="usersPanel" class="panel active">
+        <div class="filters">
+          <select id="roleFilter" onchange="loadUsers()">
+            <option value="">All roles</option>
+            <option value="manager">Manager</option>
+            <option value="admin">Admin</option>
+            <option value="sales_admin">Sales Admin</option>
+            <option value="operation">Operation</option>
+            <option value="teacher">Teacher</option>
+            <option value="sales">Educational Consultant</option>
+          </select>
+          <select id="branchFilter" onchange="loadUsers()">
+            <option value="">All branches</option>
+          </select>
+        </div>
+
+        <table style="margin-top: 18px">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Branch</th>
+              <th>Save Branch</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="table"></tbody>
+        </table>
+      </section>
+
+      <section id="branchesPanel" class="panel">
+        <div class="section-card" style="margin-bottom:18px;">
+          <div class="head" style="margin-bottom:14px;">
+            <h1 style="font-size:24px;">Branches</h1>
+          </div>
+          <div class="branch-tools">
+            <input id="newBranchName" placeholder="Add new branch" />
+            <button class="success" onclick="addBranch()">Save Branch</button>
+          </div>
+        </div>
+
+        <div id="branchesGrid" class="branch-grid"></div>
+      </section>
     </div>
 
     <div id="addModal" class="modal-backdrop" onclick="maybeCloseModal(event)">
@@ -100,8 +148,6 @@
           </select>
           <select id="branch">
             <option value="">Select branch</option>
-            <option value="AlAin">AlAin</option>
-            <option value="Abu Dhabi">Abu Dhabi</option>
           </select>
         </div>
         <div class="modal-actions">
@@ -151,6 +197,7 @@
       let pendingResetUserId = null;
       let pendingDeleteUserId = null;
       let loadedUsersById = new Map();
+      let branchOptions = [];
 
       function cleanUsername(value) {
         return String(value || "").replace(/\s+/g, "");
@@ -173,7 +220,40 @@
         return value;
       }
 
-      async function load() {
+      function branchSelectOptions(selectedValue = "") {
+        return branchOptions
+          .map((branch) => `<option value="${escapeHtml(branch.name)}" ${branch.name === selectedValue ? "selected" : ""}>${escapeHtml(branch.name)}</option>`)
+          .join("");
+      }
+
+      async function loadBranches() {
+        const response = await fetch("/api/branches");
+        branchOptions = await response.json();
+
+        const filter = document.getElementById("branchFilter");
+        filter.innerHTML = '<option value="">All branches</option>' + branchSelectOptions();
+
+        const addUserBranch = document.getElementById("branch");
+        addUserBranch.innerHTML = '<option value="">Select branch</option>' + branchSelectOptions();
+
+        renderBranches();
+      }
+
+      function renderBranches() {
+        const host = document.getElementById("branchesGrid");
+        if (!branchOptions.length) {
+          host.innerHTML = '<div class="branch-card"><strong>No branches</strong><span>Add the first branch.</span></div>';
+          return;
+        }
+        host.innerHTML = branchOptions.map((branch) => `
+          <div class="branch-card">
+            <strong>${escapeHtml(branch.name)}</strong>
+            <span>Created branch record</span>
+          </div>
+        `).join("");
+      }
+
+      async function loadUsers() {
         const query = new URLSearchParams();
         const selectedRole = document.getElementById("roleFilter").value;
         const selectedBranch = document.getElementById("branchFilter").value;
@@ -193,8 +273,7 @@
               <td data-label="Role">${displayRole(user.role)}</td>
               <td data-label="Branch">
                 <select data-branch-user="${user.id}">
-                  <option value="AlAin" ${user.branch === "AlAin" ? "selected" : ""}>AlAin</option>
-                  <option value="Abu Dhabi" ${user.branch === "Abu Dhabi" ? "selected" : ""}>Abu Dhabi</option>
+                  ${branchSelectOptions(user.branch)}
                 </select>
               </td>
               <td data-label="Save Branch">
@@ -254,7 +333,7 @@
         document.getElementById("branch").value = "";
         document.getElementById("feedback").innerText = "User added successfully.";
         closeAddModal();
-        load();
+        loadUsers();
       }
 
       async function saveBranch(userId) {
@@ -270,7 +349,30 @@
           return;
         }
         document.getElementById("feedback").innerText = "Branch updated successfully.";
-        load();
+        loadUsers();
+      }
+
+      async function addBranch() {
+        const input = document.getElementById("newBranchName");
+        const name = input.value.trim();
+        if (!name) {
+          alert("Branch name is required");
+          return;
+        }
+        const response = await fetch("/admin/branches", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name }),
+        });
+        const payload = await response.json();
+        if (!response.ok) {
+          alert(payload.error || "Unable to add branch");
+          return;
+        }
+        input.value = "";
+        document.getElementById("feedback").innerText = "Branch added successfully.";
+        await loadBranches();
+        await loadUsers();
       }
 
       function openResetModal(userId) {
@@ -341,8 +443,21 @@
         }
         document.getElementById("feedback").innerText = "User deleted successfully.";
         closeDeleteModal();
-        load();
+        loadUsers();
       }
+
+      function setActiveTab(tabName) {
+        document.querySelectorAll(".tab").forEach((tab) => {
+          tab.classList.toggle("active", tab.dataset.tab === tabName);
+        });
+        document.querySelectorAll(".panel").forEach((panel) => {
+          panel.classList.toggle("active", panel.id === `${tabName}Panel`);
+        });
+      }
+
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.addEventListener("click", () => setActiveTab(tab.dataset.tab));
+      });
 
       document.getElementById("username").addEventListener("keydown", (event) => {
         if (event.key === " ") event.preventDefault();
@@ -351,7 +466,7 @@
         event.target.value = cleanUsername(event.target.value);
       });
 
-      load();
+      Promise.all([loadBranches()]).then(loadUsers);
     </script>
   </body>
 </html>
