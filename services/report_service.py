@@ -198,7 +198,7 @@ def refresh_report_pdf(report_id):
 
 def list_reports_for_user(actor, phone=None, status=None, teacher_id=None, sales_id=None, branch=None, workflow_only=False):
     normalized_teacher_id = _normalize_id(teacher_id)
-    normalized_sales_id = _normalize_id(sales_id)
+    normalized_sales_id = _normalize_report_sales_filter(sales_id)
     if actor.get("role") == "superadmin":
         reports = models.list_reports(phone=phone, status=status, teacher_id=normalized_teacher_id, sales_id=normalized_sales_id, branch=branch)
     elif user_has_role(actor, "manager"):
@@ -1056,6 +1056,15 @@ def _normalize_id(value):
         return int(str(value).strip())
     except Exception:
         return None
+
+
+def _normalize_report_sales_filter(value):
+    raw_value = str(value).strip() if value is not None else ""
+    if not raw_value:
+        return None
+    if raw_value.lower() == DIRECT_SALES_VALUE:
+        return DIRECT_SALES_VALUE
+    return _normalize_id(raw_value)
 
 
 def _normalize_sales_selection(value):

@@ -1267,7 +1267,7 @@
         if (branch) query.set("branch", branch);
         const response = await fetch(`/api/users?${query.toString()}`);
         const users = await response.json();
-        select.innerHTML = '<option value="">All sales staff</option>';
+        select.innerHTML = '<option value="">All sales staff</option><option value="direct">Direct</option>';
         users.forEach((user) => {
           select.innerHTML += `<option value="${user.id}">${user.name}</option>`;
         });

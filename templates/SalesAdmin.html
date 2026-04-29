@@ -18,8 +18,8 @@
       }
 
       * { box-sizing: border-box; }
-      body { font-family: Arial, sans-serif; background: var(--bg); margin: 0; color: var(--ink); }
-      .page { max-width: 1380px; margin: 28px auto 40px; padding: 0 18px; }
+      body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--ink); }
+      .page { max-width: 1460px; margin: 28px auto 40px; padding: 0 18px; }
       .hero {
         display: flex;
         justify-content: space-between;
@@ -28,11 +28,12 @@
         margin-bottom: 20px;
       }
       .hero h1 { margin: 0; font-size: 34px; }
+
       .stats {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 12px;
-        margin-bottom: 18px;
+        margin-bottom: 20px;
       }
       .stat-card {
         border-radius: 14px;
@@ -49,14 +50,36 @@
         text-transform: uppercase;
         letter-spacing: 0.04em;
       }
-      .stat-card strong {
-        font-size: 34px;
-        line-height: 1;
-      }
+      .stat-card strong { font-size: 34px; line-height: 1; }
       .approved-card { background: var(--approved); }
       .delivered-card { background: var(--delivered); }
       .direct-card { background: var(--direct); }
       .assigned-card { background: var(--assigned); }
+
+      .tabs {
+        display: inline-flex;
+        gap: 8px;
+        padding: 6px;
+        border-radius: 14px;
+        background: #dfe8f2;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+      }
+      .tab {
+        border: none;
+        background: transparent;
+        color: #1e293b;
+        font-weight: 700;
+        padding: 10px 16px;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+      .tab.active {
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+      }
+      .panel { display: none; }
+      .panel.active { display: block; }
 
       .grid-2 {
         display: grid;
@@ -77,25 +100,10 @@
         gap: 12px;
         margin-bottom: 14px;
       }
-      .box-head h2 { margin: 0; }
-      .filters {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        margin-bottom: 16px;
-      }
-      input, select {
-        padding: 10px 12px;
-        border-radius: 10px;
-        border: 1px solid #cbd5e1;
-        background: #fff;
-        font: inherit;
-      }
-
-      .stack {
-        display: grid;
-        gap: 12px;
-      }
+      .box-head h2,
+      .box-head h3 { margin: 0; }
+      .box-head strong { color: var(--muted); font-size: 13px; }
+      .stack { display: grid; gap: 12px; }
       .card {
         border: 1px solid var(--line);
         border-radius: 12px;
@@ -151,8 +159,40 @@
         text-align: center;
       }
 
-      .table-wrap { border: 1px solid var(--line); border-radius: 14px; overflow-x: auto; }
-      table { width: 100%; min-width: 980px; border-collapse: collapse; }
+      .filters {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+      }
+      input, select, button {
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        font: inherit;
+      }
+      .inline-button {
+        border: none;
+        background: #2563eb;
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .inline-button.secondary {
+        background: #0f766e;
+      }
+
+      .table-wrap {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        min-width: 1100px;
+        border-collapse: collapse;
+      }
       th, td {
         padding: 11px 10px;
         border-bottom: 1px solid #e5e7eb;
@@ -168,29 +208,35 @@
         text-transform: uppercase;
         letter-spacing: 0.03em;
       }
-      .student-col { min-width: 180px; }
-      .consultant-col { min-width: 180px; }
-      .teacher-col { min-width: 130px; }
-      .phone-col { min-width: 110px; max-width: 110px; }
-      .view-col { min-width: 90px; }
+      .student-col { min-width: 190px; }
+      .consultant-col { min-width: 190px; }
+      .teacher-col { min-width: 140px; }
+      .phone-col { min-width: 120px; max-width: 120px; }
+      .actions-col { min-width: 170px; }
       .phone-cell {
-        max-width: 110px;
+        max-width: 120px;
         white-space: normal;
         overflow-wrap: anywhere;
         word-break: break-word;
         text-align: center;
       }
+      .row-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .text-button {
+        color: #2563eb;
+        text-decoration: none;
+        font-weight: 700;
+      }
+      .text-button:hover { text-decoration: underline; }
       .empty-state {
         padding: 28px 18px;
         text-align: center;
         color: var(--muted);
       }
-      .view-link {
-        color: #2563eb;
-        font-weight: 700;
-        text-decoration: none;
-      }
-      .view-link:hover { text-decoration: underline; }
 
       @media (max-width: 1100px) {
         .grid-2 { grid-template-columns: 1fr; }
@@ -215,7 +261,7 @@
         <div class="stat-card approved-card">
           <small>Approved</small>
           <strong id="approvedCount">0</strong>
-          <span id="approvedShare">0 ready reports</span>
+          <span id="approvedShare">0 waiting to download</span>
         </div>
         <div class="stat-card delivered-card">
           <small>Delivered</small>
@@ -234,70 +280,160 @@
         </div>
       </div>
 
-      <div class="grid-2">
-        <div class="box">
-          <div class="box-head">
-            <h2>Recent Ready Reports</h2>
-          </div>
-          <div id="recentList" class="stack"></div>
-        </div>
-
-        <div class="box">
-          <div class="box-head">
-            <h2>Consultant Activity</h2>
-          </div>
-          <div id="consultantList" class="stack"></div>
-        </div>
+      <div class="tabs">
+        <button class="tab active" type="button" data-tab="overview">Overview</button>
+        <button class="tab" type="button" data-tab="staff">Sales Staff</button>
+        <button class="tab" type="button" data-tab="direct">Direct</button>
+        <button class="tab" type="button" data-tab="reports">All Reports</button>
       </div>
 
-      <div class="box">
-        <div class="box-head">
-          <h2>Reports</h2>
+      <section id="overviewPanel" class="panel active">
+        <div class="grid-2">
+          <div class="box">
+            <div class="box-head">
+              <h2>Recent Ready Reports</h2>
+            </div>
+            <div id="recentList" class="stack"></div>
+          </div>
+
+          <div class="box">
+            <div class="box-head">
+              <h2>Top Consultants</h2>
+            </div>
+            <div id="topConsultants" class="stack"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="staffPanel" class="panel">
+        <div class="box" style="margin-bottom:18px;">
+          <div class="box-head">
+            <h2>Sales Staff</h2>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th class="consultant-col">Educational Consultant</th>
+                  <th>Total Reports</th>
+                  <th>Approved</th>
+                  <th>Delivered</th>
+                  <th>Direct</th>
+                  <th>Waiting to Download</th>
+                  <th>View</th>
+                </tr>
+              </thead>
+              <tbody id="staffTableBody"></tbody>
+            </table>
+            <div id="staffEmptyState" class="empty-state" style="display:none;">No records.</div>
+          </div>
         </div>
 
-        <div class="filters">
-          <select id="salesFilter" onchange="load()">
-            <option value="">All sales staff</option>
-          </select>
-          <select id="teacherFilter" onchange="load()">
-            <option value="">All teachers</option>
-          </select>
-          <select id="typeFilter" onchange="load()">
-            <option value="">All types</option>
-            <option value="midterm">Midterm</option>
-            <option value="final">Final</option>
-          </select>
-          <select id="statusFilter" onchange="load()">
-            <option value="">Approved + Delivered</option>
-            <option value="approved">Approved</option>
-            <option value="delivered">Delivered</option>
-          </select>
+        <div class="box">
+          <div class="box-head">
+            <h2 id="consultantDetailsTitle">Consultant Details</h2>
+            <strong id="consultantDetailsMeta"></strong>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th class="student-col">Student</th>
+                  <th class="teacher-col">Teacher</th>
+                  <th>Level</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th class="phone-col">Phone</th>
+                  <th class="actions-col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="consultantDetailsBody"></tbody>
+            </table>
+            <div id="consultantDetailsEmpty" class="empty-state" style="display:none;">No records.</div>
+          </div>
         </div>
+      </section>
 
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th class="student-col">Student</th>
-                <th class="consultant-col">Educational Consultant</th>
-                <th class="teacher-col">Teacher</th>
-                <th>Level</th>
-                <th>Type</th>
-                <th class="phone-col">Phone</th>
-                <th class="view-col">View</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-          </table>
-          <div id="tableEmptyState" class="empty-state" style="display:none;">No records.</div>
+      <section id="directPanel" class="panel">
+        <div class="box">
+          <div class="box-head">
+            <h2>Direct Reports</h2>
+            <strong id="directMeta">0 reports</strong>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th class="student-col">Student</th>
+                  <th class="teacher-col">Teacher</th>
+                  <th>Level</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th class="phone-col">Phone</th>
+                  <th class="actions-col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="directTableBody"></tbody>
+            </table>
+            <div id="directEmptyState" class="empty-state" style="display:none;">No records.</div>
+          </div>
         </div>
-      </div>
+      </section>
+
+      <section id="reportsPanel" class="panel">
+        <div class="box">
+          <div class="box-head">
+            <h2>All Reports</h2>
+          </div>
+
+          <div class="filters">
+            <select id="salesFilter" onchange="renderAllReports()">
+              <option value="">All sales staff</option>
+            </select>
+            <select id="teacherFilter" onchange="renderAllReports()">
+              <option value="">All teachers</option>
+            </select>
+            <select id="typeFilter" onchange="renderAllReports()">
+              <option value="">All types</option>
+              <option value="midterm">Midterm</option>
+              <option value="final">Final</option>
+            </select>
+            <select id="statusFilter" onchange="renderAllReports()">
+              <option value="">Approved + Delivered</option>
+              <option value="approved">Approved</option>
+              <option value="delivered">Delivered</option>
+            </select>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th class="student-col">Student</th>
+                  <th class="consultant-col">Educational Consultant</th>
+                  <th class="teacher-col">Teacher</th>
+                  <th>Level</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th class="phone-col">Phone</th>
+                  <th class="actions-col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="allReportsBody"></tbody>
+            </table>
+            <div id="allReportsEmptyState" class="empty-state" style="display:none;">No records.</div>
+          </div>
+        </div>
+      </section>
     </div>
 
     <script>
-      let allRows = [];
       const READY_STATUSES = new Set(["approved", "delivered"]);
+      let allRows = [];
+      let selectedConsultantKey = null;
 
       function displayPhone(row) {
         const value = String(row.student_id || "").trim();
@@ -309,33 +445,52 @@
         return row.sales_name || "-";
       }
 
-      function consultantBadge(row) {
-        return consultantLabel(row) === "Direct"
-          ? '<span class="badge direct">Direct</span>'
-          : '<span class="badge assigned">Assigned</span>';
+      function consultantKey(row) {
+        if (consultantLabel(row) === "Direct") return "direct";
+        return String(row.sales_id || consultantLabel(row) || "unknown");
+      }
+
+      function downloadUrl(row) {
+        return `/storage/reports/${row.id}/pdf?download=1`;
+      }
+
+      function actionLinks(row) {
+        return `
+          <div class="row-actions">
+            <a class="text-button" href="/view/${row.id}" target="_blank">Preview</a>
+            <a class="text-button" href="${downloadUrl(row)}" target="_blank">Download</a>
+          </div>
+        `;
       }
 
       function consultantSummary(rows) {
         const summary = new Map();
         rows.forEach((row) => {
-          const key = consultantLabel(row);
+          const key = consultantKey(row);
           if (!summary.has(key)) {
             summary.set(key, {
-              label: key,
+              key,
+              label: consultantLabel(row),
               total: 0,
               approved: 0,
               delivered: 0,
+              direct: consultantLabel(row) === "Direct" ? 0 : 0,
             });
           }
           const item = summary.get(key);
           item.total += 1;
           if (row.status === "approved") item.approved += 1;
           if (row.status === "delivered") item.delivered += 1;
+          if (consultantLabel(row) === "Direct") item.direct += 1;
         });
         return [...summary.values()].sort((a, b) => b.total - a.total || a.label.localeCompare(b.label));
       }
 
-      function renderStats(rows) {
+      function filteredReadyRows() {
+        return allRows.filter((row) => READY_STATUSES.has(row.status));
+      }
+
+      function setStats(rows) {
         const approved = rows.filter((row) => row.status === "approved").length;
         const delivered = rows.filter((row) => row.status === "delivered").length;
         const direct = rows.filter((row) => consultantLabel(row) === "Direct").length;
@@ -346,24 +501,22 @@
         document.getElementById("directCount").innerText = direct;
         document.getElementById("assignedCount").innerText = assigned;
 
-        document.getElementById("approvedShare").innerText = `${approved} ready reports`;
+        document.getElementById("approvedShare").innerText = `${approved} waiting to download`;
         document.getElementById("deliveredShare").innerText = `${delivered} delivered`;
         document.getElementById("directShare").innerText = `${direct} direct reports`;
         document.getElementById("assignedShare").innerText = `${assigned} assigned reports`;
       }
 
-      function renderRecent(rows) {
-        const host = document.getElementById("recentList");
+      function renderOverview(rows) {
+        const recentHost = document.getElementById("recentList");
+        const topHost = document.getElementById("topConsultants");
         const recentRows = [...rows]
           .sort((a, b) => String(b.sent_at || b.created_at || "").localeCompare(String(a.sent_at || a.created_at || "")))
           .slice(0, 6);
+        const topConsultants = consultantSummary(rows).slice(0, 6);
+        const maxTotal = Math.max(...topConsultants.map((item) => item.total), 1);
 
-        if (!recentRows.length) {
-          host.innerHTML = '<div class="empty-state">No records.</div>';
-          return;
-        }
-
-        host.innerHTML = recentRows.map((row) => `
+        recentHost.innerHTML = recentRows.length ? recentRows.map((row) => `
           <div class="card">
             <div class="card-top">
               <div>
@@ -377,27 +530,16 @@
               <span class="badge ${row.status}">${row.status === "approved" ? "Approved" : "Delivered"}</span>
             </div>
           </div>
-        `).join("");
-      }
+        `).join("") : '<div class="empty-state">No records.</div>';
 
-      function renderConsultants(rows) {
-        const host = document.getElementById("consultantList");
-        const consultants = consultantSummary(rows);
-        const maxTotal = Math.max(...consultants.map((item) => item.total), 1);
-
-        if (!consultants.length) {
-          host.innerHTML = '<div class="empty-state">No records.</div>';
-          return;
-        }
-
-        host.innerHTML = consultants.map((item) => `
+        topHost.innerHTML = topConsultants.length ? topConsultants.map((item) => `
           <div class="card">
             <div class="card-top">
               <div>
                 <div class="card-title">${item.label}</div>
                 <div class="card-meta">${item.total} reports</div>
               </div>
-              <span class="badge ${item.label === "Direct" ? "direct" : "assigned"}">${item.label === "Direct" ? "Direct" : "Assigned"}</span>
+              <button class="inline-button" type="button" onclick="openConsultant('${item.key.replace(/'/g, "\\'")}')">Open</button>
             </div>
             <div class="bar-track"><div class="bar-fill" style="width:${(item.total / maxTotal) * 100}%"></div></div>
             <div class="mini-stats">
@@ -406,12 +548,118 @@
               <div>Delivered<br /><strong>${item.delivered}</strong></div>
             </div>
           </div>
-        `).join("");
+        `).join("") : '<div class="empty-state">No records.</div>';
       }
 
-      function renderTable(rows) {
-        const tbody = document.getElementById("tableBody");
-        const empty = document.getElementById("tableEmptyState");
+      function renderStaff(rows) {
+        const tbody = document.getElementById("staffTableBody");
+        const empty = document.getElementById("staffEmptyState");
+        const consultants = consultantSummary(rows);
+        tbody.innerHTML = "";
+
+        consultants.forEach((item) => {
+          tbody.innerHTML += `
+            <tr>
+              <td>${item.label}</td>
+              <td>${item.total}</td>
+              <td>${item.approved}</td>
+              <td>${item.delivered}</td>
+              <td>${item.direct}</td>
+              <td>${item.approved}</td>
+              <td><button class="inline-button" type="button" onclick="openConsultant('${item.key.replace(/'/g, "\\'")}')">View</button></td>
+            </tr>
+          `;
+        });
+
+        empty.style.display = consultants.length ? "none" : "block";
+
+        if (!selectedConsultantKey && consultants.length) {
+          selectedConsultantKey = consultants[0].key;
+        }
+        renderConsultantDetails(rows);
+      }
+
+      function renderConsultantDetails(rows) {
+        const title = document.getElementById("consultantDetailsTitle");
+        const meta = document.getElementById("consultantDetailsMeta");
+        const tbody = document.getElementById("consultantDetailsBody");
+        const empty = document.getElementById("consultantDetailsEmpty");
+        const consultantRows = rows.filter((row) => consultantKey(row) === selectedConsultantKey);
+        const label = consultantRows[0] ? consultantLabel(consultantRows[0]) : "Consultant Details";
+
+        title.innerText = label;
+        meta.innerText = consultantRows.length ? `${consultantRows.length} reports` : "";
+        tbody.innerHTML = "";
+
+        consultantRows.forEach((row) => {
+          tbody.innerHTML += `
+            <tr>
+              <td>${row.id}</td>
+              <td>${row.student_name || "-"}</td>
+              <td>${row.teacher_name || "-"}</td>
+              <td>${row.level || "-"}</td>
+              <td>${row.report_type || "-"}</td>
+              <td>${row.status === "approved" ? "Approved" : "Delivered"}</td>
+              <td class="phone-cell">${displayPhone(row)}</td>
+              <td>${actionLinks(row)}</td>
+            </tr>
+          `;
+        });
+
+        empty.style.display = consultantRows.length ? "none" : "block";
+      }
+
+      function renderDirect(rows) {
+        const tbody = document.getElementById("directTableBody");
+        const empty = document.getElementById("directEmptyState");
+        const meta = document.getElementById("directMeta");
+        const directRows = rows.filter((row) => consultantLabel(row) === "Direct");
+        tbody.innerHTML = "";
+
+        directRows.forEach((row) => {
+          tbody.innerHTML += `
+            <tr>
+              <td>${row.id}</td>
+              <td>${row.student_name || "-"}</td>
+              <td>${row.teacher_name || "-"}</td>
+              <td>${row.level || "-"}</td>
+              <td>${row.report_type || "-"}</td>
+              <td>${row.status === "approved" ? "Approved" : "Delivered"}</td>
+              <td class="phone-cell">${displayPhone(row)}</td>
+              <td>${actionLinks(row)}</td>
+            </tr>
+          `;
+        });
+
+        meta.innerText = `${directRows.length} reports`;
+        empty.style.display = directRows.length ? "none" : "block";
+      }
+
+      function applyAllReportFilters(rows) {
+        const sales = document.getElementById("salesFilter").value;
+        const teacher = document.getElementById("teacherFilter").value;
+        const type = document.getElementById("typeFilter").value;
+        const status = document.getElementById("statusFilter").value;
+
+        return rows.filter((row) => {
+          if (sales) {
+            if (sales === "direct") {
+              if (consultantLabel(row) !== "Direct") return false;
+            } else if (String(row.sales_id || "") !== sales) {
+              return false;
+            }
+          }
+          if (teacher && String(row.teacher_id || "") !== teacher) return false;
+          if (type && row.report_type !== type) return false;
+          if (status && row.status !== status) return false;
+          return true;
+        });
+      }
+
+      function renderAllReports() {
+        const tbody = document.getElementById("allReportsBody");
+        const empty = document.getElementById("allReportsEmptyState");
+        const rows = applyAllReportFilters(filteredReadyRows());
         tbody.innerHTML = "";
 
         rows.forEach((row) => {
@@ -423,8 +671,9 @@
               <td>${row.teacher_name || "-"}</td>
               <td>${row.level || "-"}</td>
               <td>${row.report_type || "-"}</td>
+              <td>${row.status === "approved" ? "Approved" : "Delivered"}</td>
               <td class="phone-cell">${displayPhone(row)}</td>
-              <td><a class="view-link" href="/view/${row.id}" target="_blank">Preview</a></td>
+              <td>${actionLinks(row)}</td>
             </tr>
           `;
         });
@@ -432,29 +681,19 @@
         empty.style.display = rows.length ? "none" : "block";
       }
 
-      function applyFilters(rows) {
-        const sales = document.getElementById("salesFilter").value;
-        const teacher = document.getElementById("teacherFilter").value;
-        const type = document.getElementById("typeFilter").value;
-        const status = document.getElementById("statusFilter").value;
-
-        return rows.filter((row) => {
-          if (sales && String(row.sales_id || "") !== sales) return false;
-          if (teacher && String(row.teacher_id || "") !== teacher) return false;
-          if (type && row.report_type !== type) return false;
-          if (status && row.status !== status) return false;
-          return true;
-        });
+      function openConsultant(key) {
+        selectedConsultantKey = key;
+        setActiveTab("staff");
+        renderConsultantDetails(filteredReadyRows());
       }
 
-      async function load() {
-        const response = await fetch("/admin/reports");
-        const rows = await response.json();
-        allRows = rows.filter((row) => READY_STATUSES.has(row.status));
-        renderStats(allRows);
-        renderRecent(allRows);
-        renderConsultants(allRows);
-        renderTable(applyFilters(allRows));
+      function setActiveTab(tabName) {
+        document.querySelectorAll(".tab").forEach((tab) => {
+          tab.classList.toggle("active", tab.dataset.tab === tabName);
+        });
+        document.querySelectorAll(".panel").forEach((panel) => {
+          panel.classList.toggle("active", panel.id === `${tabName}Panel`);
+        });
       }
 
       async function loadSalesStaff() {
@@ -462,7 +701,7 @@
         const response = await fetch(`/api/users?${query.toString()}`);
         const users = await response.json();
         const select = document.getElementById("salesFilter");
-        select.innerHTML = '<option value="">All sales staff</option>';
+        select.innerHTML = '<option value="">All sales staff</option><option value="direct">Direct</option>';
         users.forEach((user) => {
           select.innerHTML += `<option value="${user.id}">${user.name}</option>`;
         });
@@ -478,6 +717,22 @@
           select.innerHTML += `<option value="${user.id}">${user.name}</option>`;
         });
       }
+
+      async function load() {
+        const response = await fetch("/admin/reports");
+        const rows = await response.json();
+        allRows = rows.filter((row) => READY_STATUSES.has(row.status));
+        const readyRows = filteredReadyRows();
+        setStats(readyRows);
+        renderOverview(readyRows);
+        renderStaff(readyRows);
+        renderDirect(readyRows);
+        renderAllReports();
+      }
+
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.addEventListener("click", () => setActiveTab(tab.dataset.tab));
+      });
 
       Promise.all([loadSalesStaff(), loadTeachers()]).then(load);
     </script>

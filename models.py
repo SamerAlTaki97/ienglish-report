@@ -451,13 +451,16 @@ def list_reports(phone=None, status=None, teacher_id=None, sales_id=None, create
         query += " AND r.teacher_id=?"
         params.append(teacher_id)
     if sales_id:
-        query += """
-            AND CASE
-                WHEN COALESCE(json_extract(r.report_json, '$.student.sales_mode'), '') = 'direct' THEN NULL
-                ELSE COALESCE(s.sales_id, CAST(json_extract(r.report_json, '$.student.sales_id') AS INTEGER))
-            END=?
-        """
-        params.append(sales_id)
+        if str(sales_id).strip().lower() == "direct":
+            query += " AND COALESCE(json_extract(r.report_json, '$.student.sales_mode'), '') = 'direct'"
+        else:
+            query += """
+                AND CASE
+                    WHEN COALESCE(json_extract(r.report_json, '$.student.sales_mode'), '') = 'direct' THEN NULL
+                    ELSE COALESCE(s.sales_id, CAST(json_extract(r.report_json, '$.student.sales_id') AS INTEGER))
+                END=?
+            """
+            params.append(sales_id)
     if created_by:
         query += " AND r.created_by=?"
         params.append(created_by)
